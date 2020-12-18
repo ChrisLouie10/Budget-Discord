@@ -1,0 +1,2 @@
+GET http://localhost:3000/api/posts
+auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmRkMWVjMGU2YzEzOTI0NzgyZDg0N2MiLCJpYXQiOjE2MDgzMjY4OTN9.yVaXEk9NApvAAdFIlrG6g3dNvV7WRZP3LnguplIFn1g
