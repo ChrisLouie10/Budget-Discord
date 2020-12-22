@@ -10,7 +10,10 @@ class ChatBox extends Component {
     //and the input is cleared
     handleEnterPress = (e) => {
         if (e.key == "Enter"){
-            this.props.action(e.target.value);
+            //Send the new message to chatDisplay.jsx
+            const timestamp = new Date();
+            console.log(timestamp.toString());
+            this.props.updateMessages(e.target.value, timestamp.toString());
             this.setState({input: ""});  
         }
     };
