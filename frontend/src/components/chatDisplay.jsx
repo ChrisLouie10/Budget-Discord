@@ -1,18 +1,18 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChatBox from './chatBox.jsx';
 
-class ChatDisplay extends Component {
-    updateMessages = (input, timestamp) => {
-        //Update the messages array from App.js
-        this.props.updateMessages(input, timestamp);
+const ChatDisplay = (props) => {
+    const updateMessages = (input, timestamp) => {
+        //Bubble up the data to App.js
+        props.updateMessages(input, timestamp);
     }
 
-    displayChat = () => {
+    const displayChat = () => {
         //Display the messages array from App.js
-        if (this.props.messages){
+        if (props.messages){
             return(
                 <div>
-                    {this.props.messages.map(message => (
+                    {props.messages.map(message => (
                         <p className="ml-2" key={message.id}>{message.author} ({message.timestamp}):<br />{message.input}</p>
                     ))}
                 </div>
@@ -20,14 +20,12 @@ class ChatDisplay extends Component {
         }
     };
 
-    render() { 
-        return (
-            <div>
-                {this.displayChat()}
-                <ChatBox updateMessages={this.updateMessages}/>
-            </div>
-        );
-    }
+    return (
+        <div>
+            {displayChat()}
+            <ChatBox updateMessages={updateMessages}/>
+        </div>
+    );
 }
  
 export default ChatDisplay;

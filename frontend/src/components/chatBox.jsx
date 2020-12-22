@@ -1,32 +1,27 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
-class ChatBox extends Component {
-    state = { 
-        input: ""
-     };
+const ChatBox = (props) => {
+    const [input, setInput] = useState("");
 
     //When Enter key is pressed on the input,
-    //the value of the input is sent to ChatDisplay
+    //the data is sent to ChatDisplay
     //and the input is cleared
-    handleEnterPress = (e) => {
+    const handleEnterPress = (e) => {
         if (e.key == "Enter"){
-            //Send the new message to chatDisplay.jsx
+            //Bubble up the new message to chatDisplay.jsx
             const timestamp = new Date();
-            console.log(timestamp.toString());
-            this.props.updateMessages(e.target.value, timestamp.toString());
-            this.setState({input: ""});  
+            props.updateMessages(e.target.value, timestamp.toString());
+            setInput("");
         }
     };
 
-    handleInputChange = (e) => {
-        this.setState({input: e.target.value});
+    const handleInputChange = (e) => {
+        setInput(e.target.value);
     };
 
-    render() { 
-        return (  
-            <input type="text" className="form-control m-2" id="chatBox" value={this.state.input} onChange={this.handleInputChange} onKeyPress={this.handleEnterPress}/>
-        );
-    }
+    return (  
+        <input type="text" className="form-control m-2" id="chatBox" value={input} onChange={handleInputChange} onKeyPress={handleEnterPress}/>
+    );
 }
  
 export default ChatBox;

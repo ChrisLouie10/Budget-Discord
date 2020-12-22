@@ -1,61 +1,63 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/navbar.jsx';
 import ChatDisplay from './components/chatDisplay.jsx';
 import axios from 'axios';
 
-class App extends Component {
-  state = { 
-    messages: [] 
-  };
+function App(){
+  const [messages, setMessages] = useState([]);
 
-  componentDidMount = () => {
+  //useEffect only runs once in the initial render
+  useEffect(() => {
+    //Make a request to the backend
     axios.get("/getChatLogs").then(response => {
-      console.log(response.data);
+      //If data from backend exists
+      //Update the messages array state
       if (response.data){
-        let messages = [...this.state.messages];
+        let _messages = [...messages];
         for (let i = 0; i < response.data.length; i++){
-          messages.push(response.data[i]);
+          _messages.push(response.data[i]);
         }
-        this.setState({ messages });
+        setMessages(_messages);
       }
     });
-  };
+  }, []);
 
-  updateMessages = (input, timestamp) => {
-    ////First clone the messages array from the state
-    let messages = [...this.state.messages];
+  const updateMessages = (input, timestamp) => {
+    ////First clone the messages array state
+    let _messages = [...messages];
     let message;
 
-    //If this is the first message then create the first map
+    //If this is the first message then create the first message
     //and push it into the messages array
-    if (messages.length === 0){
+    if (_messages.length === 0){
       message = {input: input, id: 1, author: "Stephen", timestamp: timestamp};
-      messages.push(message);
+      _messages.push(message);
     }
 
     //Otherwise use the last element of the messages array 
     //to create a new id
     else{
       message = {input: input, id: messages[messages.length-1].id + 1, author: "Stephen", timestamp: timestamp};
-      messages.push(message);
+      _messages.push(message);
     }
 
-    this.setState({ messages });
+    //Set the new messages array state
+    setMessages(_messages);
+
+    //Send the new message to the backend
     axios.post("http://localhost:3000/", message)
-    .then(() => console.log("Testing...")).
+    .then(() => {}).
     catch(err => {
       console.error(err);
     });
   };
 
-  render() { 
-    return (
-      <div>
-        <Navbar />
-        <ChatDisplay updateMessages={this.updateMessages} messages={this.state.messages}/>
-      </div>
-    );
-  };  
+  return (
+    <div>
+      <Navbar />
+      <ChatDisplay updateMessages={updateMessages} messages={messages}/>
+    </div>
+  );
 };
  
 export default App;
