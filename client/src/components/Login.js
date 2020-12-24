@@ -3,6 +3,7 @@ import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from "react-router-dom";
 
+// Simple Login page
 
 export default function Login() {
   const emailRef = useRef();
@@ -43,7 +44,7 @@ export default function Login() {
               <Form.Label>Password</Form.Label>
               <Form.Control type="password" ref={passwordRef} required></Form.Control>
             </Form.Group>
-            <Button disabled={loading}classname="w-25" type="Submit">Login</Button>
+            <Button disabled={loading} className="w-25" type="Submit">Login</Button>
           </Form>
           <div className="w-100 text-center mt-3">
             <Link to="/forgot-password">Forgot Password?</Link>

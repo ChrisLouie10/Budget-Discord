@@ -3,6 +3,7 @@ import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from 'react-router-dom';
 
+// Simple Signup page
 
 export default function Signup() {
   const emailRef = useRef();
@@ -51,7 +52,7 @@ export default function Signup() {
               <Form.Label>Confirm Password</Form.Label>
               <Form.Control type="password" ref={passwordConfirmRef} required></Form.Control>
             </Form.Group>
-            <Button disabled={loading}classname="w-25" type="Submit">Submit</Button>
+            <Button disabled={loading} className="w-25" type="Submit">Submit</Button>
           </Form>
         </Card.Body>
       </Card>
