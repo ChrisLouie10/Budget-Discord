@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/navbar.jsx';
-import ChatDisplay from './components/chatDisplay.jsx';
+import Navbar from './navbar.js';
+import ChatDisplay from './chatDisplay.js';
 import axios from 'axios';
 
 function App(){

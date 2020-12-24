@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ChatBox from './chatBox.jsx';
+import ChatBox from './chatBox.js';
 
 const ChatDisplay = (props) => {
     const updateMessages = (input, timestamp) => {
