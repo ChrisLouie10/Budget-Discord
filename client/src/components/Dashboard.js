@@ -3,6 +3,8 @@ import { Button, Card, Alert } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
 import { useAuth } from '../contexts/AuthContext';
 
+// Simple private account information.
+
 export default function Dashboard() {
   const [error, setError] = useState("");
   const { currentUser, logout } = useAuth();
@@ -21,7 +23,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Card >
+      <Card>
         <Card.Body>
           <h2 className="text-center mb-4">Profile</h2>
           {error && <Alert variant="danger">{error}</Alert>}

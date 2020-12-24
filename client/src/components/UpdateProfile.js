@@ -3,6 +3,7 @@ import { Card, Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from 'react-router-dom';
 
+// Simple Update Profile page
 
 export default function UpdateProfile() {
   const emailRef = useRef();
