@@ -1,0 +1,31 @@
+{
+  "name": "budget-discord",
+  "version": "1.0.0",
+  "description": "Discord but better",
+  "main": "app.js",
+  "scripts": {
+    "server": "nodemon app.js",
+    "client": "npm start --prefix client",
+    "devStart": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChrisLouie10/Budget-Discord.git"
+  },
+  "author": "Stephen and Chris",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChrisLouie10/Budget-Discord/issues"
+  },
+  "homepage": "https://github.com/ChrisLouie10/Budget-Discord#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.11.8",
+    "node": "^15.4.0"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "nodemon": "^2.0.6"
+  }
+}
