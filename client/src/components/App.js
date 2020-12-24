@@ -9,6 +9,7 @@ import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "./ForgotPassword";
 import UpdateProfile from "./UpdateProfile";
 import CheckingUser from './CheckingUser';
+import Chat from './Chat';
 
 export default function App() {
   /*
@@ -33,6 +34,7 @@ export default function App() {
                 <PrivateRoute exact path="/" component={Dashboard} />
                 <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
                 <PrivateRoute path="/checking-user" component={CheckingUser} />
+                <Route path="/chat" component={Chat} />
                 <Route path="/signup" component={Signup} />
                 <Route path="/login" component={Login} />
                 <Route path="/forgot-password" component={ForgotPassword} />

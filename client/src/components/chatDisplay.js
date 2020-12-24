@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChatBox from './ChatBox.js';
 
-export default ChatDisplay = (props) => {
+const ChatDisplay = (props) => {
     const updateMessages = (input, timestamp) => {
         //Bubble up the data to App.js
         props.updateMessages(input, timestamp);
@@ -27,3 +27,5 @@ export default ChatDisplay = (props) => {
         </div>
     );
 }
+
+export default ChatDisplay;
