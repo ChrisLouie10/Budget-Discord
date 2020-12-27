@@ -7,9 +7,9 @@ const ChatBox = (props) => {
     //and the input is cleared
     const handleEnterPress = (e) => {
         if (e.key == "Enter"){
-            //Bubble up the new message to chatDisplay.jsx
+            //Bubble up the new message to ChatDisplay.js
             const timestamp = new Date();
-            props.updateMessages(e.target.value, timestamp.toString());
+            props.sendMessages(e.target.value, timestamp.toString());
             setInput("");
         }
     };
