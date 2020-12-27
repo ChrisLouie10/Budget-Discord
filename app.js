@@ -1,8 +1,27 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const WebSocket = require('ws');
+const http = require('http');
 
 const app = express();
+const server = http.createServer(express);
+const wss = new WebSocket.Server({server});
+
+//WebSocket ----------------------------------
+//On WebSocket Server connection add an event listener
+//Echo back data received from a client to every other client
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(data) {
+      wss.clients.forEach(function each(client) {
+        if(ws != client && client.readyState === WebSocket.OPEN)
+          client.send(data);
+      });
+  });
+});
+
+server.listen(1000, () => console.log("WebSocket server listening on port 1000"));
+//-------------------------------------------
 
 let chatLog = [];
 
@@ -27,7 +46,7 @@ db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
 
 const messageSchema = new mongoose.Schema({
-  input: String,
+  content: String,
   author: String,
   id: Number,
   timestamp: String
@@ -55,14 +74,14 @@ app.get("/getChatLogs", (req, res) => {
 
 app.post('/', function(req, res) {
   const message = {
-    input: req.body.input,
+    content: req.body.content,
     author: req.body.author,
     id: req.body.id,
     timestamp: req.body.timestamp
   };
 
   Message.create({
-    input: req.body.input,
+    content: req.body.content,
     author: req.body.author,
     id: req.body.id,
     timestamp: req.body.timestamp
@@ -78,4 +97,4 @@ app.post('/', function(req, res) {
   });
 });
 
-app.listen(3000, () => console.log('connected'));
+app.listen(3000, () => console.log('Express app listening on port 3000'));
