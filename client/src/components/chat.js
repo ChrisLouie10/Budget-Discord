@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar.js';
 import ChatDisplay from './ChatDisplay.js';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,28 +9,31 @@ export default function Chat(){
   const ws = new WebSocket(("ws://localhost:1000"));
 
   useEffect(() => {
-    axios.get("/getChatLogs").then(response => {
-      //If data from backend exists
-      //Update the messages array state
-      if (response.data){
-        let _messages = [...messages];
-        for (let i = 0; i < response.data.length; i++){
-          _messages.push(response.data[i]);
-        }
-        setMessages(_messages);
-      }
-    });
+    ws.onopen = () => {
+      ws.send("requesting chat log");
+    }
 
     //Add event listener whenever data is received
     //from WebSocket Server, add data to messages array state
     ws.onmessage = (data) => {
-      const parsedData = JSON.parse(data.data);
-      console.log(parsedData);
-      setMessages(messages => [...messages, parsedData]);
+      try {
+        const parsedData = JSON.parse(data.data);
+        if (Array.isArray(parsedData)){
+          parsedData.forEach(data => {
+            setMessages(messages => [...messages, data]);
+          });
+        }
+        else{
+          setMessages(messages => [...messages, parsedData]);
+        }
+        
+      } catch (e) {
+        console.log("failed to parse data received from websocket server: ", data);
+      }
     };
   }, []);
 
-  const sendMessages = (content, timestamp) => {
+  const sendMessage = (content, timestamp) => {
     let data = {
       content: content, 
       id: (messages.length === 0 ? 1 : messages[messages.length-1].id + 1),
@@ -39,21 +41,16 @@ export default function Chat(){
       timestamp: timestamp
     };
 
+    //setMessages(messages => [...messages, data]);
+
     if (ws){
       ws.send(JSON.stringify(data));
-      //Send the new message to the backend
-      axios.post("http://localhost:3000/", data)
-      .then(() => {}).
-      catch(err => {
-        console.error(err);
-      });
     }
   };
 
   return (
     <div>
-      <Navbar />
-      <ChatDisplay sendMessages={sendMessages} messages={messages}/>
+      <ChatDisplay sendMessage={sendMessage} messages={messages}/>
     </div>
   );
 };

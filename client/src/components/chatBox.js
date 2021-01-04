@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 const ChatBox = (props) => {
     const [input, setInput] = useState("");
 
@@ -9,7 +10,7 @@ const ChatBox = (props) => {
         if (e.key == "Enter"){
             //Bubble up the new message to ChatDisplay.js
             const timestamp = new Date();
-            props.sendMessages(e.target.value, timestamp.toString());
+            props.sendMessage(e.target.value, timestamp.toString());
             setInput("");
         }
     };
