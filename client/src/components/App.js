@@ -10,6 +10,8 @@ import ForgotPassword from "./ForgotPassword";
 import UpdateProfile from "./UpdateProfile";
 import CheckingUser from './CheckingUser';
 import Chat from './Chat';
+import Navbar from './Navbar';
+import LeftSideNav from './LeftSideNav.js';
 
 export default function App() {
   /*
@@ -24,11 +26,13 @@ export default function App() {
   */
 
   return (
+    <div>
       <Container className="d-flex align-items-center justify-content-center"
-        style={{minHeight: "100vh"}}
-      >
+        style={{minHeight: "100vh"}}>
         <div className="w-100" style={{maxWidth: "400px"}}>
           <Router>
+            <Navbar/>
+            <LeftSideNav/>
             <AuthProvider>
               <Switch>
                 <PrivateRoute exact path="/" component={Dashboard} />
@@ -43,5 +47,6 @@ export default function App() {
           </Router>
         </div>
       </Container>
+      </div>
   );
 }

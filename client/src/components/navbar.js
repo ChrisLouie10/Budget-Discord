@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Stateless Functional Component
 const NavBar = () => {
     return (  
         <nav className="navbar navbar-dark bg-dark">

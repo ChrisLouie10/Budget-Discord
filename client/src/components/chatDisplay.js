@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import ChatBox from './ChatBox.js';
 
 const ChatDisplay = (props) => {
-    const sendMessages = (content, timestamp) => {
+    const sendMessage = (content, timestamp) => {
         //Bubble up the data to Chat.js
-        props.sendMessages(content, timestamp);
+        props.sendMessage(content, timestamp);
     }
 
    const displayChat = () => {
@@ -23,7 +23,7 @@ const ChatDisplay = (props) => {
     return (
         <div>
             {displayChat()}
-            <ChatBox sendMessages={sendMessages}/>
+            <ChatBox sendMessage={sendMessage}/>
         </div>
     );
 }
