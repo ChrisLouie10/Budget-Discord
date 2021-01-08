@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Signup from "./Signup"
 import { Container } from 'react-bootstrap';
 import { AuthProvider } from "../contexts/AuthContext";
@@ -38,7 +38,7 @@ export default function App() {
                 <PrivateRoute exact path="/" component={Dashboard} />
                 <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
                 <PrivateRoute path="/checking-user" component={CheckingUser} />
-                <Route path="/chat" component={Chat} />
+                <Route exact path="/chat/:serverId" component={Chat} />
                 <Route path="/signup" component={Signup} />
                 <Route path="/login" component={Login} />
                 <Route path="/forgot-password" component={ForgotPassword} />

@@ -1,51 +1,92 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChatDisplay from './ChatDisplay.js';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { propTypes } from 'react-bootstrap/esm/Image';
 
-export default function Chat(){
+const ws = new WebSocket("ws://localhost:1000");
+
+const Chat = ({match, location}) => {
   const [messages, setMessages] = useState([]);
   const {currentUser} = useAuth();
-  const ws = new WebSocket(("ws://localhost:1000"));
+  let serverName = "Chat Group " + match.params.serverId;
+  const initialization = useRef(true);
 
   useEffect(() => {
-    ws.onopen = () => {
-      ws.send("requesting chat log");
-    }
+    if (initialization.current){
+      initialization.current = false;
 
-    //Add event listener whenever data is received
-    //from WebSocket Server, add data to messages array state
-    ws.onmessage = (data) => {
-      try {
-        const parsedData = JSON.parse(data.data);
-        if (Array.isArray(parsedData)){
-          parsedData.forEach(data => {
-            setMessages(messages => [...messages, data]);
+      //Send a request to websocket server (wss) for the relevant chat log
+      const data = {
+        type: "chatLog",
+        serverId: match.params.serverId
+      };
+      waitForWSConnection(() => {
+        ws.send(JSON.stringify(data))
+      }, 100);
+  
+      //Add an event listener whenever a message is received from wss
+      ws.onmessage = (message) => {
+        let parsedMessage;
+        try{
+          parsedMessage = JSON.parse(message.data);
+        } catch (e) {
+          console.log("Message from wss could not be parsed!", message);
+          return;
+        }
+  
+        if (parsedMessage.type === "chatLog"){
+          parsedMessage.chatLog.forEach((message) => {
+            setMessages(messages => [...messages, message]);
           });
         }
-        else{
-          setMessages(messages => [...messages, parsedData]);
+        else if (parsedMessage.type === "message"){
+          setMessages(messages => [...messages, parsedMessage.message]);
         }
-        
-      } catch (e) {
-        console.log("failed to parse data received from websocket server: ", data);
-      }
-    };
-  }, []);
+      };
+    }
+    else{
+      //Whenever "chatroom" is switched, send a new request to wss for
+      //the relevant chat log
+      setMessages(messages => []);
+      const data = {
+        type: "chatLog",
+        serverId: match.params.serverId
+      };
+      waitForWSConnection(() => {
+        ws.send(JSON.stringify(data))
+      }, 100);
+    }
+  }, [match.params.serverId]);
+
+  const waitForWSConnection = (callback, interval) => {
+    if (ws.readyState === WebSocket.OPEN){
+      callback();
+    }
+    else{
+      setTimeout(() => {
+        waitForWSConnection(callback, interval);
+      }, interval);
+    }
+  };
 
   const sendMessage = (content, timestamp) => {
-    let data = {
+    const message = {
       content: content, 
       id: (messages.length === 0 ? 1 : messages[messages.length-1].id + 1),
       author: currentUser.email,
       timestamp: timestamp
     };
+    const data = {
+      type: "message",
+      serverId: match.params.serverId,
+      message: message
+    };
 
-    //setMessages(messages => [...messages, data]);
+    setMessages(messages => [...messages, message]);
 
-    if (ws){
+    waitForWSConnection(()=>{
       ws.send(JSON.stringify(data));
-    }
+    }, 100);
   };
 
   return (
@@ -54,3 +95,5 @@ export default function Chat(){
     </div>
   );
 };
+
+export default Chat;
