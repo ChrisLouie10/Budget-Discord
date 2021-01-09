@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 // // Simple Update Profile page
 
 export default function UpdateProfile() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
   const oldPasswordRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
@@ -46,10 +46,6 @@ export default function UpdateProfile() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    setUser(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
-  }, [])
   
   return (
     <>
