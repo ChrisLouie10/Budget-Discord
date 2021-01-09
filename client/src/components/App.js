@@ -9,6 +9,8 @@ import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
 import CheckingUser from './auth/CheckingUser';
 import Chat from './chat/Chat';
+import Navbar from './Navbar';
+import LeftSideNav from './LeftSideNav.js';
 
 export default function App() {
   /*
@@ -23,21 +25,24 @@ export default function App() {
   */
 
   return (
+    <div>
       <Container className="d-flex align-items-center justify-content-center"
-        style={{minHeight: "100vh"}}
-      >
+        style={{minHeight: "100vh"}}>
         <div className="w-100" style={{maxWidth: "400px"}}>
           <Router>
-            <Switch>
-              <PrivateRoute exact path="/" component={Dashboard} />
-              <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
-              <PrivateRoute path="/checking-user" component={CheckingUser} />
-              <Route path="/chat" component={Chat} />
-              <Route path="/signup" component={Signup} />
-              <Route path="/login" component={Login} />
-            </Switch>
+            <Navbar/>
+            <LeftSideNav/>
+              <Switch>
+                <PrivateRoute exact path="/" component={Dashboard} />
+                <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
+                <PrivateRoute path="/checking-user" component={CheckingUser} />
+                <Route exact path="/chat/:serverId" component={Chat} />
+                <Route path="/signup" component={Signup} />
+                <Route path="/login" component={Login} />
+              </Switch>
           </Router>
         </div>
       </Container>
+      </div>
   );
 }
