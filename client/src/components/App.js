@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Signup from "./Signup"
 import { Container } from 'react-bootstrap';
 import { AuthProvider } from "../contexts/AuthContext";
@@ -10,6 +10,8 @@ import ForgotPassword from "./ForgotPassword";
 import UpdateProfile from "./UpdateProfile";
 import CheckingUser from './CheckingUser';
 import Chat from './Chat';
+import Navbar from './Navbar';
+import LeftSideNav from './LeftSideNav.js';
 
 export default function App() {
   /*
@@ -24,17 +26,19 @@ export default function App() {
   */
 
   return (
+    <div>
       <Container className="d-flex align-items-center justify-content-center"
-        style={{minHeight: "100vh"}}
-      >
+        style={{minHeight: "100vh"}}>
         <div className="w-100" style={{maxWidth: "400px"}}>
           <Router>
+            <Navbar/>
+            <LeftSideNav/>
             <AuthProvider>
               <Switch>
                 <PrivateRoute exact path="/" component={Dashboard} />
                 <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
                 <PrivateRoute path="/checking-user" component={CheckingUser} />
-                <Route path="/chat" component={Chat} />
+                <Route exact path="/chat/:serverId" component={Chat} />
                 <Route path="/signup" component={Signup} />
                 <Route path="/login" component={Login} />
                 <Route path="/forgot-password" component={ForgotPassword} />
@@ -43,5 +47,6 @@ export default function App() {
           </Router>
         </div>
       </Container>
+      </div>
   );
 }
