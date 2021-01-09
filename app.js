@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Message = require('./models/Message');
+require('dotenv').config();
 const WebSocket = require('ws');
 const http = require('http');
 const { stringify } = require('querystring');
@@ -8,6 +10,12 @@ const { stringify } = require('querystring');
 const app = express();
 const server = http.createServer(express);
 const wss = new WebSocket.Server({server});
+
+//Import Routes
+const authRoute = require('./routes/auth');
+const postRoute = require('./routes/samplePage');
+
+let chatLog = [];
 
 //Mongoose -------------------------------------------
 mongoose.connect('mongodb://localhost/budget-discord', {
@@ -18,6 +26,7 @@ mongoose.connect('mongodb://localhost/budget-discord', {
 const db = mongoose.connection;
 db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
+
 
 const textServerSchema = new mongoose.Schema({
   serverName: String,
@@ -152,6 +161,11 @@ app.use(
   })
 );
 app.use(express.json());
+
+//Route Middlewares
+app.use('/api/user', authRoute);
+app.use('/api/posts', postRoute);
+
 app.use(express.urlencoded({ extended: false }));
 
-app.listen(3000, () => console.log('Express app listening on port 3000'));
+app.listen(3000, () => console.log('connected'));
