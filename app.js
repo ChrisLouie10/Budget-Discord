@@ -1,8 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Message = require('./models/Message');
+require('dotenv').config();
 
 const app = express();
+
+//Import Routes
+const authRoute = require('./routes/auth');
+const postRoute = require('./routes/samplePage');
 
 let chatLog = [];
 
@@ -26,14 +32,7 @@ const db = mongoose.connection;
 db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
 
-const messageSchema = new mongoose.Schema({
-  input: String,
-  author: String,
-  id: Number,
-  timestamp: String
-});
 
-const Message = mongoose.model("Message", messageSchema);
 
 //Use cors to allow cross origin resource sharing
 app.use(
@@ -43,6 +42,11 @@ app.use(
   })
 );
 app.use(express.json());
+
+//Route Middlewares
+app.use('/api/user', authRoute);
+app.use('/api/posts', postRoute);
+
 app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
@@ -77,5 +81,7 @@ app.post('/', function(req, res) {
     }
   });
 });
+
+
 
 app.listen(3000, () => console.log('connected'));

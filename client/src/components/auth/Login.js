@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { Card, Form, Button, Alert } from 'react-bootstrap';
-import { useAuth } from '../contexts/AuthContext';
 import { Link, useHistory } from "react-router-dom";
 
 // Simple Login page
@@ -8,7 +7,6 @@ import { Link, useHistory } from "react-router-dom";
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login } = useAuth();
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
   const history = useHistory();
@@ -19,15 +17,29 @@ export default function Login() {
     try{
       setError('');
       setLoading(true);
-      await login(emailRef.current.value, passwordRef.current.value);
-      history.push("/");
+      await fetch('http://localhost:3000/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: emailRef.current.value,
+          password: passwordRef.current.value
+        })
+      }).then(response => {return response.json()})
+        .then((data) => {
+          localStorage.setItem('auth-token', data['auth-token']);
+          localStorage.setItem('access-token', data['access-token']);
+          history.push("/");
+        })
+        .catch((error) => {
+          console.log(error);
+          setError('Failed to sign in');
+        });
     }
-    catch{
-      setError('Failed to sign in');
+    finally{
+      setLoading(false);
     }
-    setLoading(false);
-
-
   }
   return (
     <>
@@ -46,9 +58,6 @@ export default function Login() {
             </Form.Group>
             <Button disabled={loading} className="w-25" type="Submit">Login</Button>
           </Form>
-          <div className="w-100 text-center mt-3">
-            <Link to="/forgot-password">Forgot Password?</Link>
-          </div>
         </Card.Body>
       </Card>
       <div className="w-100 text-center mt-2">
