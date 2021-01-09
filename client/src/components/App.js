@@ -1,15 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import Signup from "./Signup"
+import React from 'react';
 import { Container } from 'react-bootstrap';
-import { AuthProvider } from "../contexts/AuthContext";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Dashboard from "./Dashboard";
-import Login from "./Login";
-import PrivateRoute from "./PrivateRoute";
-import ForgotPassword from "./ForgotPassword";
-import UpdateProfile from "./UpdateProfile";
-import CheckingUser from './CheckingUser';
-import Chat from './Chat';
+
+import Signup from "./auth/Signup"
+import Dashboard from "./auth/Dashboard";
+import Login from "./auth/Login";
+import PrivateRoute from "./auth/PrivateRoute";
+import UpdateProfile from "./auth/UpdateProfile";
+import CheckingUser from './auth/CheckingUser';
+import Chat from './chat/Chat';
 import Navbar from './Navbar';
 import LeftSideNav from './LeftSideNav.js';
 
@@ -33,7 +32,6 @@ export default function App() {
           <Router>
             <Navbar/>
             <LeftSideNav/>
-            <AuthProvider>
               <Switch>
                 <PrivateRoute exact path="/" component={Dashboard} />
                 <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
@@ -41,9 +39,7 @@ export default function App() {
                 <Route exact path="/chat/:serverId" component={Chat} />
                 <Route path="/signup" component={Signup} />
                 <Route path="/login" component={Login} />
-                <Route path="/forgot-password" component={ForgotPassword} />
               </Switch>
-            </AuthProvider>
           </Router>
         </div>
       </Container>
