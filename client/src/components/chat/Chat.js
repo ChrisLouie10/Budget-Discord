@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatDisplay from './ChatDisplay.js';
-import { useAuth } from '../contexts/AuthContext';
 import { propTypes } from 'react-bootstrap/esm/Image';
 
 const ws = new WebSocket("ws://localhost:1000");
 
 const Chat = ({match, location}) => {
   const [messages, setMessages] = useState([]);
-  const {currentUser} = useAuth();
   let serverName = "Chat Group " + match.params.serverId;
   const initialization = useRef(true);
 

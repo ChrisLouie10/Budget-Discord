@@ -10,7 +10,7 @@ module.exports = function verify(){
     }
     // verify access token
     try{
-        const verified = jwt.verify(token, process.env.REACT_APP_SECRET_ACCESS_TOKEN);
+        jwt.verify(token, process.env.REACT_APP_SECRET_ACCESS_TOKEN);
         return true;
     }catch(err){
         console.log('Invalid Token');
