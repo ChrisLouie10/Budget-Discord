@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatDisplay from './ChatDisplay.js';
 import { propTypes } from 'react-bootstrap/esm/Image';
-
+const jwt = require('jsonwebtoken');
 const ws = new WebSocket("ws://localhost:1000");
 
 const Chat = ({match, location}) => {
   const [messages, setMessages] = useState([]);
+  const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
   let serverName = "Chat Group " + match.params.serverId;
   const initialization = useRef(true);
 
@@ -71,7 +72,7 @@ const Chat = ({match, location}) => {
     const message = {
       content: content, 
       id: (messages.length === 0 ? 1 : messages[messages.length-1].id + 1),
-      author: currentUser.email,
+      author: user.user.name,
       timestamp: timestamp
     };
     const data = {
