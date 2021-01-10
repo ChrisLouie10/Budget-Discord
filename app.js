@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const Message = require('./models/Message');
-require('dotenv').config();
+const GroupServer = require("./models/GroupServer");
 const WebSocket = require('ws');
 const http = require('http');
 const { stringify } = require('querystring');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(express);
@@ -14,8 +14,6 @@ const wss = new WebSocket.Server({server});
 //Import Routes
 const authRoute = require('./routes/auth');
 const postRoute = require('./routes/samplePage');
-
-let chatLog = [];
 
 //Mongoose -------------------------------------------
 mongoose.connect('mongodb://localhost/budget-discord', {
@@ -26,20 +24,6 @@ mongoose.connect('mongodb://localhost/budget-discord', {
 const db = mongoose.connection;
 db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
-
-
-const textServerSchema = new mongoose.Schema({
-  serverName: String,
-  serverId: String,
-  chatLog: [{
-    content: String,
-    author: String,
-    id: Number,
-    timestamp: String
-  }]
-});
-
-const TextServer = mongoose.model("TextServer", textServerSchema); 
 
 const generateUniqueSessionId = () => {
   function s4() {
@@ -60,6 +44,8 @@ wss.on('connection', function connection(ws, incoming) {
   wsclients[sessionId] = ws;
 
   ws.on('message', (message) => {
+    //if the message can't be parsed, then skip it as all ws clients'
+    //messages should be parsable
     let parsedMessage;
     try{
       parsedMessage = JSON.parse(message);
@@ -71,27 +57,33 @@ wss.on('connection', function connection(ws, incoming) {
     //set the websocket client's serverId to the serverId of its message
     ws.serverId = parsedMessage.serverId;
 
+    //if the ws client is requesting for a chat log
     if (parsedMessage.type === "chatLog"){
-      TextServer.findOne({serverId: parsedMessage.serverId}, (err, textServer) => {
+      //look for the ws client's groupserver
+      GroupServer.findOne({serverId: parsedMessage.serverId}, (err, groupServer) => {
         if (err){
           console.log("An error occured when trying to access the DB for a specific text server! (chatLog)");
         }
-        else if (textServer !== null){
+        //if a groupserver is found, send its chat log to the ws client
+        else if (groupServer !== null){
           const message = {
             type: "chatLog",
-            chatLog: textServer.chatLog
+            chatLog: groupServer.chatLog
           }
           ws.send(JSON.stringify(message));
         }
       });
     }
+    //if the ws client is sending a new message
     else if (parsedMessage.type === "message"){
-      TextServer.findOne({serverId: parsedMessage.serverId}, (err, textServer) => {
+      //look for the ws client's groupserver
+      GroupServer.findOne({serverId: parsedMessage.serverId}, (err, groupServer) => {
         if (err){
           console.log("An error occured when trying to access the DB for a specific text server! (message)");
         }
-        else if (textServer === null){
-          TextServer.create({
+        //if the groupserver does not yet exist, then create it
+        else if (groupServer === null){
+          GroupServer.create({
             serverName: parsedMessage.serverName,
             serverId: parsedMessage.serverId,
             chatLog: [{
@@ -101,20 +93,22 @@ wss.on('connection', function connection(ws, incoming) {
               timestamp: parsedMessage.message.timestamp
             }]
           },
-          (err, _textServer) => {
+          (err, _groupServer) => {
             if (err){
               console.log("Unable to create and save a new text server to the DB!");
               console.log(err.response.status);
             }
-            else
-              console.log("New text server added, serverId:" + _textServer.serverId);
-              //Echo this message to every other websocket clients with the same serverId
+            else{
+              delete parsedMessage.message.notSent;
+              //Echo this message to EVERY websocket clients with the same serverId
               for (let key in wsclients){
-                if (key !== ws.sessionId && wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId)
-                 wsclients[key].send(message);
+                if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
+                  wsclients[key].send(JSON.stringify(parsedMessage));
+                }
               }
-          });
+          }});
         }
+        //if the groupserver exists, then update its chat log with the ws client's new message
         else{
           const newMessage = {
             content: parsedMessage.message.content,
@@ -122,14 +116,17 @@ wss.on('connection', function connection(ws, incoming) {
             id: parsedMessage.message.id,
             timestamp: parsedMessage.message.timestamp
           };
-          const newChatLog = [...textServer.chatLog, newMessage];
-          TextServer.findOneAndUpdate({serverId: parsedMessage.serverId}, {chatLog: newChatLog}, {new: true}, (err, _textServer) => {
+          const newChatLog = [...groupServer.chatLog, newMessage];
+          GroupServer.findOneAndUpdate({serverId: parsedMessage.serverId}, {chatLog: newChatLog}, {new: true}, (err, _groupServer) => {
             if (!err){
-              console.log("New message added to text server " + parsedMessage.serverId + ":\n", newMessage);
-              //Echo this message to every other websocket clients with the same serverId
+              delete parsedMessage.message.notSent;
+              console.log(parsedMessage);
+              //Echo this message to EVERY websocket clients with the same serverId
               for (let key in wsclients){
-                if (key !== ws.sessionId && wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId)
-                 wsclients[key].send(message);
+                if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
+                  wsclients[key].send(JSON.stringify(parsedMessage));
+                  console.log("sent to:", key);
+                }
               }
             }
             else{

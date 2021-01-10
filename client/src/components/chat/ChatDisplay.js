@@ -12,14 +12,23 @@ const ChatDisplay = (props) => {
         if (props.messages){
             return(
                 <div>
-                    {props.messages.map(message => (
-                        <p className="ml-2" key={message.id}>{message.author} ({message.timestamp}):<br />{message.content}</p>
-                    ))}
+                {
+                    Object.entries(props.messages).map(([key, value]) => {
+                        if (value.notSent)
+                            return(<p className="ml-2 text-secondary" key={key}>{value.author} ({value.timestamp}):<br />{value.content}</p>)
+                        else
+                            return(<p className="ml-2" key={key}>{value.author} ({value.timestamp}):<br />{value.content}</p>)
+                    })
+                }
                 </div>
             );
         }
     };
-
+    /*
+    {props.messages.map(message => (
+                        <p className="ml-2" key={message.id}>{message.author} ({message.timestamp}):<br />{message.content}</p>
+                    ))}
+    */
     return (
         <div>
             {displayChat()}

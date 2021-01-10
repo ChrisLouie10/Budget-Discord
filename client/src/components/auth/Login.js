@@ -26,7 +26,8 @@ export default function Login() {
           email: emailRef.current.value,
           password: passwordRef.current.value
         })
-      }).then(response => {return response.json()})
+      }).then(response => {
+        return response.json()})
         .then((data) => {
           localStorage.setItem('auth-token', data['auth-token']);
           localStorage.setItem('access-token', data['access-token']);

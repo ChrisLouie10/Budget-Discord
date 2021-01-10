@@ -4,57 +4,33 @@ import { propTypes } from 'react-bootstrap/esm/Image';
 const jwt = require('jsonwebtoken');
 const ws = new WebSocket("ws://localhost:1000");
 
+//WIP - Change messages state from array to dictionary!
 const Chat = ({match, location}) => {
-  const [messages, setMessages] = useState([]);
+  const [messages, _setMessages] = useState({});
+  const messagesRef = useRef(messages);
+  const setMessages = (data) => {
+    messagesRef.current = data;
+    _setMessages(data);
+  };
   const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
   let serverName = "Chat Group " + match.params.serverId;
   const initialization = useRef(true);
 
   useEffect(() => {
-    if (initialization.current){
-      initialization.current = false;
+    ws.addEventListener('message', handleMessage);
+  }, []);
 
-      //Send a request to websocket server (wss) for the relevant chat log
-      const data = {
-        type: "chatLog",
-        serverId: match.params.serverId
-      };
-      waitForWSConnection(() => {
-        ws.send(JSON.stringify(data))
-      }, 100);
-  
-      //Add an event listener whenever a message is received from wss
-      ws.onmessage = (message) => {
-        let parsedMessage;
-        try{
-          parsedMessage = JSON.parse(message.data);
-        } catch (e) {
-          console.log("Message from wss could not be parsed!", message);
-          return;
-        }
-  
-        if (parsedMessage.type === "chatLog"){
-          parsedMessage.chatLog.forEach((message) => {
-            setMessages(messages => [...messages, message]);
-          });
-        }
-        else if (parsedMessage.type === "message"){
-          setMessages(messages => [...messages, parsedMessage.message]);
-        }
-      };
-    }
-    else{
-      //Whenever "chatroom" is switched, send a new request to wss for
-      //the relevant chat log
-      setMessages(messages => []);
-      const data = {
-        type: "chatLog",
-        serverId: match.params.serverId
-      };
-      waitForWSConnection(() => {
-        ws.send(JSON.stringify(data))
-      }, 100);
-    }
+  useEffect(() => {
+    //Whenever "chatroom" is switched, send a new request to wss for
+    //the relevant chat log
+    setMessages(messages => []);
+    const data = {
+      type: "chatLog",
+      serverId: match.params.serverId
+    };
+    waitForWSConnection(() => {
+      ws.send(JSON.stringify(data))
+    }, 100);
   }, [match.params.serverId]);
 
   const waitForWSConnection = (callback, interval) => {
@@ -68,12 +44,37 @@ const Chat = ({match, location}) => {
     }
   };
 
+  const handleMessage = (message) => {
+    let parsedMessage;
+    try{
+      parsedMessage = JSON.parse(message.data);
+    } catch (e) {
+      console.log("Message from wss could not be parsed!", message);
+      return;
+    }
+
+    if (parsedMessage.type === "chatLog"){
+      let _messages = {};
+      parsedMessage.chatLog.forEach((message) => {
+        _messages[message.id] = message;
+        delete _messages[message.id].id;
+      });
+      setMessages({..._messages});
+    }
+    else if (parsedMessage.type === "message"){
+      let newMessage = {...messagesRef.current};
+      newMessage[parsedMessage.message.id] = parsedMessage.message;
+      setMessages({...newMessage});
+    }
+  }
+
   const sendMessage = (content, timestamp) => {
     const message = {
       content: content, 
-      id: (messages.length === 0 ? 1 : messages[messages.length-1].id + 1),
+      id: (Object.keys(messages).length + 1),
       author: user.user.name,
-      timestamp: timestamp
+      timestamp: timestamp,
+      notSent: true
     };
     const data = {
       type: "message",
@@ -81,7 +82,9 @@ const Chat = ({match, location}) => {
       message: message
     };
 
-    setMessages(messages => [...messages, message]);
+    let newMessage = {};
+    newMessage[message.id] = message;
+    setMessages({...messages, ...newMessage});
 
     waitForWSConnection(()=>{
       ws.send(JSON.stringify(data));
