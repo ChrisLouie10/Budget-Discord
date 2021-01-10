@@ -9,7 +9,7 @@ import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
 import CheckingUser from './auth/CheckingUser';
 import Chat from './chat/Chat';
-import Navbar from './Navbar';
+import Navbar from './navbar';
 import LeftSideNav from './LeftSideNav.js';
 
 export default function App() {
