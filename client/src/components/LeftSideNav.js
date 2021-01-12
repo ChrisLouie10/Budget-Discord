@@ -1,33 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './LeftSideNav.css';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Popup from "./Popup.js";
+import CreateServerForm from "./CreateServerForm.js";
+//import "./LeftSideNav.css";
+const jwt = require('jsonwebtoken');
 
-const LeftSideNav = (props) => {
+export default function LeftSideNav(props){
+
+    const [openPopup, setOpenPopup] = useState(false);
+    const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+    
+    useEffect(() => {
+        console.log(user.user);
+    }, []);
+
     return (
-        <div className="wrapper">
+        <div className="wrapper w-100">
             <nav id="sidebar">
-                <div className="sidebar-header">
-                    <h5>Budget-Discord</h5>
+                <div>
+                    <h5 className="text-white">Budget-Discord</h5>
                 </div>
 
-                <ul className="list-unstyled components">
+                <ul className="list-unstyled text-white">
                     <li>
-                        <Link to="/">Dashboard</Link>
+                        <Link className="text-reset" to="/">Dashboard</Link>
                     </li>
                     <li>
-                        <Link to="/update-profile">Update Profile</Link>
+                        <Link className="text-reset" to="/update-profile">Update Profile</Link>
                     </li>
-                    <li>
-                        <Link to={{pathname: "/chat/1"}}>Chat Room 1</Link>
-                    </li>
-                    <li>
-                        <Link to={{pathname: "/chat/2"}}>Chat Room 2</Link>
-                    </li>
-                    <li>
-                        <Link to={{pathname: "/chat/3"}}>Chat Room 3</Link>
-                    </li>
-                    <li>
-                        <Link to={{pathname: "/chat/4"}}>Chat Room 4</Link>
+                    {
+                        user.user.servers.map((server) => (
+                            <li key={server.serverId}>
+                                <Link className="text-reset" to={{pathname: "/group/"+server.serverId}} >
+                                    {server.serverName}
+                                </Link>
+                            </li>
+                        ))}
+                    <li onClick = {() => {if (!openPopup)setOpenPopup(true)}}>
+                        Create Server
+                        <Popup
+                        openPopup = {openPopup}
+                        setOpenPopup = {setOpenPopup}
+                        user = {user}
+                        setUser = {setUser}>
+                            <CreateServerForm />
+                        </Popup>
                     </li>
                 </ul>
             </nav>
@@ -38,5 +55,17 @@ const LeftSideNav = (props) => {
         </div>
     );
 };
-
-export default LeftSideNav;
+/*
+<li>
+    <Link to={{pathname: "/chat/1"}}>Chat Room 1</Link>
+</li>
+<li>
+    <Link to={{pathname: "/chat/2"}}>Chat Room 2</Link>
+</li>
+<li>
+    <Link to={{pathname: "/chat/3"}}>Chat Room 3</Link>
+</li>
+<li>
+    <Link to={{pathname: "/chat/4"}}>Chat Room 4</Link>
+</li>
+*/
