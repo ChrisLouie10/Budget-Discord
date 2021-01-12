@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ChatBox = (props) => {
+export default function TextChatBox(props){
     const [input, setInput] = useState("");
 
     //When Enter key is pressed on the input,
@@ -23,5 +23,3 @@ const ChatBox = (props) => {
         <input type="text" className="form-control m-2" id="chatBox" value={input} onChange={handleInputChange} onKeyPress={handleEnterPress}/>
     );
 }
-
-export default ChatBox;

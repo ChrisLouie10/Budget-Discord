@@ -1,48 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ChatDisplay from './ChatDisplay.js';
-import { propTypes } from 'react-bootstrap/esm/Image';
+import TextChatDisplay from './TextChatDisplay.js';
 const jwt = require('jsonwebtoken');
 const ws = new WebSocket("ws://localhost:1000");
 
 //WIP - Change messages state from array to dictionary!
-const Chat = ({match, location}) => {
+export default function TextChat(props){
+  
   const [messages, _setMessages] = useState({});
   const messagesRef = useRef(messages);
   const setMessages = (data) => {
     messagesRef.current = data;
     _setMessages(data);
   };
-  const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
-  let serverName = "Chat Group " + match.params.serverId;
+  let serverName = "Chat Group " + props.serverId;
   const initialization = useRef(true);
-
-  useEffect(() => {
-    ws.addEventListener('message', handleMessage);
-  }, []);
-
-  useEffect(() => {
-    //Whenever "chatroom" is switched, send a new request to wss for
-    //the relevant chat log
-    setMessages(messages => []);
-    const data = {
-      type: "chatLog",
-      serverId: match.params.serverId
-    };
-    waitForWSConnection(() => {
-      ws.send(JSON.stringify(data))
-    }, 100);
-  }, [match.params.serverId]);
-
-  const waitForWSConnection = (callback, interval) => {
-    if (ws.readyState === WebSocket.OPEN){
-      callback();
-    }
-    else{
-      setTimeout(() => {
-        waitForWSConnection(callback, interval);
-      }, interval);
-    }
-  };
 
   const handleMessage = (message) => {
     let parsedMessage;
@@ -68,17 +39,47 @@ const Chat = ({match, location}) => {
     }
   }
 
+  useEffect(() => {
+    ws.addEventListener('message', handleMessage);
+  }, []);
+
+  useEffect(() => {
+    //Whenever "chatroom" is switched, send a new request to wss for
+    //the relevant chat log
+    setMessages(messages => []);
+    const data = {
+      type: "chatLog",
+      serverId: props.serverId
+    };
+    waitForWSConnection(() => {
+      ws.send(JSON.stringify(data))
+    }, 100);
+  }, [props.serverId]);
+
+  const waitForWSConnection = (callback, interval) => {
+    if (ws.readyState === WebSocket.OPEN){
+      callback();
+    }
+    else{
+      setTimeout(() => {
+        waitForWSConnection(callback, interval);
+      }, interval);
+    }
+  };
+
+  
+
   const sendMessage = (content, timestamp) => {
     const message = {
       content: content, 
       id: (Object.keys(messages).length + 1),
-      author: user.user.name,
+      author: props.userName,
       timestamp: timestamp,
       notSent: true
     };
     const data = {
       type: "message",
-      serverId: match.params.serverId,
+      serverId: props.serverId,
       message: message
     };
 
@@ -93,9 +94,7 @@ const Chat = ({match, location}) => {
 
   return (
     <div>
-      <ChatDisplay sendMessage={sendMessage} messages={messages}/>
+      <TextChatDisplay sendMessage={sendMessage} messages={messages}/>
     </div>
   );
 };
-
-export default Chat;

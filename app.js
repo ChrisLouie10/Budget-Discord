@@ -13,6 +13,7 @@ const wss = new WebSocket.Server({server});
 
 //Import Routes
 const authRoute = require('./routes/auth');
+const createServerRoute = require('./routes/createServer.js');
 const postRoute = require('./routes/samplePage');
 
 //Mongoose -------------------------------------------
@@ -125,7 +126,6 @@ wss.on('connection', function connection(ws, incoming) {
               for (let key in wsclients){
                 if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
                   wsclients[key].send(JSON.stringify(parsedMessage));
-                  console.log("sent to:", key);
                 }
               }
             }
@@ -161,6 +161,7 @@ app.use(express.json());
 
 //Route Middlewares
 app.use('/api/user', authRoute);
+app.use('/api/createServer', createServerRoute);
 app.use('/api/posts', postRoute);
 
 app.use(express.urlencoded({ extended: false }));

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import ChatBox from './ChatBox.js';
+import TextChatBox from './TextChatBox.js';
 
-const ChatDisplay = (props) => {
+export default function TextChatDisplay(props){
     const sendMessage = (content, timestamp) => {
         //Bubble up the data to Chat.js
         props.sendMessage(content, timestamp);
@@ -32,9 +32,7 @@ const ChatDisplay = (props) => {
     return (
         <div>
             {displayChat()}
-            <ChatBox sendMessage={sendMessage}/>
+            <TextChatBox sendMessage={sendMessage}/>
         </div>
     );
 }
-
-export default ChatDisplay;
