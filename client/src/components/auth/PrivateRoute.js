@@ -31,8 +31,6 @@ export default function PrivateRoute({ component: Component, ...rest}) {
 
   if(loading) return (
     <>
-      <NavBar/>
-      <LeftSideNav/>
       <Route
         {...rest}
         render={(props) =>{
