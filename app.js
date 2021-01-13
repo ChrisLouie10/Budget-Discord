@@ -14,7 +14,6 @@ const wss = new WebSocket.Server({server});
 //Import Routes
 const authRoute = require('./routes/auth');
 const createServerRoute = require('./routes/createServer.js');
-const postRoute = require('./routes/samplePage');
 
 //Mongoose -------------------------------------------
 mongoose.connect('mongodb://localhost/budget-discord', {
@@ -162,7 +161,6 @@ app.use(express.json());
 //Route Middlewares
 app.use('/api/user', authRoute);
 app.use('/api/createServer', createServerRoute);
-app.use('/api/posts', postRoute);
 
 app.use(express.urlencoded({ extended: false }));
 
