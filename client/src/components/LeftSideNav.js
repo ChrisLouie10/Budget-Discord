@@ -12,7 +12,7 @@ const LeftSideNav = (props) => {
 
                 <ul className="list-unstyled components">
                     <li>
-                        <Link to="/">Dashboard</Link>
+                        <Link to="/dashboard">Dashboard</Link>
                     </li>
                     <li>
                         <Link to="/update-profile">Update Profile</Link>

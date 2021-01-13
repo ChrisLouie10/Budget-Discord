@@ -28,14 +28,11 @@ export default function Login() {
         })
       }).then(response => {return response.json()})
         .then((data) => {
-          localStorage.setItem('auth-token', data['auth-token']);
-          localStorage.setItem('access-token', data['access-token']);
-          history.push("/");
+          if(data.success){
+            localStorage.setItem('Authorization', data.Authorization);
+            history.push("/dashboard");
+          } else setError(data.message);
         })
-        .catch((error) => {
-          console.log(error);
-          setError('Failed to sign in');
-        });
     }
     finally{
       setLoading(false);

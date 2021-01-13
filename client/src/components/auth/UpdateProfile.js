@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken');
 
 // // Simple Update Profile page
 
-export default function UpdateProfile() {
-  const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+export default function UpdateProfile(props) {
+  const [user, setUser] = useState(props.user);
   const oldPasswordRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
@@ -23,23 +23,21 @@ export default function UpdateProfile() {
 
     try{
       setLoading(true);
-      console.log(user.user['email']);
       await fetch('http://localhost:3000/api/user/check-password', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': localStorage.getItem('Authorization')
         },
         body: JSON.stringify({
-          email: user.user['email'],
+          email: user.email,
           oldPassword: oldPasswordRef.current.value,
           password: passwordRef.current.value
         })
-      }).then(response => {
-        if(!response.ok) setError(response.statusText);
-        else{
-          history.push("/");
-        }
-        return response.json()
+      }).then(response => { return response.json()})
+        .then(data => {
+          if(!data.success) setError(data.message);
+          else history.push("/dashboard");
       })
     }
     finally{
