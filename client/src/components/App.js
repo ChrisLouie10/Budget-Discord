@@ -7,10 +7,8 @@ import Dashboard from "./auth/Dashboard";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
-import CheckingUser from './auth/CheckingUser';
+import Loading from './auth/Loading';
 import Chat from './chat/Chat';
-import Navbar from './navbar';
-import LeftSideNav from './LeftSideNav.js';
 
 export default function App() {
   /*
@@ -30,16 +28,13 @@ export default function App() {
         style={{minHeight: "100vh"}}>
         <div className="w-100" style={{maxWidth: "400px"}}>
           <Router>
-            <Navbar/>
-            <LeftSideNav/>
-              <Switch>
-                <PrivateRoute exact path="/" component={Dashboard} />
-                <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
-                <PrivateRoute path="/checking-user" component={CheckingUser} />
-                <PrivateRoute exact path="/chat/:serverId" component={Chat} />
-                <Route path="/signup" component={Signup} />
-                <Route path="/login" component={Login} />
-              </Switch>
+            <Switch>
+              <PrivateRoute exact path="/dashboard" component={Dashboard} />
+              <PrivateRoute path="/update-profile" component={UpdateProfile} />
+              <PrivateRoute exact path="/chat/:serverId" component={Chat} />
+              <Route path="/signup" component={Signup} />
+              <Route path="/login" component={Login} />
+            </Switch>
           </Router>
         </div>
       </Container>
