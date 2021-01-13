@@ -1,19 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Popup from "./Popup.js";
-import CreateServerForm from "./CreateServerForm.js";
-//import "./LeftSideNav.css";
-const jwt = require('jsonwebtoken');
+import Popup from "./popups/Popup.js";
+import CreateServerForm from "./popups/CreateServerForm.js";
+//const jwt = require('jsonwebtoken');
 
 export default function LeftSideNav(props){
 
     const [openPopup, setOpenPopup] = useState(false);
-    const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+    //const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
     
-    useEffect(() => {
-        console.log(user.user);
-    }, []);
-
     return (
         <div className="wrapper w-100">
             <nav id="sidebar">
@@ -29,7 +24,7 @@ export default function LeftSideNav(props){
                         <Link className="text-reset" to="/update-profile">Update Profile</Link>
                     </li>
                     {
-                        user.user.servers.map((server) => (
+                        props.user.user.servers.map((server) => (
                             <li key={server.serverId}>
                                 <Link className="text-reset" to={{pathname: "/group/"+server.serverId}} >
                                     {server.serverName}
@@ -41,8 +36,8 @@ export default function LeftSideNav(props){
                         <Popup
                         openPopup = {openPopup}
                         setOpenPopup = {setOpenPopup}
-                        user = {user}
-                        setUser = {setUser}>
+                        user = {props.user}
+                        setUser = {props.setUser}>
                             <CreateServerForm />
                         </Popup>
                     </li>
@@ -55,17 +50,3 @@ export default function LeftSideNav(props){
         </div>
     );
 };
-/*
-<li>
-    <Link to={{pathname: "/chat/1"}}>Chat Room 1</Link>
-</li>
-<li>
-    <Link to={{pathname: "/chat/2"}}>Chat Room 2</Link>
-</li>
-<li>
-    <Link to={{pathname: "/chat/3"}}>Chat Room 3</Link>
-</li>
-<li>
-    <Link to={{pathname: "/chat/4"}}>Chat Room 4</Link>
-</li>
-*/

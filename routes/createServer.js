@@ -1,6 +1,12 @@
 const GroupServer = require('../models/GroupServer.js');
 const User = require('../models/User');
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+
+
+function generateAccessToken(user){
+    return jwt.sign({user}, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '30m'});
+}
 
 router.post('/create', async (req, res) => {
     GroupServer.create({
@@ -37,8 +43,13 @@ router.post('/create', async (req, res) => {
                             res.status(500).send(err);
                         }
                         else{
+                            const accessToken = generateAccessToken(_user);
+                            console.log(accessToken);
                             const data = {
-                                user: _user
+                                "access-token": accessToken,
+                                "user": {
+                                    user: _user
+                                }
                             }
                             res.status(200).send(data);
                         }

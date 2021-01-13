@@ -6,7 +6,7 @@ import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
 import CheckingUser from './auth/CheckingUser';
-import GroupServer from './GroupServer.js';
+import GroupServer from './groupserver/GroupServer.js';
 
 export default function App() {
   /*

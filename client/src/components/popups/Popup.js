@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {Dialog, DialogTitle, DialogContent } from '@material-ui/core';
 
 export default function Popup(props){

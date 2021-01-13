@@ -38,7 +38,9 @@ export default function CreateServerForm(props){
               if(!response.ok) setError(response.statusText);
               else return response.json();
             }).then((data) => {
-                props.others.setUser(data);
+                console.log(data);
+                localStorage.setItem('access-token', data['access-token']);
+                props.others.setUser(data["user"]);
             })
         }finally{
             setLoading(false);
