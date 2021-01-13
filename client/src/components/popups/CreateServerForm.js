@@ -27,21 +27,19 @@ export default function CreateServerForm(props){
             fetch('http://localhost:3000/api/createServer/create', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('Authorization')
               },
               body: JSON.stringify({
                 serverName: serverName,
                 serverId: serverId,
-                userId: props.others.user.user._id
+                userId: props.others.user._id
               })
-            }).then(response => { 
-              if(!response.ok) setError(response.statusText);
-              else return response.json();
-            }).then((data) => {
-                console.log(data);
-                localStorage.setItem('access-token', data['access-token']);
-                props.others.setUser(data["user"]);
-            })
+            }).then(response => { return response.json(); })
+                .then((data) => {
+                    if(!data.success) setError(data.messsage);
+                    else props.others.setUser(data.user);
+                });
         }finally{
             setLoading(false);
         }

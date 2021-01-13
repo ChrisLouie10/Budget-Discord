@@ -2,13 +2,14 @@ const GroupServer = require('../models/GroupServer.js');
 const User = require('../models/User');
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
+const verify = require('../auth/verifyToken');
 
 
 function generateAccessToken(user){
     return jwt.sign({user}, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '30m'});
 }
 
-router.post('/create', async (req, res) => {
+router.post('/create', verify, async (req, res) => {
     GroupServer.create({
         serverName: req.body.serverName,
         serverId: req.body.serverId,
@@ -21,39 +22,23 @@ router.post('/create', async (req, res) => {
             res.status(500).send(err);
         }
         else{
-            User.findOne({_id: req.body.userId}, (err, user) => {
+            const server = {
+                serverName: req.body.serverName,
+                serverId: req.body.serverId
+            }
+            if (req.user.servers)
+                req.user.servers.push(server);
+            else{
+                req.user.servers = [];
+                req.user.servers.push(server);
+            }
+            User.findOneAndUpdate({_id: req.body.userId}, {servers: req.user.servers}, {new: true}, (err, _user) => {
                 if (err){
                     res.statusMessage = err;
-                    res.status(500).send(err);
+                    res.status(500).json({success: false, message: err});
                 }
                 else{
-                    const server = {
-                        serverName: req.body.serverName,
-                        serverId: req.body.serverId
-                    }
-                    if (user.servers)
-                        user.servers.push(server);
-                    else{
-                        user.servers = [];
-                        user.servers.push(server);
-                    }
-                    User.findOneAndUpdate({_id: req.body.userId}, {servers: user.servers}, {new: true}, (err, _user) => {
-                        if (err){
-                            res.statusMessage = err;
-                            res.status(500).send(err);
-                        }
-                        else{
-                            const accessToken = generateAccessToken(_user);
-                            console.log(accessToken);
-                            const data = {
-                                "access-token": accessToken,
-                                "user": {
-                                    user: _user
-                                }
-                            }
-                            res.status(200).send(data);
-                        }
-                    });
+                    res.status(200).json({success: true, message: 'Success', user: _user});
                 }
             });
         }

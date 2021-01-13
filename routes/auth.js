@@ -3,25 +3,25 @@ const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation } = require('../auth/validation');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const verify = require ('../auth/verifyToken');
 
 //Validation
 const Joi = require('@hapi/joi');
-const { join } = require('path');
+
+router.post('/verify', verify, (req, res) => {
+    if(req.user) return res.status(200).json({success: true, message: 'Success', user: req.user});
+    else return res.status(404).json({success: false, message: 'Denied Access'});
+});
 
 router.post('/register', async (req, res) => {
 
     // Validate data before adding user
     const {error} = registerValidation(req.body);
-    if(error) {
-        res.statusMessage = error.details[0].message;
-        return res.sendStatus(400);
-    }
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
+
     // Check if the user's email is already in the database
     const emailExist = await User.findOne({email: req.body.email});
-    if(emailExist) {
-        res.statusMessage = 'Email already exists';
-        return res.sendStatus(400);
-    }
+    if(emailExist) return res.status(400).json({success: false, message: 'Email already exists'});
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -37,130 +37,76 @@ router.post('/register', async (req, res) => {
         const newUser = await user.save();
     
         //Create and assign a refresh and access token to a user
-        const accessToken = generateAccessToken(newUser);
-        const refreshToken = jwt.sign({_id: newUser._id}, process.env.SECRET_REFRESH_TOKEN);
+        const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
         const query = { email: user.email };
-        const set = { $set: { token: refreshToken } };
+        const set = { $set: { token: token } };
         await User.updateOne(query, set);
 
-        res.status(200).send({'auth-token': refreshToken, 'access-token': accessToken});
-    }catch(err){
-        res.statusMessage = err;
-        res.sendStatus(400);
+        return res.status(200).send({success: true, message: 'Success', Authentication: token});
+    }catch(err) {
+        return res.status(400).json({success: false, message: err});
     }
 });
 
-router.delete('/logout', async (req, res) =>{
+router.delete('/logout', verify, async (req, res) =>{
 
-    // check if the user has a refresh token
-    const refreshToken = req.header('auth-token');
-    if(refreshToken == null) {
-        res.statusMessage = 'Already logged out';
-        res.sendStatus(401);
-    }
-    // delete the refresh token from the user
-    const query = { token: refreshToken };
+    // check if the user is logged in
+    if(req.user == null) res.status(401).json({success: false, message: 'Already logged out'});
+
+    // delete the token from the user
+    const query = { _id: req.user._id };
     const set = { token: null }
     const result = await User.updateOne(query, set);    
-    if(result.nModified > 0){
-        res.status(200).send("Token Deleted");
-    } else {
-        res.statusMessage = 'Token not found';
-        res.sendStatus(404);
-    }
+
+    if(result.nModified > 0) res.status(200).json({success: true, message: 'Success'});
+    else res.status(404).json({success: false, message: 'Token not found'});
 })
 
 router.post('/login', async (req, res) =>{
 
     // Validate data before adding user
     const {error} = loginValidation(req.body);
-    if(error) {
-        res.statusMessage = error.details[0].message;
-        res.status(400).send();
-    }
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
 
     // Check if the user's email is already in the database
     const user = await User.findOne({email: req.body.email});
-    if(!user) {
-        res.statusMessage = 'Email or password is incorrect';
-        res.status(400).send();
-    }
-
+    if(!user) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
+    
     // Check if password is valid
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if(!validPass) {
-        res.statusMessage = 'Email or password is incorrect';
-        res.status(400).send();
-    }
+    if(!validPass) res.status(400).json({success: false, message: 'Email or password is incorrect'});
 
-    //Create and assign a refresh and access token to a user
-    const accessToken = generateAccessToken(user);
-    const refreshToken = jwt.sign({_id: user._id}, process.env.SECRET_REFRESH_TOKEN);
+    //Create and assign a token to a user
+    const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN);
     try{
         const query = { email: user.email };
-        const set = { $set: { token: refreshToken } };
+        const set = { $set: { token: token } };
         await User.updateOne(query, set);
-        res.status(200).send({'auth-token': refreshToken, 'access-token': accessToken});
+        return res.status(200).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
     }catch(err){
-        res.status(400).send(err);
+        return res.status(400).json({success: false, message: 'Failed to log in'});
     }
 });
 
-router.post('/token', async (req, res) => {
-
-    // check if user has refresh token
-    const refreshToken = req.header('auth-token');
-    if(refreshToken == null) {
-        res.status(401).send();
-    }
-
-    // check if the refresh token is valid
-    const found = await User.findOne({token: refreshToken});
-    if(refreshToken == null) {
-        res.status(400).send();
-    }
-    
-    // verify refresh token
-    jwt.verify(refreshToken, process.env.SECRET_REFRESH_TOKEN, (err, user) => {
-        if (err) res.status(403).send();
-
-        // send back a new access token
-        const accessToken = generateAccessToken(found);
-        res.status(200).send({ accessToken: accessToken });
-    });
-});
-
-router.post('/check-password', async (req, res) => {
+router.post('/check-password', verify, async (req, res) => {
     // Validate data before adding user
     const {error} = updatePasswordValidation(req.body);
-    if(error) {
-        res.statusMessage = error.details[0].message;
-        res.status(400).send();
-    }
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
 
-    const user = await User.findOne({email: req.body.email});
-    const validPass = await bcrypt.compare(req.body.oldPassword, user.password);
-    if(!validPass) {
-        res.statusMessage = 'Old Password is Incorrect';
-        res.status(400).send();
-    }
+    const validPass = await bcrypt.compare(req.body.oldPassword, req.user.password);
+    if(!validPass) return res.status(400).json({success: false, message: 'Old Password is Incorrect'});
 
     try{
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(req.body.password, salt);
-        const query = { email: user.email };
+        const query = { email: req.user.email };
         const set = { $set: { password: hashPassword } };
         await User.updateOne(query, set);
-        res.status(200).send({result: true, message: 'Success'});
-    }catch{
-        res.statusMessage = 'Failed to change password';
-        res.status(400).send();
+
+        return res.status(200).json({success: true, message: 'Success'});
+    }catch{ 
+        return res.status(400).json({success: false, message: 'Failed to change password'});
     }
-
 })
-
-function generateAccessToken(user){
-    return jwt.sign({user}, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '30m'});
-}
 
 module.exports = router;

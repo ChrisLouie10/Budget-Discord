@@ -5,12 +5,10 @@ node_modules
 /.pnp
 .pnp.js
 .eslintcache
-.env
 package-lock.json
 
 # testing
 /coverage
-.env
 
 # production
 /build
