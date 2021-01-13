@@ -18,7 +18,7 @@ export default function LeftSideNav(props){
 
                 <ul className="list-unstyled text-white">
                     <li>
-                        <Link className="text-reset" to="/">Dashboard</Link>
+                        <Link className="text-reset" to="/dashboard">Dashboard</Link>
                     </li>
                     <li>
                         <Link className="text-reset" to="/update-profile">Update Profile</Link>

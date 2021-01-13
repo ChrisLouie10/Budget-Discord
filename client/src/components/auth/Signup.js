@@ -32,13 +32,12 @@ export default function Signup() {
           email: emailRef.current.value,
           password: passwordRef.current.value
         })
-      }).then(response => { 
-        if(!response.ok) setError(response.statusText);
+      }).then(response => { return response.json()})
+        .then(data => {
+        if(!data.success) setError(response.statusText);
         else {
-          const data = response.json();
-          localStorage.setItem('auth-token', data['auth-token']);
-          localStorage.setItem('access-token', data['access-token']);
-          history.push("/");
+          localStorage.setItem('Authorization', data.Authorization);
+          history.push("/dashboard");
         }
       });
     }

@@ -9,28 +9,25 @@ const jwt = require('jsonwebtoken');
 export default function Dashboard(props) {
 
   const [error, setError] = useState("");
-  const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+  const [user, setUser] = useState(props.user);
   const history = useHistory();
 
   async function handleLogout(){
     setError('');
 
-    try{
-      await fetch('http://localhost:3000/api/user/logout', {
-        method: 'DELETE',
-        headers: {
-          'auth-token': localStorage.getItem('auth-token')
-        }
-      }).then(response => {
-        if(!response.ok) setError(response.statusText);
-        else{
-          localStorage.removeItem('auth-token');
-          localStorage.removeItem('access-token');
-          history.push('/login');
-        }
-      });
-    }
-    catch{}
+    await fetch('http://localhost:3000/api/user/logout', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': localStorage.getItem('Authorization')
+      }
+    }).then(response => { return response.json()})
+      .then(data => {
+      if(!data.success) setError(response.statusText);
+      else{
+        localStorage.removeItem('Authorization');
+        history.push('/login');
+      }
+    });
   }
 
   return (
@@ -47,10 +44,10 @@ export default function Dashboard(props) {
                 </div>
                 {error && <Alert variant="danger">{error}</Alert>}
                 <div>
-                  <strong>Name:</strong> {user.user.name}
+                  <strong>Name:</strong> {user.name}
                 </div>
                 <div>
-                  <strong>Email:</strong> {user.user.email}
+                  <strong>Email:</strong> {user.email}
                 </div>
                 <Link to="/update-profile" className="btn btn-primary w-100 mt-3">Update Profile</Link>
               </div>
