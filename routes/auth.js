@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation } = require('../auth/validation');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const verify = require ('./verifyToken');
+const verify = require ('../auth/verifyToken');
 
 //Validation
 const Joi = require('@hapi/joi');
@@ -88,17 +88,6 @@ router.post('/login', async (req, res) =>{
     }
 });
 
-// router.post('/token', verify, async (req, res) => {
-
-//     // check if user is logged in
-//     if(req.user == null) {
-//         res.status(401).send();
-//     }
-
-//     const accessToken = generateAccessToken(found);
-//     res.status(200).send({ accessToken: accessToken });
-// });
-
 router.post('/check-password', verify, async (req, res) => {
     // Validate data before adding user
     const {error} = updatePasswordValidation(req.body);
@@ -118,7 +107,6 @@ router.post('/check-password', verify, async (req, res) => {
     }catch{ 
         return res.status(400).json({success: false, message: 'Failed to change password'});
     }
-
 })
 
 module.exports = router;
