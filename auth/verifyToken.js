@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Middleware that checks if a user has a token
+// returns the user's data if true
+// returns an error if false
 
 const verify = async function (req, res, next){
 
