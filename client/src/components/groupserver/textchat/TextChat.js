@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TextChatDisplay from './TextChatDisplay.js';
-const jwt = require('jsonwebtoken');
 const ws = new WebSocket("ws://localhost:1000");
 
 //WIP - Change messages state from array to dictionary!
@@ -40,7 +39,8 @@ export default function TextChat(props){
   }
 
   useEffect(() => {
-    ws.addEventListener('message', handleMessage);
+    if (ws)
+      ws.addEventListener('message', handleMessage);
   }, []);
 
   useEffect(() => {
@@ -57,23 +57,23 @@ export default function TextChat(props){
   }, [props.serverId]);
 
   const waitForWSConnection = (callback, interval) => {
-    if (ws.readyState === WebSocket.OPEN){
-      callback();
-    }
-    else{
-      setTimeout(() => {
-        waitForWSConnection(callback, interval);
-      }, interval);
+    if(ws){
+      if (ws.readyState === WebSocket.OPEN){
+        callback();
+      }
+      else{
+        setTimeout(() => {
+          waitForWSConnection(callback, interval);
+        }, interval);
+      }
     }
   };
-
-  
 
   const sendMessage = (content, timestamp) => {
     const message = {
       content: content, 
       id: (Object.keys(messages).length + 1),
-      author: props.userName,
+      author: props.user.user.name,
       timestamp: timestamp,
       notSent: true
     };
@@ -92,9 +92,8 @@ export default function TextChat(props){
     }, 100);
   };
 
+
   return (
-    <div>
-      <TextChatDisplay sendMessage={sendMessage} messages={messages}/>
-    </div>
+    <TextChatDisplay sendMessage={sendMessage} messages={messages}/>
   );
 };

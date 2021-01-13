@@ -11,15 +11,25 @@ export default function TextChatDisplay(props){
         //Display the messages array from Chat.js
         if (props.messages){
             return(
-                <div>
+                <div className="row">
+
+                <div className="col-12" aria-orientation="vertical" style={{height: "100%", position: "absolute", overflowY: "scroll"}}>
+
                 {
                     Object.entries(props.messages).map(([key, value]) => {
                         if (value.notSent)
-                            return(<p className="ml-2 text-secondary" key={key}>{value.author} ({value.timestamp}):<br />{value.content}</p>)
+                            return(
+                                <p className="ml-2 #858585" key={key}>
+                                     {value.author} ({value.timestamp}):<br />{value.content}
+                                </p>);
                         else
-                            return(<p className="ml-2" key={key}>{value.author} ({value.timestamp}):<br />{value.content}</p>)
+                            return(
+                                <p className="ml-2" style={{color: "#c2c2c2"}} key={key}>
+                                    {value.author} ({value.timestamp}):<br />{value.content}
+                                </p>);
                     })
                 }
+                </div>
                 </div>
             );
         }
@@ -30,7 +40,7 @@ export default function TextChatDisplay(props){
                     ))}
     */
     return (
-        <div>
+        <div className="col-11 align-self-end w-100" style={{minHeight: "100vh", background: "#303030"}}>
             {displayChat()}
             <TextChatBox sendMessage={sendMessage}/>
         </div>

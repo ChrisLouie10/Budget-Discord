@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 
 // Simple private account information.
 
-export default function Dashboard() {
+export default function Dashboard(props) {
+
   const [error, setError] = useState("");
   const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
   const history = useHistory();
@@ -36,7 +37,7 @@ export default function Dashboard() {
     <div className="container-fluid">
       <div className="row">
         <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <LeftSideNav />
+          <LeftSideNav user={user} setUser={setUser} />
         </div>
         <div className="col-11 my-auto">
             <div className="card mx-auto" style={{maxWidth: "400px"}}>

@@ -54,7 +54,7 @@ wss.on('connection', function connection(ws, incoming) {
       console.log("Message from ws client could not be parsed!", message);
       return;
     }
-
+  
     //set the websocket client's serverId to the serverId of its message
     ws.serverId = parsedMessage.serverId;
 
