@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import NavBar from '../navbar';
-import LeftSideNav from '../LeftSideNav';
 import Loading from './Loading';
 
 // Component creating a private route

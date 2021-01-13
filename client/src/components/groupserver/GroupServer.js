@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import LeftSideNav from '../LeftSideNav.js';
 import TextChat from './textchat/TextChat.js';
 const jwt = require('jsonwebtoken');
 
-export default function GroupServer({match}){
+export default function GroupServer(props){
 
-    const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+    const [user, setUser] = useState(props.user);
 
     const userHasAccess = () => {
         let bool = false;
-        user.user.servers.forEach((server) => {
-            if (server.serverId === match.params.serverId){
+        user.servers.forEach((server) => {
+            if (server.serverId === props.computedMatch.params.serverId){
                 bool = true;
                 return;
             }
@@ -28,11 +28,11 @@ export default function GroupServer({match}){
                         <div className="col-1" style={{minHeight: "100vh", background: "#212121"}}>
                             <LeftSideNav user={user} setUser={setUser}/>
                         </div>
-                        <TextChat serverId={match.params.serverId} user={user}/>
+                        <TextChat serverId={props.computedMatch.params.serverId} user={user}/>
                     </div>
                 </div> 
                 :
-                <Redirect to="/" />
+                <Redirect to="/dashboard" />
            }
        </div>
     );

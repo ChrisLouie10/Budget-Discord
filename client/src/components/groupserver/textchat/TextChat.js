@@ -73,7 +73,7 @@ export default function TextChat(props){
     const message = {
       content: content, 
       id: (Object.keys(messages).length + 1),
-      author: props.user.user.name,
+      author: props.user.name,
       timestamp: timestamp,
       notSent: true
     };

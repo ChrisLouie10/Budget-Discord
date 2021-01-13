@@ -24,7 +24,7 @@ export default function LeftSideNav(props){
                         <Link className="text-reset" to="/update-profile">Update Profile</Link>
                     </li>
                     {
-                        props.user.user.servers.map((server) => (
+                        props.user.servers.map((server) => (
                             <li key={server.serverId}>
                                 <Link className="text-reset" to={{pathname: "/group/"+server.serverId}} >
                                     {server.serverName}
