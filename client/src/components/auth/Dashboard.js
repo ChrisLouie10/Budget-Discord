@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Alert } from 'react-bootstrap';
 import { Link, useHistory } from "react-router-dom";
-import LeftSideNav from '../LeftSideNav.js'
-const jwt = require('jsonwebtoken');
+import ServersSidebar from '../ServersSidebar.js'
 
 // Simple private account information.
 
@@ -34,7 +33,7 @@ export default function Dashboard(props) {
     <div className="container-fluid">
       <div className="row">
         <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <LeftSideNav user={user} setUser={setUser} />
+          <ServersSidebar user={user} setUser={setUser} />
         </div>
         <div className="col-11 my-auto">
             <div className="card mx-auto" style={{maxWidth: "400px"}}>

@@ -8,7 +8,9 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   const [ success, setSuccess ] = useState();
   const [ loading, setLoading ] = useState(false);
   
-  useEffect(async () => {
+  useEffect(fetchUser, []);
+
+  async function fetchUser(){
     let mounted = true;
     await fetch('http://localhost:3000/api/user/verify', {
       method: 'POST',
@@ -25,14 +27,14 @@ export default function PrivateRoute({ component: Component, ...rest}) {
       }).catch(error => (mounted ? setSuccess(false): null));
     setLoading(true);
     return () => mounted = false;
-  }, [])
+  }
 
   if(loading) return (
     <>
       <Route
         {...rest}
         render={(props) =>{
-          return success ? <Component {...rest} user={user} props={props} /> : <Redirect to="/login" />;
+          return success ? <Component {...rest} user={user} props={props} fetchUser={fetchUser}/> : <Redirect to="/login" />;
         }}
       ></Route>
     </>
