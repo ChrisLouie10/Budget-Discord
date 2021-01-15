@@ -26,14 +26,14 @@ export default function TextChat(props){
     if (parsedMessage.type === "chatLog"){
       let _messages = {};
       parsedMessage.chatLog.forEach((message) => {
-        _messages[message.id] = message;
-        delete _messages[message.id].id;
+        _messages[message.index] = message;
+        delete _messages[message.index].index;
       });
       setMessages({..._messages});
     }
     else if (parsedMessage.type === "message"){
       let newMessage = {...messagesRef.current};
-      newMessage[parsedMessage.message.id] = parsedMessage.message;
+      newMessage[parsedMessage.message.index] = parsedMessage.message;
       setMessages({...newMessage});
     }
   }
@@ -72,7 +72,7 @@ export default function TextChat(props){
   const sendMessage = (content, timestamp) => {
     const message = {
       content: content, 
-      id: (Object.keys(messages).length + 1),
+      index: (Object.keys(messages).length + 1),
       author: props.user.name,
       timestamp: timestamp,
       notSent: true
@@ -84,7 +84,7 @@ export default function TextChat(props){
     };
 
     let newMessage = {};
-    newMessage[message.id] = message;
+    newMessage[message.index] = message;
     setMessages({...messages, ...newMessage});
 
     waitForWSConnection(()=>{

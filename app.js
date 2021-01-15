@@ -13,7 +13,7 @@ const wss = new WebSocket.Server({server});
 
 //Import Routes
 const authRoute = require('./routes/auth');
-const createServerRoute = require('./routes/createServer.js');
+const groupServerRoute = require('./routes/groupServer.js');
 
 //Mongoose -------------------------------------------
 mongoose.connect('mongodb://localhost/budget-discord', {
@@ -60,7 +60,7 @@ wss.on('connection', function connection(ws, incoming) {
     //if the ws client is requesting for a chat log
     if (parsedMessage.type === "chatLog"){
       //look for the ws client's groupserver
-      GroupServer.findOne({serverId: parsedMessage.serverId}, (err, groupServer) => {
+      GroupServer.findOne({_id: parsedMessage.serverId}, (err, groupServer) => {
         if (err){
           console.log("An error occured when trying to access the DB for a specific text server! (chatLog)");
         }
@@ -77,10 +77,11 @@ wss.on('connection', function connection(ws, incoming) {
     //if the ws client is sending a new message
     else if (parsedMessage.type === "message"){
       //look for the ws client's groupserver
-      GroupServer.findOne({serverId: parsedMessage.serverId}, (err, groupServer) => {
+      GroupServer.findOne({_id: parsedMessage.serverId}, (err, groupServer) => {
         if (err){
           console.log("An error occured when trying to access the DB for a specific text server! (message)");
         }
+        /*
         //if the groupserver does not yet exist, then create it
         else if (groupServer === null){
           GroupServer.create({
@@ -89,7 +90,7 @@ wss.on('connection', function connection(ws, incoming) {
             chatLog: [{
               content: parsedMessage.message.content,
               author: parsedMessage.message.author,
-              id: parsedMessage.message.id,
+              index: parsedMessage.message.index,
               timestamp: parsedMessage.message.timestamp
             }]
           },
@@ -108,16 +109,17 @@ wss.on('connection', function connection(ws, incoming) {
               }
           }});
         }
+        */
         //if the groupserver exists, then update its chat log with the ws client's new message
         else{
           const newMessage = {
             content: parsedMessage.message.content,
             author: parsedMessage.message.author,
-            id: parsedMessage.message.id,
+            index: parsedMessage.message.index,
             timestamp: parsedMessage.message.timestamp
           };
           const newChatLog = [...groupServer.chatLog, newMessage];
-          GroupServer.findOneAndUpdate({serverId: parsedMessage.serverId}, {chatLog: newChatLog}, {new: true}, (err, _groupServer) => {
+          GroupServer.findOneAndUpdate({_id: parsedMessage.serverId}, {chatLog: newChatLog}, {new: true}, (err, _groupServer) => {
             if (!err){
               delete parsedMessage.message.notSent;
               console.log(parsedMessage);
@@ -160,7 +162,7 @@ app.use(express.json());
 
 //Route Middlewares
 app.use('/api/user', authRoute);
-app.use('/api/createServer', createServerRoute);
+app.use('/api/groupServer', groupServerRoute);
 
 app.use(express.urlencoded({ extended: false }));
 
