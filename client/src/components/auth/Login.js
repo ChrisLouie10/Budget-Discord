@@ -35,9 +35,7 @@ export default function Login() {
           } else setError(data.message);
         })
     }
-    finally{
-      setLoading(false);
-    }
+    finally{}
   }
   return (
     <Container className="d-flex align-items-center justify-content-center"

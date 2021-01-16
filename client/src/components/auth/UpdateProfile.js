@@ -46,39 +46,32 @@ export default function UpdateProfile(props) {
   }
   
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <ServersSidebar user={user} setUser={setUser}/>
-        </div>
-        <div className="col-11 my-auto">
-          <div className="card mx-auto" style={{maxWidth: "400px"}}>
-            <div className="card-body">
-              <div className="card-header text-center mb-4">
-                <h2>Update Profile</h2>
-              </div>
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Form onSubmit={handleSubmit}>
-                <Form.Group id="password">
-                  <Form.Label>Old Password</Form.Label>
-                  <Form.Control type="password" ref={oldPasswordRef}></Form.Control>
-                </Form.Group>
-                <Form.Group id="password">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control type="password" ref={passwordRef}></Form.Control>
-                </Form.Group>
-                <Form.Group id="password-confirm">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control type="password" ref={passwordConfirmRef}></Form.Control>
-                </Form.Group>
-                <Button disabled={loading} className="w-25" type="Submit">Update</Button>
-              </Form>
-            </div>
+    <div className="col-11 my-auto">
+      <div className="card mx-auto" style={{maxWidth: "400px"}}>
+        <div className="card-body">
+          <div className="card-header text-center mb-4">
+            <h2>Update Profile</h2>
           </div>
-          <div className="w-100 text-center mt-2">
-            <Link to="/dashboard">Cancel</Link>
-          </div>
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Form.Group id="password">
+              <Form.Label>Old Password</Form.Label>
+              <Form.Control type="password" ref={oldPasswordRef}></Form.Control>
+            </Form.Group>
+            <Form.Group id="password">
+              <Form.Label>Password</Form.Label>
+              <Form.Control type="password" ref={passwordRef}></Form.Control>
+            </Form.Group>
+            <Form.Group id="password-confirm">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control type="password" ref={passwordConfirmRef}></Form.Control>
+            </Form.Group>
+            <Button disabled={loading} className="w-25" type="Submit">Update</Button>
+          </Form>
         </div>
+      </div>
+      <div className="w-100 text-center mt-2">
+        <Link to="/dashboard">Cancel</Link>
       </div>
     </div>
   );
