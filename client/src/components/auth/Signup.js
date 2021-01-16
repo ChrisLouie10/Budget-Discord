@@ -37,7 +37,7 @@ export default function Signup() {
         if(!data.success) setError(response.statusText);
         else {
           localStorage.setItem('Authorization', data.Authorization);
-          history.push("/dashboard");
+          history.push("/login");
         }
       });
     }

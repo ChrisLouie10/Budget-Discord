@@ -21,7 +21,7 @@ export default function App() {
   */
 
   return (
-    <div>
+    <>
       <Router>
         <Switch>
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
@@ -31,6 +31,6 @@ export default function App() {
           <Route path="/login" component={Login} />
         </Switch>
       </Router>
-    </div>
+    </>
   );
 }

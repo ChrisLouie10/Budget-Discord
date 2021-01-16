@@ -5,37 +5,44 @@ import CreateServerForm from "./popups/CreateServerForm.js";
 
 export default function ServersSidebar(props){
 
+    const controller = new AbortController();
+    const { signal } = controller;
+    const [mounted, setMounted] = useState(true);
+    const [servers, setServers] = useState([]);
     const [openPopup, setOpenPopup] = useState(false);
     const [error, setError] = useState("");
-    const [servers, setServers] = useState([]);
-    const [loading, setLoading] = useState(false);
     const history = useHistory();
 
     useEffect(()=>{
-        fetchServerListInfo();
+        return function cleanup(){
+            controller.abort();
+            setMounted(false);
+        }
     }, []);
 
-    function fetchServerListInfo(){
-        console.log("Fetching for serverId:", props.user.servers);
+    useEffect(()=> {
+        fetchServerListInfo();
+    }, [props.user.servers]);
+
+    async function fetchServerListInfo(){
         try{
-            fetch('http://localhost:3000/api/groupServer/find', {
+            await fetch('http://localhost:3000/api/groupServer/find', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': localStorage.getItem('Authorization')
                 },
                 body: JSON.stringify({
+                    type: "find",
                     serverIds: props.user.servers
-                })
+                }), 
+                signal
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (!data.success) setError(data.message);
-                    else {
-                        setServers(data.servers);
-                    }
+                    else if (mounted) setServers(data.servers);     
                 });
-        }finally{
-            setLoading(false);
+        }finally {
         }
     }
 
@@ -43,29 +50,28 @@ export default function ServersSidebar(props){
         e.preventDefault();
 
         if (props.serverId){
-            setLoading(true);
-            
             try{
-                fetch('http://localhost:3000/api/groupServer/create', {
+                fetch('http://localhost:3000/api/groupServer/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': localStorage.getItem('Authorization')
                     },
                     body: JSON.stringify({
+                        type: "delete",
                         serverId: props.serverId,
                         userId: props.user._id
-                    })
+                    }),
+                    signal
                 }).then(response => { return response.json(); })
                     .then((data) => {
                         if (!data.success) setError(data.message);
                         else {
-                            props.setUser(data.user);
+                            fetchServerListInfo();
                             history.push("/dashboard");
                         }
                     });
             }finally{
-                setLoading(false);
             }
         }
     }
@@ -92,14 +98,16 @@ export default function ServersSidebar(props){
                                 </Link>
                             </li>
                         ))}
-                    <li onClick = {() => {if(!openPopup || !loading) setOpenPopup(true)}}>
+                    <li onClick = {() => {if(!openPopup) setOpenPopup(true)}}>
                         Create Server
                         <Popup
                         openPopup = {openPopup}
                         setOpenPopup = {setOpenPopup}
                         user = {props.user}
-                        setUser = {props.setUser}>
-                            <CreateServerForm />
+                        setUser = {props.setUser}
+                        servers = {servers}
+                        setServers = {setServers}>
+                            <CreateServerForm mounted />
                         </Popup>
                     </li>
                     <li onClick = {deleteCurrentServer}>

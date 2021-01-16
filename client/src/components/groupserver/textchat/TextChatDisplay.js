@@ -34,11 +34,6 @@ export default function TextChatDisplay(props){
             );
         }
     };
-    /*
-    {props.messages.map(message => (
-                        <p className="ml-2" key={message.id}>{message.author} ({message.timestamp}):<br />{message.content}</p>
-                    ))}
-    */
     return (
         <div className="col-11 align-self-end w-100" style={{minHeight: "100vh", background: "#303030"}}>
             {displayChat()}

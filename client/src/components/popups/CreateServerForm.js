@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { setServers } from 'dns';
+import React, { useState, useEffect} from 'react';
 
 export default function CreateServerForm(props){
 
+    const controller = new AbortController();
+    const { signal } = controller;
     const [input, setInput] = useState(props.others.user.name + "'s Server");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    useEffect(()=>{
+        return function cleanup(){
+            controller.abort();
+        }
+    }, []);
+
     async function handleSubmit(e){
         e.preventDefault();
-
         setLoading(true);
         const serverName = input;
 
@@ -21,19 +28,25 @@ export default function CreateServerForm(props){
                 'Authorization': localStorage.getItem('Authorization')
               },
               body: JSON.stringify({
+                type: "create",
                 serverName: serverName,
                 userId: props.others.user._id
-              })
+              }),
+              signal
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if(!data.success) setError(data.message);
-                    else props.others.setUser(data.user);
+                    else if (props.mounted){
+                        props.others.setUser(data.user);
+                        let servers = [...props.others.servers];
+                        servers.push(data.server);
+                        props.others.setServers([...servers]);
+                    }
                 });
         }finally{
             setLoading(false);
+            props.setOpenPopup(false);
         }
-
-        props.setOpenPopup(false);
     }
 
     const handleInputChange = (e) => {

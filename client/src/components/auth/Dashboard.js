@@ -8,7 +8,6 @@ import ServersSidebar from '../ServersSidebar.js'
 export default function Dashboard(props) {
 
   const [error, setError] = useState("");
-  const [user, setUser] = useState(props.user);
   const history = useHistory();
 
   async function handleLogout(){
@@ -30,32 +29,25 @@ export default function Dashboard(props) {
   }
 
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <ServersSidebar user={user} setUser={setUser} />
-        </div>
-        <div className="col-11 my-auto">
-            <div className="card mx-auto" style={{maxWidth: "400px"}}>
-              <div className="card-body">
-                <div className="card-header text-center mb-4">
-                  <h2>Profile</h2>
-                </div>
-                {error && <Alert variant="danger">{error}</Alert>}
-                <div>
-                  <strong>Name:</strong> {user.name}
-                </div>
-                <div>
-                  <strong>Email:</strong> {user.email}
-                </div>
-                <Link to="/update-profile" className="btn btn-primary w-100 mt-3">Update Profile</Link>
-              </div>
+    <div className="col-11 my-auto">
+        <div className="card mx-auto" style={{maxWidth: "400px"}}>
+          <div className="card-body">
+            <div className="card-header text-center mb-4">
+              <h2>Profile</h2>
             </div>
-            <div className="w-100 text-center mt-2">
-              <Button variant="link" onClick={handleLogout}>Log Out</Button>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <div>
+              <strong>Name:</strong> {props.user.name}
             </div>
+            <div>
+              <strong>Email:</strong> {props.user.email}
+            </div>
+            <Link to="/update-profile" className="btn btn-primary w-100 mt-3">Update Profile</Link>
+          </div>
         </div>
-      </div>
+        <div className="w-100 text-center mt-2">
+          <Button variant="link" onClick={handleLogout}>Log Out</Button>
+        </div>
     </div>
   )
 }
