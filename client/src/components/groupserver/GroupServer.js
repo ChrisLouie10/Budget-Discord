@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
-import ServersSidebar from '../ServersSidebar.js';
 import TextChat from './textchat/TextChat.js';
 
 export default function GroupServer(props){

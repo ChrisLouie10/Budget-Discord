@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, Alert } from 'react-bootstrap';
+import React, { useState } from 'react';
 import { Link, useHistory } from "react-router-dom";
-import ServersSidebar from '../ServersSidebar.js'
-
 // Simple private account information.
 
 export default function Dashboard(props) {
@@ -35,7 +32,7 @@ export default function Dashboard(props) {
             <div className="card-header text-center mb-4">
               <h2>Profile</h2>
             </div>
-            {error && <Alert variant="danger">{error}</Alert>}
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
             <div>
               <strong>Name:</strong> {props.user.name}
             </div>
@@ -46,7 +43,7 @@ export default function Dashboard(props) {
           </div>
         </div>
         <div className="w-100 text-center mt-2">
-          <Button variant="link" onClick={handleLogout}>Log Out</Button>
+          <button type="button" className="btn btn-link" onClick={handleLogout}>Log Out</button>
         </div>
     </div>
   )
