@@ -1,15 +1,22 @@
-import React, { useRef, useState } from 'react';
-import { Card, Form, Button, Alert, Container } from 'react-bootstrap';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link, useHistory } from "react-router-dom";
 
 // Simple Login page
 
 export default function Login() {
+
+  const [mounted, setMounted] = useState(true);
   const emailRef = useRef();
   const passwordRef = useRef();
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
   const history = useHistory();
+
+  useEffect(() => {
+    return function cleanup(){
+      setMounted(false);
+    }
+  }, []);
 
   async function handleSubmit(e){
     e.preventDefault();
@@ -35,34 +42,38 @@ export default function Login() {
           } else setError(data.message);
         })
     }
-    finally{}
+    finally{
+      if (mounted) setLoading(false);
+    }
   }
   return (
-    <Container className="d-flex align-items-center justify-content-center"
+    <div className="container d-flex align-items-center justify-content-center"
         style={{minHeight: "100vh"}}>
       <div className="w-100" style={{maxWidth: "400px"}}>
-        <Card>
-          <Card.Body>
-            <h2 className="text-center mb-4">Log In</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={handleSubmit}>
-              <Form.Group id="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control type="email" ref={emailRef} required></Form.Control>
-              </Form.Group>
-              <Form.Group id="password">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" ref={passwordRef} required></Form.Control>
-              </Form.Group>
-              <Button disabled={loading} className="w-25" type="Submit">Login</Button>
-            </Form>
-          </Card.Body>
-        </Card>
+        <div className="card">
+          <div className="card-body">
+            <div className="card-header text-center mb-4">
+             <h2>Log In</h2>
+            </div>
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3" id="email">
+                <label htmlFor="input-email">Email</label>
+                <input type="email" className="form-control" id="input-email" ref={emailRef} required></input>
+              </div>
+              <div className="mb-3" id="password">
+                <label htmlFor="input-password">Password</label>
+                <input type="password" className="form-control" id="input-password" ref={passwordRef} required></input>
+              </div>
+              <button disabled={loading} className="btn btn-primary w-25" type="Submit">Login</button>
+            </form>
+          </div>
+        </div>
         <div className="w-100 text-center mt-2">
           Need an account? <Link to="/signup">Sign Up</Link>
         </div>
       </div>
-    </Container>
+    </div>
   )
 }
 
