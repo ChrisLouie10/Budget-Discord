@@ -1,39 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
-import LeftSideNav from '../LeftSideNav.js';
 import TextChat from './textchat/TextChat.js';
-const jwt = require('jsonwebtoken');
+import ServerSidebar from '../ServerSidebar.js';
 
-export default function GroupServer({match}){
+export default function GroupServer(props){
 
-    const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
+    const [loading, setLoading] = useState(true);
+    const [userAccess, setUserAccess] = useState(false);
 
-    const userHasAccess = () => {
-        let bool = false;
-        user.user.servers.forEach((server) => {
-            if (server.serverId === match.params.serverId){
-                bool = true;
-                return;
+    useEffect(async () => {
+        if (props.user){
+            try{
+                await fetch('http://localhost:3000/api/groupServer/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('Authorization')
+                    },
+                    body: JSON.stringify({
+                        type: 'verify',
+                        userId: props.user._id,
+                        serverId: props.computedMatch.params.serverId
+                    })
+                }).then(response => { return response.json(); })
+                    .then((data) => {
+                        setUserAccess(data.success);
+                    })
+            } finally{
+                setLoading(false);
             }
-        });
-        return bool;
-    }
+        }
+        else setUserAccess(false);
+    }, []);
 
     return(
-       <div>
+       <>
            {
-                userHasAccess() ? 
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col-1" style={{minHeight: "100vh", background: "#212121"}}>
-                            <LeftSideNav user={user} setUser={setUser}/>
+               loading ?
+               <p>Loading</p>
+               :
+                (userAccess ? 
+                (
+                    <>
+                        <div className="col-1" style={{minHeight: "100vh", background: "#292929"}}>
+                            <ServerSidebar 
+                            user={props.user} 
+                            setUser={props.setUser} 
+                            servers={props.servers} 
+                            setServers={props.setServers}
+                            serverId={props.computedMatch.params.serverId}
+                            fetchServerListInfo={props.fetchServerListInfo}
+                            />
                         </div>
-                        <TextChat serverId={match.params.serverId} user={user}/>
-                    </div>
-                </div> 
+                        <TextChat serverId={props.computedMatch.params.serverId} user={props.user}/>
+                    </>
+                )
                 :
-                <Redirect to="/" />
+                <Redirect to="/dashboard" />)
            }
-       </div>
+       </>
     );
 }
