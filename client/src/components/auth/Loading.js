@@ -3,8 +3,13 @@ import React from 'react';
 export default function Loading() {
 
   return (
-    <>
-      <p>Loading</p>
-    </>
+    <div className="d-flex justify-content-center align-items-center flex-column" style={{height: "100vh"}}>
+      <h1>Loading...</h1>
+      <div className="spinner-border" 
+        style={{width: "20rem", height: "20rem"}} 
+        role="status">
+          <span class="sr-only">Loading...</span>
+      </div>
+    </div>
   )
 }

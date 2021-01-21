@@ -46,6 +46,9 @@ export default function ServersList(props){
                         <Link className="text-reset" to="/dashboard">Dashboard</Link>
                     </li>
                     <li>
+                        <Link className="text-reset" to="/friends">Friends</Link>
+                    </li>
+                    <li>
                         <Link className="text-reset" to="/update-profile">Update Profile</Link>
                     </li>
                     {displayServers()}
