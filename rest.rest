@@ -1,0 +1,35 @@
+POST http://localhost:3000/api/user/register 
+Content-Type: application/json
+
+{
+    "name": "newUser",
+    "email": "tt@tt.com",
+    "password": "tttttttttt"
+}
+
+#####
+
+POST http://localhost:3000/api/user/login 
+Content-Type: application/json
+
+{
+    "email": "tt@tt.com",
+    "password": "tttttttttt"
+}
+
+#####
+
+GET http://localhost:3000/api/posts/
+Content-Type: application/json
+access-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWZmMGYwMWZiYmQ3OGMxNWQwYjY1ZjJkIn0sImlhdCI6MTYxMDA1ODU2NSwiZXhwIjoxNjEwMDU4NTgwfQ.7qWCLtoSWY3tDSipej0J7GHplWxVp_Xr04v0663LWDU
+
+
+#####
+
+POST http://localhost:3000/api/user/token
+auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmY3OTk4MjMyZTQ2ZjQ0MWNmOTYzNzQiLCJpYXQiOjE2MTAwNjI3NTh9.ac50BrvhlBud7qMPbUEqcU_rEGnJvcxHMGQi972PpzA
+
+#####
+
+DELETE http://localhost:3000/api/user/logout
+auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ZmY3OTk4MjMyZTQ2ZjQ0MWNmOTYzNzQiLCJpYXQiOjE2MTAwNjI3NTh9.ac50BrvhlBud7qMPbUEqcU_rEGnJvcxHMGQi972PpzA

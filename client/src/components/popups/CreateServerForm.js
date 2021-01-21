@@ -2,11 +2,8 @@ import React, { useState, useEffect} from 'react';
 
 export default function CreateServerForm(props){
 
-<<<<<<< HEAD
-=======
     const controller = new AbortController();
     const { signal } = controller;
->>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
     const [input, setInput] = useState(props.others.user.name + "'s Server");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);

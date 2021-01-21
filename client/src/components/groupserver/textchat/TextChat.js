@@ -77,20 +77,6 @@ export default function TextChat(props){
   };
 
   const sendMessage = (content, timestamp) => {
-<<<<<<< HEAD
-    const message = {
-      content: content, 
-      id: (Object.keys(messages).length + 1),
-      author: props.user.name,
-      timestamp: timestamp,
-      notSent: true
-    };
-    const data = {
-      type: "message",
-      serverId: props.serverId,
-      message: message
-    };
-=======
     if (mounted){
       const message = {
         content: content, 
@@ -104,7 +90,6 @@ export default function TextChat(props){
         serverId: props.serverId,
         message: message
       };
->>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
 
       let newMessage = {};
       newMessage[message.index] = message;

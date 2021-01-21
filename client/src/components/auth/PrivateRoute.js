@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
-<<<<<<< HEAD
-=======
 import ServersList from '../ServersList.js';
->>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
 import Loading from './Loading';
 
 // Component creating a private route
