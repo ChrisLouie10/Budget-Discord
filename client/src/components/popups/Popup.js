@@ -11,7 +11,7 @@ export default function Popup(props){
     return(
         <Dialog open={openPopup} maxWidth="md" onEscapeKeyDown={onEscapeKeyDown}>
             <DialogTitle>
-                <div>Create New Server</div>
+                <div>{title}</div>
             </DialogTitle>
             <DialogContent>
                 {React.cloneElement(children,{openPopup: openPopup, setOpenPopup: setOpenPopup, others: others})}
