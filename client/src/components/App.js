@@ -7,6 +7,7 @@ import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
 import Loading from './auth/Loading';
 import GroupServer from './groupserver/GroupServer.js';
+import JoinGroupServer from './groupserver/JoinGroupServer.js';
 
 export default function App() {
   /*
@@ -27,6 +28,7 @@ export default function App() {
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
           <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
+          <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer}/>
           <Route path="/signup" component={Signup} />
           <Route path="/login" component={Login} />
         </Switch>

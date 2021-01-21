@@ -1,27 +1,62 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import TextChat from './textchat/TextChat.js';
+import ServerSidebar from '../ServerSidebar.js';
 
 export default function GroupServer(props){
 
-    function userHasAccess(){
-        let bool = false;
-        props.user.servers.forEach((server) => {
-            if (server === props.computedMatch.params.serverId){
-                bool = true;
-                return;
+    const [loading, setLoading] = useState(true);
+    const [userAccess, setUserAccess] = useState(false);
+
+    useEffect(async () => {
+        if (props.user){
+            try{
+                await fetch('http://localhost:3000/api/groupServer/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('Authorization')
+                    },
+                    body: JSON.stringify({
+                        type: 'verify',
+                        userId: props.user._id,
+                        serverId: props.computedMatch.params.serverId
+                    })
+                }).then(response => { return response.json(); })
+                    .then((data) => {
+                        setUserAccess(data.success);
+                    })
+            } finally{
+                setLoading(false);
             }
-        });
-        return bool;
-    }
+        }
+        else setUserAccess(false);
+    }, []);
 
     return(
        <>
            {
-                userHasAccess() ? 
-                <TextChat serverId={props.computedMatch.params.serverId} user={props.user}/>
+               loading ?
+               <p>Loading</p>
+               :
+                (userAccess ? 
+                (
+                    <>
+                        <div className="col-1" style={{minHeight: "100vh", background: "#292929"}}>
+                            <ServerSidebar 
+                            user={props.user} 
+                            setUser={props.setUser} 
+                            servers={props.servers} 
+                            setServers={props.setServers}
+                            serverId={props.computedMatch.params.serverId}
+                            fetchServerListInfo={props.fetchServerListInfo}
+                            />
+                        </div>
+                        <TextChat serverId={props.computedMatch.params.serverId} user={props.user}/>
+                    </>
+                )
                 :
-                <Redirect to="/dashboard" />
+                <Redirect to="/dashboard" />)
            }
        </>
     );

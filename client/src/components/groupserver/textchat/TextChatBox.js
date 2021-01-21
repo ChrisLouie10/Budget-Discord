@@ -20,7 +20,7 @@ export default function TextChatBox(props){
         if (input === "")
             return;
         const timestamp = new Date();
-        props.sendMessage(input, timestamp.toString());
+        props.sendMessage(input, timestamp.toUTCString());
         setInput("");
     }
 
