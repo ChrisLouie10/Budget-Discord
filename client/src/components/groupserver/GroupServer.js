@@ -5,17 +5,6 @@ import ServerSidebar from '../ServerSidebar.js';
 
 export default function GroupServer(props){
 
-<<<<<<< HEAD
-    const [user, setUser] = useState(props.user);
-
-    const userHasAccess = () => {
-        let bool = false;
-        console.log(props)
-        user.servers.forEach((server) => {
-            if (server.serverId === props.computedMatch.params.serverId){
-                bool = true;
-                return;
-=======
     const [loading, setLoading] = useState(true);
     const [userAccess, setUserAccess] = useState(false);
 
@@ -39,7 +28,6 @@ export default function GroupServer(props){
                     })
             } finally{
                 setLoading(false);
->>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
             }
         }
         else setUserAccess(false);
@@ -64,19 +52,11 @@ export default function GroupServer(props){
                             fetchServerListInfo={props.fetchServerListInfo}
                             />
                         </div>
-<<<<<<< HEAD
-                        <TextChat serverId={props.computedMatch.params.serverId} user={user}/>
-                    </div>
-                </div> 
-                :
-                <Redirect to="/dashboard" />
-=======
                         <TextChat serverId={props.computedMatch.params.serverId} user={props.user}/>
                     </>
                 )
                 :
                 <Redirect to="/dashboard" />)
->>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
            }
        </>
     );
