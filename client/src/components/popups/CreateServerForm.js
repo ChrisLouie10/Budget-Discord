@@ -1,4 +1,3 @@
-import { setServers } from 'dns';
 import React, { useState, useEffect} from 'react';
 
 export default function CreateServerForm(props){
@@ -18,7 +17,6 @@ export default function CreateServerForm(props){
     async function handleSubmit(e){
         e.preventDefault();
         setLoading(true);
-        const serverName = input;
 
         try{
             fetch('http://localhost:3000/api/groupServer/create', {
@@ -29,19 +27,14 @@ export default function CreateServerForm(props){
               },
               body: JSON.stringify({
                 type: "create",
-                serverName: serverName,
+                name: input,
                 userId: props.others.user._id
               }),
               signal
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if(!data.success) setError(data.message);
-                    else if (props.mounted){
-                        props.others.setUser(data.user);
-                        let servers = [...props.others.servers];
-                        servers.push(data.server);
-                        props.others.setServers([...servers]);
-                    }
+                    else if (props.mounted) props.others.fetchServerListInfo();
                 });
         }finally{
             setLoading(false);

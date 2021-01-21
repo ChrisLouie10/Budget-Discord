@@ -62,15 +62,15 @@ export default function Signup() {
               </div>
               <div className="mb-3" id="email">
               <label htmlFor="input-email">Email</label>
-                <div className="form-control" type="email" id="input-email" ref={emailRef} required></div>
+                <input type="email" className="form-control" id="input-email" ref={emailRef} required></input>
               </div>
               <div className="mb-3" id="password">
               <label htmlFor="input-password">Password</label>
-                <div className="form-control" type="password" id="input-password" ref={passwordRef} required></div>
+                <input className="form-control" type="password" id="input-password" ref={passwordRef} required></input>
               </div>
               <div className="mb-3" id="password-confirm">
               <label htmlFor="input-password-confirm">Confirm Password</label>
-                <div className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required></div>
+                <input className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required></input>
               </div>
               <button disabled={loading} className="btn btn-primary w-25" type="Submit">Submit</button>
             </form>

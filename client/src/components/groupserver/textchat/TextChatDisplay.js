@@ -35,7 +35,7 @@ export default function TextChatDisplay(props){
         }
     };
     return (
-        <div className="col-11 align-self-end w-100" style={{minHeight: "100vh", background: "#303030"}}>
+        <div className="col-10 align-self-end w-100" style={{minHeight: "100vh", background: "#303030"}}>
             {displayChat()}
             <TextChatBox sendMessage={sendMessage}/>
         </div>

@@ -25,15 +25,15 @@ const db = mongoose.connection;
 db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
 
+//WebSocket ----------------------------------
+let wsclients = {};
+
 const generateUniqueSessionId = () => {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   }
   return s4() + s4() + '-' + s4();
 };
-
-//WebSocket ----------------------------------
-let wsclients = {};
 //On WebSocket Server connection add an event listener
 //Echo back data received from a client to every client
 wss.on('connection', function connection(ws, incoming) {
@@ -81,37 +81,8 @@ wss.on('connection', function connection(ws, incoming) {
         if (err){
           console.log("An error occured when trying to access the DB for a specific text server! (message)");
         }
-        /*
-        //if the groupserver does not yet exist, then create it
-        else if (groupServer === null){
-          GroupServer.create({
-            serverName: parsedMessage.serverName,
-            serverId: parsedMessage.serverId,
-            chatLog: [{
-              content: parsedMessage.message.content,
-              author: parsedMessage.message.author,
-              index: parsedMessage.message.index,
-              timestamp: parsedMessage.message.timestamp
-            }]
-          },
-          (err, _groupServer) => {
-            if (err){
-              console.log("Unable to create and save a new text server to the DB!");
-              console.log(err.response.status);
-            }
-            else{
-              delete parsedMessage.message.notSent;
-              //Echo this message to EVERY websocket clients with the same serverId
-              for (let key in wsclients){
-                if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
-                  wsclients[key].send(JSON.stringify(parsedMessage));
-                }
-              }
-          }});
-        }
-        */
         //if the groupserver exists, then update its chat log with the ws client's new message
-        else{
+        else if (groupServer !== null){
           const newMessage = {
             content: parsedMessage.message.content,
             author: parsedMessage.message.author,
