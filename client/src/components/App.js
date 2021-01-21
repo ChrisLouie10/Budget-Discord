@@ -6,7 +6,11 @@ import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
 import GroupServer from './groupserver/GroupServer.js';
+<<<<<<< HEAD
 import FindFriends from './popups/FindFriends'
+=======
+import JoinGroupServer from './groupserver/JoinGroupServer.js';
+>>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
 
 export default function App() {
   /*
@@ -21,7 +25,7 @@ export default function App() {
   */
 
   return (
-    <div>
+    <>
       <Router>
         <Switch>
           <PrivateRoute exact path="/" component={Dashboard} />
@@ -29,10 +33,11 @@ export default function App() {
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
           <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
+          <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer}/>
           <Route path="/signup" component={Signup} />
           <Route path="/login" component={Login} />
         </Switch>
       </Router>
-    </div>
+    </>
   );
 }

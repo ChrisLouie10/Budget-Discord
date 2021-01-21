@@ -1,8 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
 import { Link, useHistory } from 'react-router-dom';
-import LeftSideNav from '../LeftSideNav.js';
-const jwt = require('jsonwebtoken');
 
 // // Simple Update Profile page
 
@@ -47,39 +44,32 @@ export default function UpdateProfile(props) {
   }
   
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <LeftSideNav user={user} setUser={setUser}/>
-        </div>
-        <div className="col-11 my-auto">
-          <div className="card mx-auto" style={{maxWidth: "400px"}}>
-            <div className="card-body">
-              <div className="card-header text-center mb-4">
-                <h2>Update Profile</h2>
-              </div>
-              {error && <Alert variant="danger">{error}</Alert>}
-              <Form onSubmit={handleSubmit}>
-                <Form.Group id="password">
-                  <Form.Label>Old Password</Form.Label>
-                  <Form.Control type="password" ref={oldPasswordRef}></Form.Control>
-                </Form.Group>
-                <Form.Group id="password">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control type="password" ref={passwordRef}></Form.Control>
-                </Form.Group>
-                <Form.Group id="password-confirm">
-                  <Form.Label>Confirm Password</Form.Label>
-                  <Form.Control type="password" ref={passwordConfirmRef}></Form.Control>
-                </Form.Group>
-                <Button disabled={loading} className="w-25" type="Submit">Update</Button>
-              </Form>
+    <div className="col-11 my-auto">
+      <div className="card mx-auto" style={{maxWidth: "400px"}}>
+        <div className="card-body">
+          <div className="card-header text-center mb-4">
+            <h2>Update Profile</h2>
+          </div>
+          {error && <div className="alert alert-danger" role="alert">{error}</div>}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3" id="old-password">
+              <label htmlFor="input-old-password">Old Password</label>
+              <input type="password" className="form-control" id="input-old-password" ref={oldPasswordRef} required></input>
             </div>
-          </div>
-          <div className="w-100 text-center mt-2">
-            <Link to="/dashboard">Cancel</Link>
-          </div>
+            <div className="mb-3" id="password">
+              <label htmlFor="input-password">password</label>
+              <div className="form-control" type="password" id="input-email" ref={passwordRef} required></div>
+            </div>
+            <div className="mb-3" id="password-confirm">
+              <label htmlFor="input-password-confirm">Confirm Password</label>
+              <div className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required></div>
+            </div>
+            <button disabled={loading} className="btn btn-primary w-25" type="Submit">Update</button>
+          </form>
         </div>
+      </div>
+      <div className="w-100 text-center mt-2">
+        <Link to="/dashboard">Cancel</Link>
       </div>
     </div>
   );

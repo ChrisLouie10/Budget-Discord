@@ -1,50 +1,48 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect} from 'react';
 
 export default function CreateServerForm(props){
 
+<<<<<<< HEAD
+=======
+    const controller = new AbortController();
+    const { signal } = controller;
+>>>>>>> 47177db4f7aa31e71d595d0204bef91474c8ca0e
     const [input, setInput] = useState(props.others.user.name + "'s Server");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const history = useHistory();
 
-    //generates a random 16 length string as a unique server id
-    const generateUniqueServerId = () => {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    useEffect(()=>{
+        return function cleanup(){
+            controller.abort();
         }
-        return s4() + s4() + s4() + s4();
-    };
+    }, []);
 
     async function handleSubmit(e){
         e.preventDefault();
-
         setLoading(true);
-        const serverId = generateUniqueServerId();
-        const serverName = input;
 
         try{
-            fetch('http://localhost:3000/api/createServer/create', {
+            fetch('http://localhost:3000/api/groupServer/create', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': localStorage.getItem('Authorization')
               },
               body: JSON.stringify({
-                serverName: serverName,
-                serverId: serverId,
+                type: "create",
+                name: input,
                 userId: props.others.user._id
-              })
+              }),
+              signal
             }).then(response => { return response.json(); })
                 .then((data) => {
-                    if(!data.success) setError(data.messsage);
-                    else props.others.setUser(data.user);
+                    if(!data.success) setError(data.message);
+                    else if (props.mounted) props.others.fetchServerListInfo();
                 });
         }finally{
             setLoading(false);
+            props.setOpenPopup(false);
         }
-
-        props.setOpenPopup(false);
     }
 
     const handleInputChange = (e) => {
