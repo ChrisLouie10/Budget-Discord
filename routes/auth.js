@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Friends = require('../models/Friends');
 const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation } = require('../auth/validation');
 const bcrypt = require('bcryptjs');
@@ -35,6 +36,12 @@ router.post('/register', async (req, res) => {
     });
     try{
         const newUser = await user.save();
+
+        const friends = new Friends({
+            user_id: newUser._id
+        });
+
+        await friends.save();
     
         //Create and assign a refresh and access token to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);

@@ -13,6 +13,7 @@ const wss = new WebSocket.Server({server});
 
 //Import Routes
 const authRoute = require('./routes/auth');
+const friendsRoute = require('./routes/friends');
 const groupServerRoute = require('./routes/groupServer.js');
 
 //Mongoose -------------------------------------------
@@ -133,6 +134,7 @@ app.use(express.json());
 
 //Route Middlewares
 app.use('/api/user', authRoute);
+app.use('/api/friends', friendsRoute);
 app.use('/api/groupServer', groupServerRoute);
 
 app.use(express.urlencoded({ extended: false }));
