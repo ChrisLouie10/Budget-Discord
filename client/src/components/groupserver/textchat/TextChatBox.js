@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 export default function TextChatBox(props){
     const [input, setInput] = useState("");
@@ -20,7 +20,7 @@ export default function TextChatBox(props){
         if (input === "")
             return;
         const timestamp = new Date();
-        props.sendMessage(input, timestamp.toString());
+        props.sendMessage(input, timestamp.toUTCString());
         setInput("");
     }
 
