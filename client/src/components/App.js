@@ -5,8 +5,8 @@ import Dashboard from "./auth/Dashboard";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
 import UpdateProfile from "./auth/UpdateProfile";
-import Loading from './auth/Loading';
 import GroupServer from './groupserver/GroupServer.js';
+import FindFriends from './popups/FindFriends'
 
 export default function App() {
   /*
@@ -24,6 +24,8 @@ export default function App() {
     <div>
       <Router>
         <Switch>
+          <PrivateRoute exact path="/" component={Dashboard} />
+          <PrivateRoute exact path="/friends" component={FindFriends} />
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
           <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
           <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
