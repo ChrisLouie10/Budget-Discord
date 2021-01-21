@@ -4,11 +4,6 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const verify = require('../auth/verifyToken');
 
-
-function generateAccessToken(user){
-    return jwt.sign({user}, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '30m'});
-}
-
 router.post('/create', verify, async (req, res) => {
     GroupServer.create({
         serverName: req.body.serverName,

@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 
 export default function CreateServerForm(props){
 
-    const [input, setInput] = useState(props.others.user.user.name + "'s Server");
+    const [input, setInput] = useState(props.others.user.name + "'s Server");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const history = useHistory();

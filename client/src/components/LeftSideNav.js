@@ -7,7 +7,6 @@ import CreateServerForm from "./popups/CreateServerForm.js";
 export default function LeftSideNav(props){
 
     const [openPopup, setOpenPopup] = useState(false);
-    //const [user, setUser] = useState(jwt.verify(localStorage.getItem('access-token'), process.env.REACT_APP_SECRET_ACCESS_TOKEN));
     
     return (
         <div className="wrapper w-100">
@@ -23,8 +22,11 @@ export default function LeftSideNav(props){
                     <li>
                         <Link className="text-reset" to="/update-profile">Update Profile</Link>
                     </li>
+                    <li>
+                        <Link className="text-reset" to="/friends">Friends</Link>
+                    </li>
                     {
-                        props.user.user.servers.map((server) => (
+                        props.user.servers.map((server) => (
                             <li key={server.serverId}>
                                 <Link className="text-reset" to={{pathname: "/group/"+server.serverId}} >
                                     {server.serverName}
