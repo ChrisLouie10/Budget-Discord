@@ -48,12 +48,6 @@ export default function ServersList(props){
                     <li>
                         <Link className="text-reset" to="/friends">Friends</Link>
                     </li>
-<<<<<<< HEAD
-=======
-                    <li>
-                        <Link className="text-reset" to="/update-profile">Update Profile</Link>
-                    </li>
->>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
                     {displayServers()}
                     <li onClick = {() => {if(!openPopupCreate) setOpenPopupCreate(true)}}>
                     <Link className="text-reset" to="#">Create Server</Link>
