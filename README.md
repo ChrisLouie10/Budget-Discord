@@ -2,4 +2,4 @@
 
 #####
 
-A small project recreating our favorite text and voice application.
+A small project recreating our favorite text and voice application
