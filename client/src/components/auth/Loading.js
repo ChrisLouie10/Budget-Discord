@@ -8,7 +8,7 @@ export default function Loading() {
       <div className="spinner-border" 
         style={{width: "20rem", height: "20rem"}} 
         role="status">
-          <span class="sr-only">Loading...</span>
+          <span className="sr-only">Loading...</span>
       </div>
     </div>
   )

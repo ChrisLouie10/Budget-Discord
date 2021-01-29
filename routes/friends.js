@@ -69,6 +69,7 @@ router.post('/accept-friend-request', verify, async (req, res) => {
 })
 
 router.get('/get-friend-requests', verify, async (req, res) => {
+
   const userFriends = await Friends.findOne({user_id: req.user._id});
   if(!userFriends) return res.status(400).json({success: false, message: 'User cannot be found'});
 

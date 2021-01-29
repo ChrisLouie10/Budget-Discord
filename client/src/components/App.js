@@ -29,7 +29,8 @@ export default function App() {
           <PrivateRoute exact path="/friends" component={FindFriends} />
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
           <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
-          <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
+          <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
+          <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
           <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer}/>
           <Route path="/signup" component={Signup} />
           <Route path="/login" component={Login} />

@@ -14,13 +14,17 @@ let userSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   name: {
     type: String,
     required: true,
     max: 32
   }, 
+  groupServers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'GroupServer'
+  }],
   token: {
     type: String,
     default: null

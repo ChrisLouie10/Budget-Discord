@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const GroupServer = require("./models/GroupServer");
+const TextChannel = require("./models/TextChannel");
 const WebSocket = require('ws');
 const http = require('http');
 const { stringify } = require('querystring');
@@ -60,16 +61,16 @@ wss.on('connection', function connection(ws, incoming) {
 
     //if the ws client is requesting for a chat log
     if (parsedMessage.type === "chatLog"){
-      //look for the ws client's groupserver
-      GroupServer.findOne({_id: parsedMessage.serverId}, (err, groupServer) => {
+      //look for the ws client's text channel
+      TextChannel.findById(parsedMessage.textChannelId, (err, textChannel) => {
         if (err){
-          console.log("An error occured when trying to access the DB for a specific text server! (chatLog)");
+          console.log("An error occured when trying to access the DB for a specific text channel! (chatLog)");
         }
-        //if a groupserver is found, send its chat log to the ws client
-        else if (groupServer !== null){
+        //if a text channel is found, send its chat log to the ws client
+        else if (textChannel !== null){
           const message = {
             type: "chatLog",
-            chatLog: groupServer.chatLog
+            chatLog: textChannel.chat_log
           }
           ws.send(JSON.stringify(message));
         }
@@ -77,35 +78,51 @@ wss.on('connection', function connection(ws, incoming) {
     }
     //if the ws client is sending a new message
     else if (parsedMessage.type === "message"){
-      //look for the ws client's groupserver
-      GroupServer.findOne({_id: parsedMessage.serverId}, (err, groupServer) => {
-        if (err){
-          console.log("An error occured when trying to access the DB for a specific text server! (message)");
+      const newMessage = {
+        content: parsedMessage.message.content,
+        author: parsedMessage.message.author,
+        index: parsedMessage.message.index,
+        timestamp: parsedMessage.message.timestamp
+      };
+      //Find and update the text channel with the new message
+      TextChannel.findByIdAndUpdate(parsedMessage.textChannelId, {$push: {chat_log: newMessage}}, 
+      {new: true},
+      (err, textChannel) => {
+        if (err) console.log("An error occured when trying to access and update the DB for a specific text channel! (message)");
+        else if (textChannel !== null){
+          //Echo this message to EVERY websocket clients with the same serverId
+          const data = {
+            type: "message",
+            message: newMessage,
+            textChannelId: parsedMessage.textChannelId
+          }
+          for (let key in wsclients){
+            if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
+              wsclients[key].send(JSON.stringify(data));
+            }
+          }
         }
-        //if the groupserver exists, then update its chat log with the ws client's new message
-        else if (groupServer !== null){
-          const newMessage = {
-            content: parsedMessage.message.content,
-            author: parsedMessage.message.author,
-            index: parsedMessage.message.index,
-            timestamp: parsedMessage.message.timestamp
-          };
-          const newChatLog = [...groupServer.chatLog, newMessage];
-          GroupServer.findOneAndUpdate({_id: parsedMessage.serverId}, {chatLog: newChatLog}, {new: true}, (err, _groupServer) => {
-            if (!err){
-              delete parsedMessage.message.notSent;
-              console.log(parsedMessage);
-              //Echo this message to EVERY websocket clients with the same serverId
-              for (let key in wsclients){
-                if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
-                  wsclients[key].send(JSON.stringify(parsedMessage));
-                }
-              }
-            }
-            else{
-              console.log("Failed to update text server " + parsedMessage.serverId + " with a new message\n", err.response.status);
-            }
+        else console.log("Failed to update text channel", parsedMessage.textChannelId, "with a new message.");
+      });
+    }
+    else if (parsedMessage.type === "textChannels"){
+      TextChannel.find({group_server_id: parsedMessage.groupServerId}, (err, textChannels) => {
+        if (err) console.log("An error occured when trying to access the DB for text channels!");
+        else if (textChannels !== null && textChannels.length > 0){
+          let textChannels_ = [];
+          textChannels.forEach(textChannel => {
+            const textChannel_ = {
+              id: textChannel._id,
+              name: textChannel.name,
+              date: textChannel.date,
+              chatLog: textChannel.chat_log
+            };
+            textChannels_.push(textChannel_);
           });
+          const message = {
+            textChannels: textChannels_
+          }
+          ws.send(JSON.stringify(message));
         }
       });
     }
