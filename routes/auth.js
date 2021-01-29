@@ -1,7 +1,12 @@
 const User = require('../models/User');
+<<<<<<< HEAD
+const router = require('express').Router();
+const { registerValidation, loginValidation, updatePasswordValidation, updateNameValidation, deleteAccountValidation } = require('../auth/validation');
+=======
 const Friends = require('../models/Friends');
 const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation } = require('../auth/validation');
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const verify = require ('../auth/verifyToken');
@@ -9,9 +14,15 @@ const verify = require ('../auth/verifyToken');
 //Validation
 const Joi = require('@hapi/joi');
 
+<<<<<<< HEAD
+router.get('/verify', verify, (req, res) => {
+    if(req.user) return res.status(200).json({success: true, message: 'Success', user: req.user});
+    else return res.status(401).json({success: false, message: 'Denied Access'});
+=======
 router.post('/verify', verify, (req, res) => {
     if(req.user) return res.status(200).json({success: true, message: 'Success', user: req.user});
     else return res.status(404).json({success: false, message: 'Denied Access'});
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 });
 
 router.post('/register', async (req, res) => {
@@ -28,11 +39,24 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req.body.password, salt);
 
+<<<<<<< HEAD
+    // Generate a non copy of a number id
+    numberID = await generateRandomNumberID(req.body.name);
+
+=======
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
     // Add user to database
     const user = new User({
         name: req.body.name,
         email: req.body.email,
         password: hashPassword,
+<<<<<<< HEAD
+        number_id: numberID
+    });
+
+    try{
+        const newUser = await user.save();
+=======
     });
     try{
         const newUser = await user.save();
@@ -42,6 +66,7 @@ router.post('/register', async (req, res) => {
         });
 
         await friends.save();
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
     
         //Create and assign a refresh and access token to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
@@ -49,8 +74,14 @@ router.post('/register', async (req, res) => {
         const set = { $set: { token: token } };
         await User.updateOne(query, set);
 
+<<<<<<< HEAD
+        return res.status(201).json({success: true, message: 'Success', Authentication: token});
+    }catch(err) {
+        console.log(err)
+=======
         return res.status(200).send({success: true, message: 'Success', Authentication: token});
     }catch(err) {
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
         return res.status(400).json({success: false, message: err});
     }
 });
@@ -58,15 +89,24 @@ router.post('/register', async (req, res) => {
 router.delete('/logout', verify, async (req, res) =>{
 
     // check if the user is logged in
+<<<<<<< HEAD
+    if(req.user == null) return res.status(401).json({success: false, message: 'Already logged out'});
+=======
     if(req.user == null) res.status(401).json({success: false, message: 'Already logged out'});
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 
     // delete the token from the user
     const query = { _id: req.user._id };
     const set = { token: null }
     const result = await User.updateOne(query, set);    
 
+<<<<<<< HEAD
+    if(result.nModified > 0) return res.status(200).json({success: true, message: 'Success'});
+    else return res.status(404).json({success: false, message: 'Token not found'});
+=======
     if(result.nModified > 0) res.status(200).json({success: true, message: 'Success'});
     else res.status(404).json({success: false, message: 'Token not found'});
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 })
 
 router.post('/login', async (req, res) =>{
@@ -81,7 +121,11 @@ router.post('/login', async (req, res) =>{
     
     // Check if password is valid
     const validPass = await bcrypt.compare(req.body.password, user.password);
+<<<<<<< HEAD
+    if(!validPass) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
+=======
     if(!validPass) res.status(400).json({success: false, message: 'Email or password is incorrect'});
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 
     //Create and assign a token to a user
     const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN);
@@ -89,12 +133,32 @@ router.post('/login', async (req, res) =>{
         const query = { email: user.email };
         const set = { $set: { token: token } };
         await User.updateOne(query, set);
+<<<<<<< HEAD
+        return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
+=======
         return res.status(200).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
     }catch(err){
         return res.status(400).json({success: false, message: 'Failed to log in'});
     }
 });
 
+<<<<<<< HEAD
+router.patch('/change-password', verify, async (req, res) => {
+    // Validate data
+    const {error} = updatePasswordValidation(req.body);
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
+
+    // Check password
+    const validPass = await bcrypt.compare(req.body.oldPassword, req.user.password);
+    if(!validPass) return res.status(400).json({success: false, message: 'Old Password is Incorrect'});
+
+    // Update password
+    try{
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(req.body.password, salt);
+        const query = { _id: req.user._id };
+=======
 router.post('/check-password', verify, async (req, res) => {
     // Validate data before adding user
     const {error} = updatePasswordValidation(req.body);
@@ -107,6 +171,7 @@ router.post('/check-password', verify, async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(req.body.password, salt);
         const query = { email: req.user.email };
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
         const set = { $set: { password: hashPassword } };
         await User.updateOne(query, set);
 
@@ -114,6 +179,78 @@ router.post('/check-password', verify, async (req, res) => {
     }catch{ 
         return res.status(400).json({success: false, message: 'Failed to change password'});
     }
+<<<<<<< HEAD
+});
+
+router.patch('/change-name', verify, async (req, res) => {
+    // Validate data
+    const {error} = updateNameValidation(req.body);
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
+
+    // Check password
+    const validPass = await bcrypt.compare(req.body.password, req.user.password);
+    if(!validPass) return res.status(400).json({success: false, message: 'Password is incorrect'});
+
+    // Update name
+    try{
+        numberID = await generateRandomNumberID(req.body.name);
+        const query = { _id: req.user._id };
+        const set = { $set: { name: req.body.name, number_id: numberID } };
+        await User.updateOne(query, set);
+
+        return res.status(200).json({success: true, message: 'Success'});
+    }catch{ 
+        return res.status(400).json({success: false, message: 'Failed to change name'});
+    }
+});
+
+router.delete('/delete-account', verify, async (req, res) => {
+    // Validate data
+    const {error} = deleteAccountValidation(req.body);
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
+
+    // Check password
+    const validPass = await bcrypt.compare(req.body.password, req.user.password);
+    if(!validPass) return res.status(400).json({success: false, message: 'Password is incorrect'});
+
+    try{
+        const query = { _id: req.user._id };
+        await User.deleteOne(query);
+
+        return res.status(200).json({success: true, message: 'Success'});
+    }catch{ 
+        return res.status(400).json({success: false, message: 'Failed to delete account'});
+    }
+});
+
+async function generateRandomNumberID(name){
+    let numberID = Math.floor(Math.random() * Math.floor(1000));;
+    let userNumberIDs = await User.find({name: name});
+    if(userNumberIDs.length == 1000) return res.status(400).json({success: false, message: "Username unavailable: Too many called" + req.body.name});
+    let i = 0;
+    while(binarySearch(userNumberIDs, numberID)){
+        numberID += 647;
+        numberID = numberID < 1000? numberID : numberID - 1000;
+    }
+    return numberID;
+}
+
+function binarySearch(arr, val){
+    let start = 0;
+    let end = arr.length - 1;
+
+    while (start <= end) {
+        let mid = Math.floor((start + end) / 2);
+
+        if(arr[mid] == val) return true;
+        else if (arr[mid] < val) start = mid + 1;
+        else end = mid - 1;
+    }
+
+    return false;
+}
+=======
 })
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
 
 module.exports = router;

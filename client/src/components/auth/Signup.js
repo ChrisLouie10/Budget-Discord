@@ -33,7 +33,11 @@ export default function Signup() {
         })
       }).then(response => { return response.json()})
         .then(data => {
+<<<<<<< HEAD
+        if(!data.success) setError(data.message);
+=======
         if(!data.success) setError(response.statusText);
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
         else {
           localStorage.setItem('Authorization', data.Authorization);
           history.push("/login");

@@ -34,12 +34,22 @@ export default function Dashboard(props) {
           </div>
           {error && <div className="alert alert-danger" role="alert">{error}</div>}
           <div>
+<<<<<<< HEAD
+            <strong>Name:</strong> {props.user.name} #{props.user.number_id}
+=======
             <strong>Name:</strong> {props.user.name}
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
           </div>
           <div>
             <strong>Email:</strong> {props.user.email}
           </div>
+<<<<<<< HEAD
+          <Link to="/change-name" className="btn btn-primary w-100 mt-3">Change Name</Link>
+          <Link to="/change-password" className="btn btn-primary w-100 mt-3">Change Password</Link>
+          <Link to="/delete-account" className="btn btn-danger w-100 mt-3">Delete Account</Link>
+=======
           <Link to="/update-profile" className="btn btn-primary w-100 mt-3">Update Profile</Link>
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
         </div>
       </div>
       <div className="w-100 text-center mt-2">

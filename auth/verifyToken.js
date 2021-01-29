@@ -15,7 +15,11 @@ const verify = async function (req, res, next){
     if(token){
         await jwt.verify(token, process.env.SECRET_AUTH_TOKEN, (err, id) => {
             if(err) {
+<<<<<<< HEAD
+                return res.status(401).json({
+=======
                 return res.json({
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
                     success: false, 
                     message: 'Token is not valid'
                 });
@@ -27,7 +31,11 @@ const verify = async function (req, res, next){
             }
         });
     }else{
+<<<<<<< HEAD
+        res.status(401).json({
+=======
         res.json({
+>>>>>>> f0fbb3e6f45f9b9b3bf27ee65a1038b987a0a335
             success: false,
             message: 'Auth token is not supplied'
         });
