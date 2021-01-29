@@ -15,7 +15,7 @@ const verify = async function (req, res, next){
     if(token){
         await jwt.verify(token, process.env.SECRET_AUTH_TOKEN, (err, id) => {
             if(err) {
-                return res.json({
+                return res.status(401).json({
                     success: false, 
                     message: 'Token is not valid'
                 });
@@ -27,7 +27,7 @@ const verify = async function (req, res, next){
             }
         });
     }else{
-        res.json({
+        res.status(401).json({
             success: false,
             message: 'Auth token is not supplied'
         });

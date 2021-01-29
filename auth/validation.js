@@ -26,6 +26,23 @@ const updatePasswordValidation = (data) => {
     return schema.validate(data);
 };
 
+const updateNameValidation = (data) => {
+    const schema = Joi.object({
+        name: Joi.string().max(32).required(),
+        password: Joi.string().max(32).min(10).required()
+    });
+    return schema.validate(data);
+};
+
+const deleteAccountValidation = (data) => {
+    const schema = Joi.object({
+        password: Joi.string().max(32).min(10).required()
+    });
+    return schema.validate(data);
+};
+
 module.exports.registerValidation = registerValidation;
 module.exports.loginValidation = loginValidation;
 module.exports.updatePasswordValidation = updatePasswordValidation;
+module.exports.updateNameValidation = updateNameValidation;
+module.exports.deleteAccountValidation = deleteAccountValidation;

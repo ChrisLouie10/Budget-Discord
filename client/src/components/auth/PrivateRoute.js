@@ -15,7 +15,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   useEffect(async () => {
     let mounted = true;
     await fetch('http://localhost:3000/api/user/verify', {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': localStorage.getItem('Authorization')
@@ -71,7 +71,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
                 servers={servers}
                 fetchServerListInfo={fetchServerListInfo}/>
             </div>
-            <Component 
+            <Component
               {...rest} 
               user={user} 
               setUser={setUser} 

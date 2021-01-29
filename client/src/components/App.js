@@ -4,10 +4,12 @@ import Signup from "./auth/Signup"
 import Dashboard from "./auth/Dashboard";
 import Login from "./auth/Login";
 import PrivateRoute from "./auth/PrivateRoute";
-import UpdateProfile from "./auth/UpdateProfile";
 import GroupServer from './groupserver/GroupServer.js';
-import FindFriends from './popups/FindFriends'
+import Friends from './friends/Friends'
 import JoinGroupServer from './groupserver/JoinGroupServer.js';
+import ChangeName from './auth/ChangeName';
+import DeleteAccount from './auth/DeleteAccount';
+import ChangePassword from './auth/ChangePassword';
 
 export default function App() {
   /*
@@ -26,9 +28,11 @@ export default function App() {
       <Router>
         <Switch>
           <PrivateRoute exact path="/" component={Dashboard} />
-          <PrivateRoute exact path="/friends" component={FindFriends} />
+          <PrivateRoute exact path="/friends" component={Friends} />
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
-          <PrivateRoute exact path="/update-profile" component={UpdateProfile} />
+          <PrivateRoute exact path="/change-name" component={ChangeName} />
+          <PrivateRoute exact path="/change-password" component={ChangePassword} />
+          <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
           <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
           <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer}/>
           <Route path="/signup" component={Signup} />

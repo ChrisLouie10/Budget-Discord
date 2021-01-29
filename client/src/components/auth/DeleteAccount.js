@@ -3,9 +3,8 @@ import { Link, useHistory } from 'react-router-dom';
 
 // // Simple Update Profile page
 
-export default function UpdateProfile(props) {
+export default function DeleteAccount(props) {
   const [user, setUser] = useState(props.user);
-  const oldPasswordRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
   const [error, setError] = useState();
@@ -21,21 +20,19 @@ export default function UpdateProfile(props) {
 
     try{
       setLoading(true);
-      await fetch('http://localhost:3000/api/user/check-password', {
-        method: 'POST',
+      await fetch('http://localhost:3000/api/user/delete-account', {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': localStorage.getItem('Authorization')
         },
         body: JSON.stringify({
-          email: user.email,
-          oldPassword: oldPasswordRef.current.value,
           password: passwordRef.current.value
         })
-      }).then(response => { return response.json()})
+      }).then(response => { return response.json() })
         .then(data => {
           if(!data.success) setError(data.message);
-          else history.push("/dashboard");
+          else history.push("/login");
       })
     }
     finally{
@@ -48,21 +45,17 @@ export default function UpdateProfile(props) {
       <div className="card mx-auto" style={{maxWidth: "400px"}}>
         <div className="card-body">
           <div className="card-header text-center mb-4">
-            <h2>Update Profile</h2>
+            <h2>Delete Account</h2>
           </div>
           {error && <div className="alert alert-danger" role="alert">{error}</div>}
           <form onSubmit={handleSubmit}>
-            <div className="mb-3" id="old-password">
-              <label htmlFor="input-old-password">Old Password</label>
-              <input type="password" className="form-control" id="input-old-password" ref={oldPasswordRef} required></input>
-            </div>
             <div className="mb-3" id="password">
-              <label htmlFor="input-password">password</label>
-              <div className="form-control" type="password" id="input-email" ref={passwordRef} required></div>
+              <label htmlFor="input-password">Enter Password to Delete Account</label>
+              <input className="form-control" type="password" id="input-password" ref={passwordRef} required></input>
             </div>
             <div className="mb-3" id="password-confirm">
               <label htmlFor="input-password-confirm">Confirm Password</label>
-              <div className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required></div>
+              <input className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required></input>
             </div>
             <button disabled={loading} className="btn btn-primary w-25" type="Submit">Update</button>
           </form>
@@ -74,5 +67,3 @@ export default function UpdateProfile(props) {
     </div>
   );
 }
-
-

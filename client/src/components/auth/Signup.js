@@ -33,7 +33,7 @@ export default function Signup() {
         })
       }).then(response => { return response.json()})
         .then(data => {
-        if(!data.success) setError(response.statusText);
+        if(!data.success) setError(data.message);
         else {
           localStorage.setItem('Authorization', data.Authorization);
           history.push("/login");

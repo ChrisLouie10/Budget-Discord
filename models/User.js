@@ -21,6 +21,12 @@ let userSchema = new mongoose.Schema({
     required: true,
     max: 32
   }, 
+  number_id:{
+    type: Number, 
+    required: true
+  },
+  friends: [String],
+  friend_request: [String],
   token: {
     type: String,
     default: null
