@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
+import Loading from '../auth/Loading';
 
 export default function JoinGroupServer(props){
 
@@ -8,6 +9,7 @@ export default function JoinGroupServer(props){
     const [loading, setLoading] = useState(true);
     const [success, setSuccess] = useState();
     const [serverId, setServerId] = useState("");
+    const history = useHistory();
 
     useEffect(async ()=>{
         if (props.computedMatch.params.inviteCode){
@@ -26,13 +28,13 @@ export default function JoinGroupServer(props){
                         signal
                     }).then(response => { return response.json(); })
                         .then((data) => {
-                            console.log("message:", data.message);
                             setServerId(data.serverId);
-                            props.fetchServerListInfo();
+                            props.fetchServerListInfo(true, true);
                             setSuccess(data.success);
+                            setLoading(false);
                         });
             }finally{
-                setLoading(false);
+                history.push("/group/"+serverId);
             }
         }
         return function cleanup(){
@@ -44,12 +46,12 @@ export default function JoinGroupServer(props){
         <>
             {
                 loading ?
-                <p>Loading</p>
+                <Loading />
                 :
                (success ? 
-               <Redirect to={{pathname: "/group/"+serverId}} />
+              <></>
                :
-               <Redirect to="/dashboard" />) 
+              <></>) 
             }
         </>
     )

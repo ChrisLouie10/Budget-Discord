@@ -11,8 +11,8 @@ export default function InviteForm(props){
     const [error, setError] = useState("");
 
     useEffect(async ()=>{
-        if (props.others.inviteCode)
-            await setInviteUrl("http://localhost:5000/join/"+props.others.inviteCode);
+        if (props.inviteCodes[props.groupServerId])
+            await setInviteUrl("http://localhost:5000/join/"+props.inviteCodes[props.groupServerId]);
         return function cleanup(){
             controller.abort();
         }
@@ -21,7 +21,7 @@ export default function InviteForm(props){
     async function generateInviteLink(e){
         e.preventDefault();
         setLoading(true);
-        
+
         try{
             await fetch('http://localhost:3000/api/groupServer/create-invite', {
                 method: 'POST',
@@ -31,8 +31,8 @@ export default function InviteForm(props){
                 },
                 body: JSON.stringify({
                     type: 'create-invite',
-                    userId: props.others.user,
-                    serverId: props.others.serverId,
+                    userId: props.userId,
+                    groupServerId: props.groupServerId,
                     expiration: parseInt(expiration),
                     limit: parseInt(limit)
                 }),
@@ -40,9 +40,11 @@ export default function InviteForm(props){
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (!data.success) setError(data.message);
-                    else if (props.mounted) {
+                    else{
                         setInviteUrl("http://localhost:5000/join/"+data.code);
-                        props.others.setInviteCode(data.code);
+                        const inviteCodes = {...props.inviteCodes};
+                        inviteCodes[props.groupServerId] = data.code;
+                        props.setInviteCodes({...inviteCodes});
                         updateServerInfo();
                     }
                 })
@@ -58,7 +60,8 @@ export default function InviteForm(props){
             },
             body: JSON.stringify({
                 type: 'find-one',
-                serverId: props.others.serverId,
+                groupServerId: props.groupServerId,
+                userId: props.userId
             }),
             signal
         }).then(response => { return response.json(); })
@@ -66,9 +69,9 @@ export default function InviteForm(props){
                 if (!data.success) setError(data.message);
                 else if (props.mounted) {
                     if (data.server){  
-                        let servers = {...props.others.servers};
-                        servers[props.others.serverId] = data.server[props.others.serverId];
-                        props.others.setServers({...servers});
+                        let groupServers = {...props.groupServers};
+                        groupServers[props.groupServerId] = data.server[props.groupServerId];
+                        props.setGroupServers({...groupServers});
                     }
                 }
             })

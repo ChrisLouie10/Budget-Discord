@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Popup from "./popups/Popup.js";
 import CreateServerForm from "./popups/CreateServerForm.js";
 
@@ -22,9 +22,16 @@ export default function ServersList(props){
                     Object.entries(props.servers).map(([key,value]) => {
                         return(
                             <li key={key}>
-                                <Link className="text-reset" to={{pathname: "/group/"+key}} >
+                                {
+                                props.groupServerId === key ?
+                                <Link onClick={(e) => e.preventDefault()} style={{color: "#b5fff3"}} to={{pathname: "/group/"+key+"/"+(props.lastTextChannels[key] ? props.lastTextChannels[key] : value.textChannels[0])}} >
                                     {value.name}
                                 </Link>
+                                :
+                                <Link className="text-reset" to={{pathname: "/group/"+key+"/"+(props.lastTextChannels[key] ? props.lastTextChannels[key] : value.textChannels[0])}} >
+                                    {value.name}
+                                </Link>
+                                }
                             </li>
                         )
                     })

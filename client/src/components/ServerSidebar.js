@@ -1,112 +1,94 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import Popup from "./popups/Popup.js";
-import InviteForm from "./popups/InviteForm.js"
+import { Link } from "react-router-dom";
+import RightClickMenu from "./popups/RightClickMenu.js";
+import Actions from "./popups/Actions.js";
 
 export default function ServersList(props){
 
     const [mounted, setMounted] = useState(true);
-    const [serverName, setServerName] = useState("GroupServer");
-    const [inviteCode, setInviteCode] = useState();
-    const [matchingInviteCode, setMatchingInviteCode] = useState(false);
-    const [openPopupInvite, setOpenPopupInvite] = useState(false);
-    const [error, setError] = useState("");
-    const history = useHistory();
-    const controller = new AbortController();
-    const { signal } = controller;
+    const [groupServerName, setGroupServerName] = useState("Group Server");
+    const [actionDialog, setActionDialog] = useState(0);
+    const [openPopupActions, setOpenPopupActions] = useState(false);
     
     useEffect(()=>{
         return function cleanup(){
-            controller.abort();
             setMounted(false);
         }
     }, []);
 
     useEffect(() => {
-        if (props.servers){
-            setServerName(props.servers[props.serverId].name);
+        if (props.groupServers){
+            setGroupServerName(props.groupServers[props.groupServerId].name);
         }
-        setMatchingInviteCode(false);
-    }, [props.serverId]);
+    }, [props.groupServerId]);
 
-    useEffect(getCurrentInviteCode, [props.servers, matchingInviteCode]);
-
-    async function deleteCurrentServer(e){
-        e.preventDefault();
-
-        if (props.serverId){
-            await fetch('http://localhost:3000/api/groupServer/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('Authorization')
-                },
-                body: JSON.stringify({
-                    type: "delete",
-                    serverId: props.serverId,
-                    userId: props.user._id
-                }),
-                signal
-            }).then(response => { return response.json(); })
-                .then((data) => {
-                    if (!data.success) setError(data.message);
-                    else {
-                        props.fetchServerListInfo();
-                        history.push("/dashboard");
-                    }
-            });
+    function handleRightClick(e){
+        if (e.nativeEvent.which === 3 || e.type === "contextmenu"){
+            e.preventDefault();
         }
-    }
+    };
 
-    function getCurrentInviteCode(){
-        if (!matchingInviteCode && props.servers){
-            Object.entries(props.servers).map(([key, value]) => {
-                if (key === props.serverId){
-                    setMatchingInviteCode(true);
-                    if (value.invite)
-                        setInviteCode(value.invite.code);
-                    return;
+    function displayTextChannels(){
+        if (props.textChannels){ 
+            return(
+                <>
+                {
+                    Object.entries(props.textChannels).map(([key, value]) => {
+                        if (value.groupServerId === props.groupServerId){
+                            return(
+                                <li key={key}>
+                                {
+                                    props.textChannelId === key ?
+                                    <Link style={{color: "#b5fff3"}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                        {value.name}
+
+                                    </Link>
+                                    :
+                                    <Link className="text-reset" onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                        {value.name}
+
+                                    </Link>
+                                }
+                                </li>
+                            )
+                        }
+                    })
                 }
-            });
+                </>
+            )
         }
     }
 
     return (
             <nav id="server-side-bar">
                 <div className="row">
-                    <h5 className="text-white">{serverName}</h5>
+                    <h5 className="text-white">{groupServerName}</h5>
                 </div>
                 <div className="row">
                     <ul className="list-unstyled text-white">
-                    {
-                        (props.servers[props.serverId].owner ||
-                            props.servers[props.serverId].admin) ?
-                        <li onClick = {() => {if(!openPopupInvite) setOpenPopupInvite(true)}}>
-                            <Link className="text-reset" to="#">Invite People</Link>
-                            <Popup
-                            title={"Invite"}
-                            openPopup = {openPopupInvite}
-                            setOpenPopup = {setOpenPopupInvite}
-                            user = {props.user}
-                            servers = {props.servers}
-                            setServers = {props.setServers}
-                            serverId = {props.serverId}
-                            inviteCode = {inviteCode}
-                            setInviteCode = {setInviteCode}>
-                                <InviteForm mounted={mounted}/>
-                            </Popup>
-                        </li>
-                        :
-                        <></>
-                    }
-                    {
-                        props.servers[props.serverId].owner ?
-                        <li onClick = {deleteCurrentServer}>
-                            <Link className="text-reset" to="#">Delete Current Server</Link>
-                        </li>
-                        :
-                        <></>
-                    }
+                    <li onClick = {() => {if(!openPopupActions) {setOpenPopupActions(true); setActionDialog(0);}}}>
+                        <Link className="text-reset" to="#">Actions</Link>  
+                            <Actions
+                                mounted={mounted}
+                                openPopup={openPopupActions}
+                                setOpenPopup={setOpenPopupActions}
+                                actionDialog={actionDialog}
+                                setActionDialog={setActionDialog}
+                                user = {props.user}
+                                setUser = {props.setUser}
+                                groupServerName = {groupServerName}
+                                groupServers = {props.groupServers}
+                                setGroupServers = {props.setGroupServers}
+                                textChannels={props.textChannels}
+                                setTextChannels={props.setTextChannels}
+                                inviteCodes = {props.inviteCodes}
+                                setInviteCodes = {props.setInviteCodes}
+                                groupServerId = {props.groupServerId}
+                                textChannelId = {props.textChannelId}
+                                fetchServerListInfo={props.fetchServerListInfo}
+                                />
+                    </li>
+                    {displayTextChannels()}
                     </ul>
                 </div>
             </nav>

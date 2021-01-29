@@ -10,6 +10,7 @@ import JoinGroupServer from './groupserver/JoinGroupServer.js';
 import ChangeName from './auth/ChangeName';
 import DeleteAccount from './auth/DeleteAccount';
 import ChangePassword from './auth/ChangePassword';
+import FindFriends from './popups/FindFriends'
 
 export default function App() {
   /*
@@ -33,7 +34,8 @@ export default function App() {
           <PrivateRoute exact path="/change-name" component={ChangeName} />
           <PrivateRoute exact path="/change-password" component={ChangePassword} />
           <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
-          <PrivateRoute exact path="/group/:serverId" component={GroupServer} />
+          <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
+          <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
           <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer}/>
           <Route path="/signup" component={Signup} />
           <Route path="/login" component={Login} />

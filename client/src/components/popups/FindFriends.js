@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
-import LeftSideNav from '../LeftSideNav.js';
+import LeftSideNav from '../ServersList.js';
 
 
 // Simple Login page
@@ -160,11 +160,6 @@ export default function FindFriend(props) {
   }, []);
 
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-1 bg-dark" style={{minHeight: "100vh"}}>
-          <LeftSideNav user={user} setUser={setUser}/>
-        </div>
         <div className="col-11 my-auto bg-secondary d-flex-column" style={{minHeight: "100vh"}}>
           {showFriendRequests ? friends.map((friend) => (
               <div className="d-flex m-2 mx-auto" style={{maxWidth: "800px"}} key={friend.id}>
@@ -211,7 +206,5 @@ export default function FindFriend(props) {
             ))}
           </div>
         </div>
-      </div>
-    </div>
   );
 }
