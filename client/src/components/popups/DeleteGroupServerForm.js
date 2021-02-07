@@ -35,7 +35,7 @@ export default function DeleteGroupServerForm(props){
                     signal
                 }).then(response => { return response.json(); })
                     .then((data) => {
-                        if (!data.success) setError(data.message);
+                        if (!data.success) console.log(data.message);
                         else {
                             props.setOpenPopup(false);
                             props.fetchServerListInfo();

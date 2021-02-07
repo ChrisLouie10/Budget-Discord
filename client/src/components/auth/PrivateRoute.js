@@ -34,8 +34,8 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   }
 
   useEffect(()=>{
-    console.log("group", groupServers);
-    console.log("text", textChannels);
+    //console.log("group", groupServers);
+    //console.log("text", textChannels);
   }, [groupServers, textChannels]);
 
   //On initialization, set up websocket and verify
