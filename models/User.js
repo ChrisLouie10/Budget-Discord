@@ -21,23 +21,12 @@ let userSchema = new mongoose.Schema({
     required: true,
     max: 32
   }, 
-<<<<<<< HEAD
   number_id:{
     type: Number, 
     required: true
   },
   friends: [String],
-  friend_request: [String],
-=======
-  groupServers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'GroupServer'
-  }],
->>>>>>> 24c9822446cd02ca01bf71404bbe96c7ba773feb
-  token: {
-    type: String,
-    default: null
-  }
+  friend_request: [String]
 });
 
 module.exports = mongoose.model("User", userSchema);

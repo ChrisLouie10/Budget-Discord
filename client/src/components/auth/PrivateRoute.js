@@ -47,6 +47,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
       ws.addEventListener('message', handleWSSMessage);
     }
 
+    console.log("fetched");
     let user;
 
     await fetch('http://localhost:3000/api/user/verify', {

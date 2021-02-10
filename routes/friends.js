@@ -6,7 +6,7 @@ router.post('/find-users', verify, async (req, res) => {
   if(req.body.friendNumber != ""){
     const user = await User.findOne({ name: req.body.friendName, number_id: parseInt(req.body.friendNumber) });
     if(!user) return res.status(404).json({success: false, message: 'No friends found with that name'});
-    else return res.status(200).json({ success: true, message: 'Success', friendResult: [{ name: user.name, numberID: user.number_id }] });
+    else return res.status(200).json({ success: true, message: 'Success', friendResult: [{ name: user.name, id: user._id, numberID: user.number_id }] });
   }
   const users = await User.find({name: req.body.friendName});
   if(users.length == 0) return res.status(404).json({ success: false, message: 'No friends found with that name' });
@@ -30,7 +30,7 @@ router.post('/send-friend-request', verify, async (req, res) => {
       return res.status(200).json({ success: true, message: 'Success' });
     }
     catch{
-      return res.status(400).json({ success: false, message: 'Failed to accept Friend Request' }); 
+      return res.status(500).json({ success: false, message: 'Failed to accept Friend Request' }); 
     }
   }
 
@@ -42,7 +42,7 @@ router.post('/send-friend-request', verify, async (req, res) => {
     return res.status(200).json({success: true, message: 'Friend Request Sent'});
   }
   catch{
-    return res.status(400).json({success: false, message: 'Failed to send friend request'}); 
+    return res.status(500).json({success: false, message: 'Failed to send friend request'}); 
   }
 });
 
@@ -59,7 +59,7 @@ router.post('/accept-friend-request', verify, async (req, res) => {
     return res.status(200).json({success: true, message: 'Success'});
   }
   catch{
-    return res.status(400).json({success: false, message: 'Failed to accept Friend Request'}); 
+    return res.status(500).json({success: false, message: 'Failed to accept Friend Request'}); 
   }
 })
 
@@ -99,7 +99,7 @@ router.delete('/delete-friend', verify, async (req, res) => {
 
     return res.status(200).json({success: true, message: 'Success'});
   } catch{
-    return res.status(400).json({success: false, message: 'Failed to remove friend'}); 
+    return res.status(500).json({success: false, message: 'Failed to remove friend'}); 
   }
 })
 
