@@ -6,7 +6,6 @@ export default function CreateChannelForm(props){
     const controller = new AbortController();
     const { signal } = controller;
     const [input, setInput] = useState("new-channel");
-    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const history = useHistory();
 
@@ -36,26 +35,19 @@ export default function CreateChannelForm(props){
               signal
             }).then(response => { return response.json(); })
                 .then((data) => {
-                    if(!data.success) setError(data.message);
-                    else {
-                        let textChannels = {...props.textChannels};
+                    if(data.success) {
                         let groupServers = {...props.groupServers};
-                        newTextChannelId = data.textChannel._id;
-                        groupServers[data.textChannel.group_server_id].textChannels.push(data.textChannel._id);
-                        textChannels[newTextChannelId] = {
-                            chatLog: data.textChannel.chat_log,
-                            date: data.textChannel.date,
-                            groupServerId: data.textChannel.group_server_id,
-                            name: data.textChannel.name
-                        };
+                        newTextChannelId = data.textChannelId;
+                        groupServers[props.groupServerId].textChannels[newTextChannelId] = data.textChannel;
                         props.setGroupServers({...groupServers});
-                        props.setTextChannels({...textChannels});
                         setLoading(false);
                         props.setOpenPopup(false);
                     }
                 });
         }finally{
-            history.push("/group/"+props.groupServerId+"/"+newTextChannelId);
+            if (newTextChannelId)
+                history.push("/group/"+props.groupServerId+"/"+newTextChannelId);
+            else history.push("/dashboard");
         }
     }
 

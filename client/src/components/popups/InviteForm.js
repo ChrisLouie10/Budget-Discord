@@ -8,11 +8,10 @@ export default function InviteForm(props){
     const [inviteUrl, setInviteUrl] = useState("");
     const [expiration, setExpiration] = useState("30");
     const [limit, setLimit] = useState("1");
-    const [error, setError] = useState("");
 
-    useEffect(async ()=>{
-        if (props.inviteCodes[props.groupServerId])
-            await setInviteUrl("http://localhost:5000/join/"+props.inviteCodes[props.groupServerId]);
+    useEffect(()=>{
+        if (props.groupServers[props.groupServerId].inviteCode)
+            setInviteUrl("http://localhost:5000/join/"+props.groupServers[props.groupServerId].inviteCode);
         return function cleanup(){
             controller.abort();
         }
@@ -39,42 +38,14 @@ export default function InviteForm(props){
                 signal
             }).then(response => { return response.json(); })
                 .then((data) => {
-                    if (!data.success) setError(data.message);
-                    else{
+                    if (data.success){
                         setInviteUrl("http://localhost:5000/join/"+data.code);
-                        const inviteCodes = {...props.inviteCodes};
-                        inviteCodes[props.groupServerId] = data.code;
-                        props.setInviteCodes({...inviteCodes});
-                        updateServerInfo();
+                        let groupServers = {...props.groupServers};
+                        groupServers[props.groupServerId].inviteCode = data.code;
+                        props.setGroupServers({...groupServers}); 
                     }
                 })
         }finally{ setLoading(false); }
-    }
-
-    async function updateServerInfo(){
-        await fetch('http://localhost:3000/api/groupServer/find-one', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('Authorization')
-            },
-            body: JSON.stringify({
-                type: 'find-one',
-                groupServerId: props.groupServerId,
-                userId: props.userId
-            }),
-            signal
-        }).then(response => { return response.json(); })
-            .then((data) => {
-                if (!data.success) setError(data.message);
-                else if (props.mounted) {
-                    if (data.server){  
-                        let groupServers = {...props.groupServers};
-                        groupServers[props.groupServerId] = data.server[props.groupServerId];
-                        props.setGroupServers({...groupServers});
-                    }
-                }
-            })
     }
 
     function handleExpirationChange(e){

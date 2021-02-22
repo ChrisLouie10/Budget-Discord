@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import GroupServer from '../groupserver/GroupServer.js';
+import JoinGroupServer from '../groupserver/JoinGroupServer.js'
 import ServersList from '../ServersList.js';
 import Loading from './Loading';
 const ws = new WebSocket("ws://localhost:1000");
@@ -9,46 +10,33 @@ const ws = new WebSocket("ws://localhost:1000");
 export default function PrivateRoute({ component: Component, ...rest}) {
 
   const controller = new AbortController();
-  const { signal } = controller;
-  const [ user, setUser ] = useState();
-  const [ success, setSuccess ] = useState(false);
-  const [ loading, setLoading ] = useState(true);
-  const [ mounted, setMounted] = useState(true);
-  const [ error, setError] = useState("");
+  const {signal} = controller;
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(true);
+  const [groupServers, setGroupServers] = useState({});
 
-  //key: groupServerId, value: properties (name, textChannelId's)
-  const [ groupServers, setGroupServers ] = useState({});
-  //key: textChannelId, value: properties (name, groupServerId, chatLog)
-  const [ textChannels, _setTextChannels ] = useState({});
-  //key: groupServerId, value: inviteCode
-  const [ inviteCodes, setInviteCodes ] = useState({});
-  //Used to "remember" which text channel a user leaves off of in
-  //a group server
-  //key: groupServerId, value: textChannelId
-  const [lastTextChannels, setLastTextChannels] = useState({});
-
-  const textChannelsRef = useRef(textChannels);
-  const setTextChannels = (data) => {
-    textChannelsRef.current = data;
-    _setTextChannels(data);
+  const [user, _setUser] = useState();
+  const userRef = useRef(user);
+  const setUser = async (data) => {
+    userRef.current = data;
+    _setUser(data);
   }
 
-  useEffect(()=>{
-    //console.log("group", groupServers);
-    //console.log("text", textChannels);
-  }, [groupServers, textChannels]);
+  const [chatLogs, _setChatLogs] = useState({});
+  const chatLogsRef = useRef(chatLogs);
+  const setChatLogs = (data) => {
+    chatLogsRef.current = data;
+    _setChatLogs(data);
+  };
 
-  //On initialization, set up websocket and verify
-  //user log-in. Then fetch the verified user's
-  //group server list information to update
-  //groupServers, textChannels, and inviteCodes states
   useEffect(async () => {
+    //Set up websocket
     if (ws){
       ws.addEventListener('message', handleWSSMessage);
     }
 
-    let user;
-
+    //Verify user
     await fetch('http://localhost:3000/api/user/verify', {
       method: 'GET',
       headers: {
@@ -58,21 +46,13 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }).then(response => { if(mounted) return response.json() })
       .then((data) => { 
         if(mounted){
-          user = data.user;
           setUser(data.user);
           setSuccess(data.success);
         }
+        if (!data.success) console.log(data.message);
     }).catch(error => (mounted ? setSuccess(false): null));
 
-    await fetchServerListInfo(true, true, user);
-    setLoading(false);
-    return () => {
-      setMounted(false);
-      controller.abort();
-    }
-  }, [])
-
-  async function fetchServerListInfo(getTextChannels = false, getInviteCodes = true, _user = undefined){
+    //Populate groupServers state
     await fetch('http://localhost:3000/api/groupServer/find', {
         method: 'POST',
         headers: {
@@ -81,26 +61,24 @@ export default function PrivateRoute({ component: Component, ...rest}) {
         },
         body: JSON.stringify({
             type: "find",
-            userId: _user ? _user._id : (user ? user._id : undefined),
-            getTextChannels: getTextChannels,
-            getInviteCodes: getInviteCodes
+            userId: userRef.current._id
         }),
         signal
-    }).then(response => { return response.json(); })
-        .then((data) => {
-          if (!data.success) setError(data.message);
-          else {
-            setGroupServers({...data.servers});  
-            if (getTextChannels) {
-              setTextChannels({...data.textChannels});
-            }
-            if (getInviteCodes) {
-              setInviteCodes({...data.inviteCodes});
-            }
-          }       
-        });
-  }
+    }).then(response => { if(mounted) return response.json(); })
+      .then((data) => {
+        if (data.success) setGroupServers({...data.groupServers});     
+        else console.log(data.message); 
+    });
 
+    setLoading(false);
+
+    return () => {
+      setMounted(false);
+      controller.abort();
+    }
+  }, [])
+
+  // Repeatedly attempts to contact ws server with "callback" until ws server is online
   function waitForWSConnection(callback, interval){
     if(ws){
       if (ws.readyState === WebSocket.OPEN) callback();
@@ -121,38 +99,30 @@ export default function PrivateRoute({ component: Component, ...rest}) {
           console.log("Message from wss could not be parsed!", message);
           return;
       }
+
+      //Check whether message from ws server is valid
       if (parsedMessage.type === "message"){
-        let _textChannels = {...textChannelsRef.current};
-        console.log("MESSAGE:", _textChannels);
-        _textChannels[parsedMessage.textChannelId].chatLog[_textChannels[parsedMessage.textChannelId].chatLog.length - 1] = parsedMessage.message;
-        setTextChannels({..._textChannels});
+        let _chatLogs = {...chatLogsRef.current};
+        const index = _chatLogs[parsedMessage.textChannelId].length - 1;
+        _chatLogs[parsedMessage.textChannelId][index] = parsedMessage.message;
+        setChatLogs({..._chatLogs});
       }
     }
   }
 
-  function sendMessage(content, timestamp, index, groupServerId, textChannelId){
+  function sendMessage(message, groupServerId, textChannelId){
     if (mounted){
-      const message = {
-        content: content, 
-        index: index + 1,
-        author: user.name,
-        timestamp: timestamp,
-        notSent: true
-      };
+      //Create data 
       const data = {
         type: "message",
         textChannelId: textChannelId,
         serverId: groupServerId,
         message: message
       };
-  
-      let _textChannels = {...textChannels};
-      _textChannels[textChannelId].chatLog.push(message);
-      setTextChannels({..._textChannels});
-  
+      //Send data over to ws server
       waitForWSConnection(()=>{
         ws.send(JSON.stringify(data));
-      }, 100);
+      }, 500);
     }
   }
 
@@ -169,24 +139,18 @@ export default function PrivateRoute({ component: Component, ...rest}) {
                 user={user} 
                 setUser={setUser} 
                 groupServerId={rest.computedMatch.params.groupServerId}
-                lastTextChannels={lastTextChannels}
-                servers={groupServers}
-                fetchServerListInfo={fetchServerListInfo}/>
+                groupServers={groupServers}
+                setGroupServers={setGroupServers}/>
             </div>
             <Component
               {...rest} 
-              textChannels={(Component === GroupServer) ? textChannels : undefined}
-              setTextChannels={(Component === GroupServer) ? setTextChannels : undefined}
-              inviteCodes={(Component === GroupServer) ? inviteCodes : undefined}
-              setInviteCodes={(Component === GroupServer) ? setInviteCodes : undefined}
+              groupServers={(Component === GroupServer || Component === JoinGroupServer) ? groupServers : undefined} 
+              setGroupServers={(Component === GroupServer || Component === JoinGroupServer) ? setGroupServers : undefined}
+              chatLogs={(Component === GroupServer) ? chatLogs : undefined}
+              setChatLogs={(Component === GroupServer) ? setChatLogs : undefined}
               sendMessage={(Component === GroupServer) ? sendMessage : undefined}
-              lastTextChannels={(Component === GroupServer) ? lastTextChannels : undefined}
-              setLastTextChannels={(Component === GroupServer) ? setLastTextChannels : undefined}
               user={user} 
-              setUser={setUser} 
-              groupServers={groupServers} 
-              setGroupServers={setGroupServers}
-              fetchServerListInfo={fetchServerListInfo}
+              setUser={setUser}
               props={props}/> 
           </>
           : 

@@ -9,7 +9,7 @@ export default function ServersList(props){
     const [groupServerName, setGroupServerName] = useState("Group Server");
     const [actionDialog, setActionDialog] = useState(0);
     const [openPopupActions, setOpenPopupActions] = useState(false);
-    
+
     useEffect(()=>{
         return function cleanup(){
             setMounted(false);
@@ -29,29 +29,27 @@ export default function ServersList(props){
     };
 
     function displayTextChannels(){
-        if (props.textChannels){ 
+        if (props.groupServers[props.groupServerId]){ 
             return(
                 <>
                 {
-                    Object.entries(props.textChannels).map(([key, value]) => {
-                        if (value.groupServerId === props.groupServerId){
-                            return(
-                                <li key={key}>
-                                {
-                                    props.textChannelId === key ?
-                                    <Link style={{color: "#b5fff3"}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
-                                        {value.name}
+                    Object.entries(props.groupServers[props.groupServerId].textChannels).map(([key, value]) => {
+                        return(
+                            <li key={key}>
+                            {
+                                props.textChannelId === key ?
+                                <Link style={{color: "#b5fff3"}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                    {value.name}
 
-                                    </Link>
-                                    :
-                                    <Link className="text-reset" onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
-                                        {value.name}
+                                </Link>
+                                :
+                                <Link className="text-reset" onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                    {value.name}
 
-                                    </Link>
-                                }
-                                </li>
-                            )
-                        }
+                                </Link>
+                            }
+                            </li>
+                        )
                     })
                 }
                 </>
@@ -79,13 +77,8 @@ export default function ServersList(props){
                                 groupServerName = {groupServerName}
                                 groupServers = {props.groupServers}
                                 setGroupServers = {props.setGroupServers}
-                                textChannels={props.textChannels}
-                                setTextChannels={props.setTextChannels}
-                                inviteCodes = {props.inviteCodes}
-                                setInviteCodes = {props.setInviteCodes}
                                 groupServerId = {props.groupServerId}
                                 textChannelId = {props.textChannelId}
-                                fetchServerListInfo={props.fetchServerListInfo}
                                 />
                     </li>
                     {displayTextChannels()}

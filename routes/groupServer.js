@@ -63,11 +63,22 @@ router.post("/create", verify, async (req, res) => {
                     await GroupServer.findByIdAndUpdate(groupServer._id, {$push : {textChannels : textChannel._id}});
                     //Push the new groupServer Id into the user's groupServers property
                     const user = await User.findByIdAndUpdate(req.body.userId, 
-                        {$push : { groupServers : groupServer._id }}, 
+                        {$push : { group_servers : groupServer._id }}, 
                         {new: true}); 
                     if (user !== null){
                         //Return the new groupServer to client
-                        res.status(200).json({success: true, message: "Success", groupServer: {id: groupServer._id, name: groupServer.name}});
+                        let _textChannel = {};
+                        _textChannel[textChannel._id] = {
+                            groupServerId: textChannel.group_server_id,
+                            name: textChannel.name,
+                            date: textChannel.date
+                        }
+                        const _groupServer = {
+                            name: groupServer.name,
+                            owner: true,
+                            textChannels: _textChannel
+                        }
+                        res.status(200).json({success: true, message: "Success", groupServer: _groupServer, groupServerId: groupServer._id});
                     } 
                     else res.status(500).json({success: false, message: "Something went wrong when updating user info."});
                 } 
@@ -108,7 +119,12 @@ router.post("/create-channel", verify, async (req, res) => {
                 });
                 //Update the groupServer's information to reflect the new textChannel and return the new textChannel to client
                 await GroupServer.findByIdAndUpdate(req.body.groupServerId, {$push : {textChannels : textChannel._id}});
-                res.status(200).json({success: true, message: "Success.", textChannel: textChannel});
+                res.status(200).json({success: true, message: "Success.", textChannelId: textChannel._id,
+                    textChannel: {
+                        groupServerId: textChannel.group_server_id, 
+                        name: textChannel.name,
+                        date: textChannel.date,
+                }});
             }
             else res.status(401).json({success: false, message: "The user is not authorized to create channels."});
         }
@@ -129,6 +145,7 @@ router.post("/find-one", verify, async (req, res) => {
                 name: groupServer.name,
                 invite: groupServer.invite
             }
+
             if (req.body.userId == groupServer.owner)
                 properties.owner = true;
             else if (groupServer.admins && !properties.owner){
@@ -149,12 +166,10 @@ router.post("/find-one", verify, async (req, res) => {
 
 //Returns a dictionary of groupServers
 //that match the id's from req.body.servers
-//key = _id, value = {name: String, invite: Object, admin: boolean} 
+//key = _id, value = {name: String, inviteCode: String, owner/admin: boolean, textChannels: Object} 
 router.post("/find", verify, async (req, res) => {
     if (req.body.type === "find" && req.body.userId){
         let groupServers = {};
-        let textChannels = {};
-        let invites = {};
         //Find the user's groupServers
         const _groupServers = await GroupServer.find({users: req.body.userId}); 
         if (_groupServers.length > 0){
@@ -163,12 +178,11 @@ router.post("/find", verify, async (req, res) => {
             const promise = new Promise((resolve, reject) => {
                 _groupServers.forEach(async (groupServer, index, array) => {
                     //Push groupServer info. to the groupServers object
-                    const properties = {
+                    let properties = {
                         name: groupServer.name,
-                        invite: groupServer.invite,
-                        owner: (req.body.userId == groupServer.owner) ? true : undefined,
-                        textChannels: groupServer.textChannels
+                        owner: (req.body.userId == groupServer.owner) ? true : undefined
                     };
+                    //Check whether the user is an admin
                     if (groupServer.admins && !properties.owner){
                         groupServer.admins.forEach((admin) => {
                             if (admin == req.body.userId){
@@ -177,31 +191,28 @@ router.post("/find", verify, async (req, res) => {
                             }
                         });
                     }
-                    groupServers[groupServer._id] = properties;
-                    
-                    if(req.body.getTextChannels){
-                        //If client wants the textChannels then find them
-                        const _textChannels = await TextChannel.find({group_server_id: groupServer._id});
-                        //If there are textChannels then push their info. to the textChannels object
-                        if (_textChannels.length > 0){
-                            _textChannels.forEach(textChannel => {
-                                const properties = {
-                                    groupServerId: textChannel.group_server_id,
-                                    name: textChannel.name,
-                                    date: textChannel.date,
-                                    chatLog: textChannel.chat_log
-                                };
-                                textChannels[textChannel._id] = properties;
-                            });
-                        }
-                    }
-                    if (req.body.getInviteCodes){
-                        //If client wants the invite then find it and push its info. to the invites object
+                    //Give user access to invite code if they are the owner/admin
+                    if (properties.owner || properties.admin){
                         const invite = await Invite.findOne({group_server_id: groupServer._id});
                         if (invite !== null) {
-                            invites[groupServer._id] = invite.code;
+                            properties.inviteCode = invite.code;
                         }
                     }
+                    
+                    const _textChannels = await TextChannel.find({group_server_id: groupServer._id});
+                    let textChannels = {};
+                    if (_textChannels.length > 0){
+                        _textChannels.forEach(textChannel => {
+                            textChannels[textChannel._id] = {
+                                groupServerId: textChannel.group_server_id,
+                                name: textChannel.name,
+                                date: textChannel.date
+                            };
+                        });
+                    }
+                    properties.textChannels = textChannels;
+                    groupServers[groupServer._id] = properties;
+                    
                     //End promise after the last groupServer
                     if (index === array.length -1 ) resolve();
                 });
@@ -211,15 +222,28 @@ router.post("/find", verify, async (req, res) => {
                 res.status(200).json({
                     success: true, 
                     message: "Success", 
-                    servers: groupServers, 
-                    textChannels: req.body.getTextChannels ? textChannels : undefined,
-                    inviteCodes: req.body.getInviteCodes ? invites : undefined
+                    groupServers: groupServers
                 });
             });
         }
-        else res.status(404).json({success: false, message: "No group servers found."});
+        else res.status(200).json({success: false, message: "No group servers found.", groupServers: null});
     }   
     else res.status(400).json({success: false, message: "Failed. Bad request.\n" + JSON.stringify(req.body)});
+});
+
+router.post("/get-chat-log", verify, async(req, res) => {
+    if (req.body.type === "get-chat-log" && req.body.textChannelId){
+        try{
+            const textChannel = await TextChannel.findById(req.body.textChannelId);
+            if (textChannel !== null)
+                res.status(200).json({success: true, message: "Success.", chatLog: textChannel.chat_log});
+            else
+                res.status(400).json({success: false, message: "Failed. No match found."});
+        } catch(e){
+            res.status(500).json({success: false, message: "Failed. Something went wrong.", err: e});
+        }
+    } 
+    else res.status(400).json({success: false, message: "Failed. Bad request. \n" + JSON.stringify(req.body)});
 });
 
 //Verifies whether a user is part of a groupServer and has access to the channel
@@ -285,20 +309,31 @@ router.post("/join", verify, async (req, res) => {
                         }
                     });
                     if (newMember){
-                        const _groupServer = await GroupServer.findByIdAndUpdate(invite.group_server_id, {$push : {users: req.body.userId}}, {new: true});
-                        if (!(_groupServer instanceof Error)){
-                            //Decrease invite number of uses left, if there is a limit
-                            if (invite.limit){
-                                invite.limit--;
-                                if (invite.limit <= 0) await Invite.findOneAndDelete(invite._id);
-                                else await Invite.findByIdAndUpdate(invite._id, {limit: invite.limit});
-                            }
-                            //Return the new group server to client
-                            const user = await User.findByIdAndUpdate(req.body.userId, {$push : {groupServers : _groupServer.id}});
-                            if (!(user instanceof Error)) res.status(200).json({success: true, message: "Success.", serverId: _groupServer._id, user: user});
-                            else res.status(500).json({success: false, message: "Failed to update user information.", err: user});
+                        await GroupServer.findByIdAndUpdate(invite.group_server_id, {$push : {users: req.body.userId}});
+                        //Decrease invite number of uses left, if there is a limit
+                        if (invite.limit){
+                            invite.limit--;
+                            if (invite.limit <= 0) await Invite.findOneAndDelete({_id: invite._id});
+                            else await Invite.findByIdAndUpdate(invite._id, {limit: invite.limit});
                         }
-                        else res.status(500).json({success: false, message: "Failed to add user to the group server.", err: _groupServer});
+                        //Return the new group server to client
+                        const user = await User.findByIdAndUpdate(req.body.userId, {$push : {group_servers : groupServer.id}});
+                        const _textChannels = await TextChannel.find({group_server_id: groupServer._id});
+                        let textChannels = {};
+                        if (_textChannels.length > 0){
+                            _textChannels.forEach(textChannel => {
+                                textChannels[textChannel._id] = {
+                                    groupServerId: textChannel.group_server_id,
+                                    name: textChannel.name,
+                                    date: textChannel.date
+                                };
+                            });
+                        }
+                        res.status(200).json({success: true, message: "Success.", groupServerId: groupServer._id, user: user,
+                            groupServer: {
+                                name: groupServer.name,
+                                textChannels: textChannels
+                        }});
                     }
                     else{
                         res.status(400).json({success: false, message: "Requesting user is already part of the group server."});
@@ -312,7 +347,7 @@ router.post("/join", verify, async (req, res) => {
                 else res.status(500).json({success: false, message: "Failed to remove expired invite.", err: _invite});
             }
         }
-        else res.status(500).json({success: false, message: "Failed"});
+        else res.status(500).json({success: false, message: "Failed. Invite code doesn't exist."});
     }
     else res.status(400).json({success: false, message: "Failed. Bad request.\n" + JSON.stringify(req.body)});
 });
@@ -324,7 +359,7 @@ router.post("/leave", verify, async (req, res) => {
         const groupServer = await GroupServer.findByIdAndUpdate(req.body.groupServerId, {$pull : {users : req.body.userId}}, {new: true});
         if (groupServer !== null){
             //Update the user info.
-            const user = await User.findByIdAndUpdate(req.body.userId, {$pull : {groupServers : req.body.groupServerId}}, {new: true});
+            const user = await User.findByIdAndUpdate(req.body.userId, {$pull : {group_servers : req.body.groupServerId}}, {new: true});
             if (user !== null){
                 res.status(200).json({success: true, message: "Success", user: user});
             }
@@ -380,9 +415,15 @@ router.post("/delete", verify, async (req, res) => {
                     await GroupServer.findByIdAndDelete(groupServer._id);
                     await TextChannel.deleteMany({group_server_id: groupServer._id});
                     await Invite.findOneAndDelete({group_server_id : groupServer._id});
+                    const users = await User.find({group_servers: groupServer._id});
+                    if (users.length > 0){
+                        users.forEach(async user => {
+                            await User.findByIdAndUpdate(user._id, {$pull : {group_servers : groupServer._id}});
+                        });
+                    }
                     res.status(200).json({success: true, message: "Success"});
                 } catch (e){
-                    res.status(500).json({success: false, message: "Something went wrong when deleting the group server.", err: e});
+                    res.status(500).json({success: false, message: "Something went wrong when deleting the group server.\n" + e, err: e});
                 }
             }
             else res.status(401).json({success: false, message: "The requesting user is not the owner of the group server."}); 

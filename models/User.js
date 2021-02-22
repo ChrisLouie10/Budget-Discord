@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+mongoose.set('useCreateIndex', true);
 
 let userSchema = new mongoose.Schema({
   email: {
@@ -27,9 +28,10 @@ let userSchema = new mongoose.Schema({
   },
   friends: [String],
   friend_request: [String],
-  groupServers: [{
+  group_servers: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'GroupServer'
+    ref: 'GroupServer',
+    indexed: true
   }],
   token: {
     type: String,

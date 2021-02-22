@@ -4,8 +4,7 @@ export default function CreateServerForm(props){
 
     const controller = new AbortController();
     const { signal } = controller;
-    const [input, setInput] = useState(props.others.user.name + "'s Server");
-    const [error, setError] = useState("");
+    const [input, setInput] = useState(props.user.name + "'s Server");
     const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
@@ -28,13 +27,16 @@ export default function CreateServerForm(props){
               body: JSON.stringify({
                 type: "create",
                 name: input,
-                userId: props.others.user._id
+                userId: props.user._id
               }),
               signal
             }).then(response => { return response.json(); })
                 .then((data) => {
-                    if(!data.success) setError(data.message);
-                    else if (props.mounted) props.others.fetchServerListInfo(true);
+                    if(data.success){
+                        let groupServers = {...props.groupServers};
+                        groupServers[data.groupServerId] = data.groupServer;
+                        props.setGroupServers({...groupServers});
+                    }
                 });
         }finally{
             setLoading(false);
