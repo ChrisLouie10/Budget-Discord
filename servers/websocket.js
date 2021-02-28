@@ -1,33 +1,11 @@
 const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const GroupServer = require("./models/GroupServer");
-const TextChannel = require("./models/TextChannel");
+const TextChannel = require("../models/TextChannel");
 const WebSocket = require('ws');
 const http = require('http');
-const { stringify } = require('querystring');
-require('dotenv').config();
 
-const app = express();
 const server = http.createServer(express);
 const wss = new WebSocket.Server({server});
 
-//Import Routes
-const authRoute = require('./routes/auth');
-const friendsRoute = require('./routes/friends');
-const groupServerRoute = require('./routes/groupServer.js');
-
-//Mongoose -------------------------------------------
-mongoose.connect('mongodb://localhost/budget-discord', {
-  useUnifiedTopology: true,  
-  useNewUrlParser: true,
-  useFindAndModify: false
-});
-const db = mongoose.connection;
-db.on('error', (error) => console.log(error));
-db.once('open', () => console.log('Connected to Database'));
-
-//WebSocket ----------------------------------
 let wsclients = {};
 
 const generateUniqueSessionId = () => {
@@ -137,23 +115,4 @@ wss.on('connection', function connection(ws, incoming) {
   console.log("Current number of ws clients connected:", Object.keys(wsclients).length);
 });
 
-server.listen(1000, () => console.log("WebSocket server listening on port 1000"));
-
-//app -------------------------------------------
-//Use cors to allow cross origin resource sharing
-app.use(
-  cors({
-    origin: 'http://localhost:5000',
-    credentials: true,
-  })
-);
-app.use(express.json());
-
-//Route Middlewares
-app.use('/api/user', authRoute);
-app.use('/api/friends', friendsRoute);
-app.use('/api/groupServer', groupServerRoute);
-
-app.use(express.urlencoded({ extended: false }));
-
-app.listen(3000, () => console.log('connected'));
+module.exports = server;

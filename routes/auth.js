@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/User');
 const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation, updateNameValidation, deleteAccountValidation } = require('../auth/validation');
@@ -39,10 +40,12 @@ router.post('/register', async (req, res) => {
     });
 
     try{
+        console.log('working1');
         const newUser = await user.save();
-    
+        console.log(process.env.SECRET_AUTH_TOKEN);
         //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
+        console.log('working1');
         return res.status(201).json({success: true, message: 'Success', Authentication: token});
     }catch(err) {
         return res.status(500).json({success: false, message: err});
@@ -68,7 +71,7 @@ router.post('/login', async (req, res) =>{
     if(!validPass) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
 
     //Create and assign a token to a user
-    const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN);
+    const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
     try{
         const query = { email: user.email };
         const set = { $set: { token: token } };
