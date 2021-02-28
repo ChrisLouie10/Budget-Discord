@@ -27,16 +27,7 @@ let userSchema = new mongoose.Schema({
     required: true
   },
   friends: [String],
-  friend_request: [String],
-  group_servers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'GroupServer',
-    indexed: true
-  }],
-  token: {
-    type: String,
-    default: null
-  }
+  friend_request: [String]
 });
 
 module.exports = mongoose.model("User", userSchema);

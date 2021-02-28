@@ -5,9 +5,7 @@
   "proxy": "http://localhost:3000",
   "dependencies": {
     "@material-ui/core": "^4.11.2",
-    "axios": "^0.21.0",
     "bootstrap": "^4.5.3",
-    "firebase": "^8.2.1",
     "isomorphic-ws": "^4.0.1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
@@ -19,7 +17,6 @@
   "scripts": {
     "start": "set PORT=5000 && react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "browserslist": {

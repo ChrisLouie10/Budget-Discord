@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/User');
 const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation, updateNameValidation, deleteAccountValidation } = require('../auth/validation');
@@ -39,33 +40,20 @@ router.post('/register', async (req, res) => {
     });
 
     try{
+        console.log('working1');
         const newUser = await user.save();
-    
-        //Create and assign a refresh and access token to a user
+        console.log(process.env.SECRET_AUTH_TOKEN);
+        //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
-        const query = { email: user.email };
-        const set = { $set: { token: token } };
-        await User.updateOne(query, set);
-
+        console.log('working1');
         return res.status(201).json({success: true, message: 'Success', Authentication: token});
     }catch(err) {
-        console.log(err)
-        return res.status(400).json({success: false, message: err});
+        return res.status(500).json({success: false, message: err});
     }
 });
 
 router.delete('/logout', verify, async (req, res) =>{
-
-    // check if the user is logged in
-    if(req.user == null) return res.status(401).json({success: false, message: 'Already logged out'});
-
-    // delete the token from the user
-    const query = { _id: req.user._id };
-    const set = { token: null }
-    const result = await User.updateOne(query, set);    
-
-    if(result.nModified > 0) return res.status(200).json({success: true, message: 'Success'});
-    else return res.status(404).json({success: false, message: 'Token not found'});
+    return res.status(200).json({success: true, message: 'Success'});
 })
 
 router.post('/login', async (req, res) =>{
@@ -83,14 +71,14 @@ router.post('/login', async (req, res) =>{
     if(!validPass) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
 
     //Create and assign a token to a user
-    const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN);
+    const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
     try{
         const query = { email: user.email };
         const set = { $set: { token: token } };
         await User.updateOne(query, set);
         return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
     }catch(err){
-        return res.status(400).json({success: false, message: 'Failed to log in'});
+        return res.status(500).json({success: false, message: 'Failed to log in'});
     }
 });
 
@@ -113,7 +101,7 @@ router.patch('/change-password', verify, async (req, res) => {
 
         return res.status(200).json({success: true, message: 'Success'});
     }catch{ 
-        return res.status(400).json({success: false, message: 'Failed to change password'});
+        return res.status(500).json({success: false, message: 'Failed to change password'});
     }
 });
 
@@ -135,7 +123,7 @@ router.patch('/change-name', verify, async (req, res) => {
 
         return res.status(200).json({success: true, message: 'Success'});
     }catch{ 
-        return res.status(400).json({success: false, message: 'Failed to change name'});
+        return res.status(500).json({success: false, message: 'Failed to change name'});
     }
 });
 
@@ -154,7 +142,7 @@ router.delete('/delete-account', verify, async (req, res) => {
 
         return res.status(200).json({success: true, message: 'Success'});
     }catch{ 
-        return res.status(400).json({success: false, message: 'Failed to delete account'});
+        return res.status(500).json({success: false, message: 'Failed to delete account'});
     }
 });
 
