@@ -20,32 +20,28 @@ export default function DeleteGroupServerForm(props){
     async function deleteCurrentServer(){
         if (props.groupServerId && mounted){
             setLoading(true);
-            try{
-                await fetch('http://localhost:3000/api/groupServer/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('Authorization')
-                    },
-                    body: JSON.stringify({
-                        type: "delete",
-                        groupServerId: props.groupServerId,
-                        userId: props.userId
-                    }),
-                    signal
-                }).then(response => { return response.json(); })
-                    .then((data) => {
-                        if (!data.success) setError(data.message);
-                        else {
-                            props.setOpenPopup(false);
-                            props.fetchServerListInfo();
-                            history.push("/dashboard");
-                        }
-                });
-            } finally{
-                if (mounted)
-                    setLoading(false);
-            }
+            await fetch('http://localhost:3000/api/groupServer/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('Authorization')
+                },
+                body: JSON.stringify({
+                    type: "delete",
+                    groupServerId: props.groupServerId,
+                    userId: props.userId
+                }),
+                signal
+            }).then(response => { return response.json(); })
+                .then((data) => {
+                    if (data.success){
+                        history.push("/dashboard");
+                        let groupServers = {...props.groupServers};
+                        delete groupServers[props.groupServerId];
+                        props.setGroupServers({...groupServers});
+                    }
+                    else console.log(data.message);
+            });
         }
     }
 

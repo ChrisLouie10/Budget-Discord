@@ -19,36 +19,29 @@ export default function LeaveGroupServerForm(props){
     async function leaveGroupServer(){
         if (props.groupServerId && mounted){
             setLoading(true);
-            try{
-                await fetch('http://localhost:3000/api/groupServer/leave', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('Authorization')
-                    },
-                    body: JSON.stringify({
-                        type: "leave",
-                        groupServerId: props.groupServerId,
-                        userId: props.userId
-                    }),
-                    signal
-                }).then(response => { return response.json(); })
-                    .then((data) => {
-                        if (!data.success) setError(data.message);
-                        else if (mounted){
-                            let groupServers = {...props.groupServers};
-                            delete groupServers[props.groupServerId];
-                            props.setGroupServers({...groupServers})
-                            props.setUser(data.user);
-                        }
-                });
-            } finally{
-                if (mounted){
-                    setLoading(false);
-                    props.setOpenPopup(false);
-                    history.push("/dashboard");
-                }
-            }
+            await fetch('http://localhost:3000/api/groupServer/leave', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('Authorization')
+                },
+                body: JSON.stringify({
+                    type: "leave",
+                    groupServerId: props.groupServerId,
+                    userId: props.userId
+                }),
+                signal
+            }).then(response => { return response.json(); })
+                .then((data) => {
+                    if (data.success && mounted){
+                        history.push("/dashboard");
+                        let groupServers = {...props.groupServers};
+                        delete groupServers[props.groupServerId];
+                        props.setGroupServers({...groupServers})
+                        props.setUser(data.user);
+                    }
+                    else console.log(data.message);
+            });
         }
     }
 

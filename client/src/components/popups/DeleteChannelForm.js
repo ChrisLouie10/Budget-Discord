@@ -6,8 +6,9 @@ export default function DeleteChannelForm(props){
     const controller = new AbortController();
     const { signal } = controller;
     const history = useHistory();
-    const [mounted, setMounted] = useState(true);
+    const [textChannelName] = useState(props.groupServers[props.groupServerId].textChannels[props.textChannelId].name);
     const [input, setInput] = useState("");
+    const [mounted, setMounted] = useState(true);
     const [loading, setLoading] = useState(false);
 
     useEffect(()=>{
@@ -18,45 +19,33 @@ export default function DeleteChannelForm(props){
     }, []);
 
     async function deleteCurrentChannel(){
-        if (props.groupServerId && mounted && props.groupServers[props.groupServerId].textChannels.length > 1){
+        //We want group servers to have at least one channel. So don't delete if there is only one channel left.
+        const numOfTextChannels = Object.keys(props.groupServers[props.groupServerId].textChannels).length;
+        if (mounted &&  numOfTextChannels > 1){
             setLoading(true);
-            try{
-                await fetch('http://localhost:3000/api/groupServer/delete-channel', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('Authorization')
-                    },
-                    body: JSON.stringify({
-                        type: "delete-channel",
-                        groupServerId: props.groupServerId,
-                        textChannelId: props.textChannelId,
-                        userId: props.userId
-                    }),
-                    signal
-                }).then(response => { return response.json(); })
-                    .then((data) => {
-                        if (!data.success) setError(data.message);
-                        else {
-                            let textChannels = {...props.textChannels};
-                            let groupServers = {...props.groupServers};
-                            delete textChannels[props.textChannelId];
-                            const index = groupServers[props.groupServerId].textChannels.indexOf(props.textChannelId);
-                            if (index > -1){
-                                groupServers[props.groupServerId].textChannels.splice(index, 1);
-                            }
-                            props.setTextChannels(textChannels);
-                            props.setGroupServers(groupServers);
-                            
-                            setLoading(false);
-                            props.setOpenPopup(false);
-                        }
-                });
-            } finally{
-                if (mounted){
-                    history.push("/dashboard");
-                }
-            }
+            await fetch('http://localhost:3000/api/groupServer/delete-channel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('Authorization')
+                },
+                body: JSON.stringify({
+                    type: "delete-channel",
+                    groupServerId: props.groupServerId,
+                    textChannelId: props.textChannelId,
+                    userId: props.userId
+                }),
+                signal
+            }).then(response => { return response.json(); })
+                .then((data) => {
+                    if (data.success){
+                        history.push("/dashboard");
+                        let groupServers = {...props.groupServers};
+                        delete groupServers[props.groupServerId].textChannels[props.textChannelId];
+                        props.setGroupServers({...groupServers});
+                    }
+                    else console.log(data.message);
+            });
         }
     }
 
@@ -66,13 +55,13 @@ export default function DeleteChannelForm(props){
 
     function handleSubmit(e){
         e.preventDefault();
-        if (input === props.textChannels[props.textChannelId].name) deleteCurrentChannel();
+        if (input === textChannelName) deleteCurrentChannel();
     }
 
     return(
         <form>
             <div className="form-group">
-                <p>Type "{props.textChannels[props.textChannelId].name}" to confirm deletion</p>
+                <p>Type "{textChannelName}" to confirm deletion</p>
                 <input 
                     type="text"
                     className="form-control"

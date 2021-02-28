@@ -83,27 +83,6 @@ wss.on('connection', function connection(ws, incoming) {
         else console.log("Failed to update text channel", parsedMessage.textChannelId, "with a new message.");
       });
     }
-    else if (parsedMessage.type === "textChannels"){
-      TextChannel.find({group_server_id: parsedMessage.groupServerId}, (err, textChannels) => {
-        if (err) console.log("An error occured when trying to access the DB for text channels!");
-        else if (textChannels !== null && textChannels.length > 0){
-          let textChannels_ = [];
-          textChannels.forEach(textChannel => {
-            const textChannel_ = {
-              id: textChannel._id,
-              name: textChannel.name,
-              date: textChannel.date,
-              chatLog: textChannel.chat_log
-            };
-            textChannels_.push(textChannel_);
-          });
-          const message = {
-            textChannels: textChannels_
-          }
-          ws.send(JSON.stringify(message));
-        }
-      });
-    }
   });
 
   ws.on('close',() => {

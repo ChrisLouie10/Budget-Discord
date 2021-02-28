@@ -64,11 +64,9 @@ export default function Actions(props){
                     <DialogContent>
                         <InviteForm
                             userId={props.user._id}
-                            groupServers={props.groupServer}
+                            groupServers={props.groupServers}
                             setGroupServers={props.setGroupServers}
                             groupServerId={props.groupServerId}
-                            inviteCodes={props.inviteCodes}
-                            setInviteCodes={props.setInviteCodes}
                         />
                     </DialogContent>
                 </>
@@ -86,8 +84,6 @@ export default function Actions(props){
                             groupServerId={props.groupServerId}
                             groupServers={props.groupServers}
                             setGroupServers={props.setGroupServers}
-                            textChannels={props.textChannels}
-                            setTextChannels={props.setTextChannels}
                             setOpenPopup={props.setOpenPopup}
                         />
                     </DialogContent>
@@ -107,9 +103,6 @@ export default function Actions(props){
                             groupServerId={props.groupServerId}
                             groupServers={props.groupServers}
                             setGroupServers={props.setGroupServers}
-                            textChannels={props.textChannels}
-                            setTextChannels={props.setTextChannels}
-                            setOpenPopup={props.setOpenPopup}
                         />
                     </DialogContent>
                 </>
@@ -128,8 +121,6 @@ export default function Actions(props){
                             setGroupServers={props.setGroupServers}
                             groupServerId={props.groupServerId}
                             groupServerName={props.groupServerName}
-                            fetchServerListInfo={props.fetchServerListInfo}
-                            setOpenPopup={props.setOpenPopup}
                         />
                     </DialogContent>
                 </>
