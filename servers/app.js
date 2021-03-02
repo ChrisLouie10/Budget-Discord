@@ -6,7 +6,7 @@ const app = express();
 // Mongodb
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/budget-discord', {
+mongoose.connect(process.env.mongodburi, {
   useUnifiedTopology: true,  
   useNewUrlParser: true,
   useFindAndModify: false
@@ -23,7 +23,7 @@ const groupServerRoute = require('../routes/groupServer.js');
 //Use cors to allow cross origin resource sharing
 app.use(
   cors({
-    origin: 'http://localhost:5000',
+    origin: process.env.clienturi,
     credentials: true,
   })
 );

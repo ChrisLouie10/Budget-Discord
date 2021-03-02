@@ -1,3 +1,4 @@
+require("dotenv").config();
 import React, { useState, useEffect, useRef } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import GroupServer from '../groupserver/GroupServer.js';
@@ -37,7 +38,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }
 
     //Verify user
-    await fetch('http://localhost:3000/api/user/verify', {
+    await fetch("http://localhost:3000/api/user/verify", {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +54,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }).catch(error => (mounted ? setSuccess(false): null));
 
     //Populate groupServers state
-    await fetch('http://localhost:3000/api/groupServer/find', {
+    await fetch("http://localhost:3000/api/groupServer/find", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

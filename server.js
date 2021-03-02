@@ -1,6 +1,8 @@
 require('dotenv').config();
 const server = require('./servers/websocket');
 const app = require('./servers/app');
+const wssPort = process.env.wssPort || 1000;
+const serverPort = process.env.serverPort || 3000;
 
-server.listen(1000, () => console.log("WebSocket server listening on port 1000"));
-app.listen(3000, () => console.log('connected'));
+server.listen(wssPort, () => console.log("WebSocket server listening on port " + wssPort));
+app.listen(serverPort, () => console.log('Server listening on port ' + serverPort));

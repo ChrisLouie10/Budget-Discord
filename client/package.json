@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.2",
     "bootstrap": "^4.5.3",
+    "dotenv": "^8.2.0",
     "isomorphic-ws": "^4.0.1",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
@@ -30,5 +31,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }
