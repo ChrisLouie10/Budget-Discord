@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Discord but better",
   "main": "app.js",
+  "engines": {
+    "node": "12.x",
+    "npm": "6.x"
+  },
   "scripts": {
     "heroku-postbuild": "cd client && npm install && npm run build",
     "server": "nodemon server.js",
