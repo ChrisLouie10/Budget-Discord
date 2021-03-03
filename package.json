@@ -12,7 +12,7 @@
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "devStart": "concurrently \"npm run server\" \"npm run client\"",
-    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "nodemon server.js",
     "test": "jest --forceExit --verbose false --coverage"
   },
   "repository": {
