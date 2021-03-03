@@ -8,7 +8,7 @@
     "npm": "6.x"
   },
   "scripts": {
-    "heroku-postbuild": "cd client && npm install && npm run build",
+    "heroku-postbuild": "rd /s /q \"node_modules/babel-jest\" && rd /s /q \"node_modules/jest\" && cd client && npm install && npm run build",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "devStart": "concurrently \"npm run server\" \"npm run client\"",
