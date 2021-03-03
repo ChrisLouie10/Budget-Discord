@@ -38,7 +38,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }
 
     //Verify user
-    await fetch("http://localhost:3000/api/user/verify", {
+    await fetch("/api/user/verify", {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }).catch(error => (mounted ? setSuccess(false): null));
 
     //Populate groupServers state
-    await fetch("http://localhost:3000/api/groupServer/find", {
+    await fetch("/api/groupServer/find", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

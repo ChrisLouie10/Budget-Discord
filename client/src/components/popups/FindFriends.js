@@ -21,7 +21,7 @@ export default function FindFriend(props) {
     try{
       setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/find', {
+      await fetch('/api/friends/find', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export default function FindFriend(props) {
     try{
       setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/send-friend-request', {
+      await fetch('/api/friends/send-friend-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export default function FindFriend(props) {
     try{
       setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/accept-friend-request', {
+      await fetch('/api/friends/accept-friend-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export default function FindFriend(props) {
     try{
       setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/delete-friend', {
+      await fetch('/api/friends/delete-friend', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ export default function FindFriend(props) {
 
   useEffect(async () =>{
     setShowFriendRequests(false);
-    await fetch('http://localhost:3000/api/friends/get-friend-requests', {
+    await fetch('/api/friends/get-friend-requests', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export default function FindFriend(props) {
         if(data.success) setFriendRequests(data.friendRequests);
         else setError(data.message);
       })
-    await fetch('http://localhost:3000/api/friends/get-friends', {
+    await fetch('/api/friends/get-friends', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

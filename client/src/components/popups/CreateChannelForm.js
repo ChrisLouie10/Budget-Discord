@@ -20,7 +20,7 @@ export default function CreateChannelForm(props){
         setLoading(true);
         let newTextChannelId;
         try{
-            await fetch('http://localhost:3000/api/groupServer/create-channel', {
+            await fetch('/api/groupServer/create-channel', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

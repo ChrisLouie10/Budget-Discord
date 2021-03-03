@@ -22,7 +22,7 @@ export default function InviteForm(props){
         setLoading(true);
 
         try{
-            await fetch('http://localhost:3000/api/groupServer/create-invite', {
+            await fetch('/api/groupServer/create-invite', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -10,7 +10,7 @@ export default function Dashboard(props) {
   async function handleLogout(){
     setError('');
 
-    await fetch('http://localhost:3000/api/user/logout', {
+    await fetch('/api/user/logout', {
       method: 'DELETE',
       headers: {
         'Authorization': localStorage.getItem('Authorization')

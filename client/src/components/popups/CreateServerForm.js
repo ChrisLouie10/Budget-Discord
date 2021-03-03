@@ -18,7 +18,7 @@ export default function CreateServerForm(props){
         setLoading(true);
 
         try{
-            fetch('http://localhost:3000/api/groupServer/create', {
+            fetch('/api/groupServer/create', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

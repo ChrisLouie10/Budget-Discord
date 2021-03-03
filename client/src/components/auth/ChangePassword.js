@@ -21,7 +21,7 @@ export default function ChangePassword(props) {
 
     try{
       setLoading(true);
-      await fetch('http://localhost:3000/api/user/change-password', {
+      await fetch('/api/user/change-password', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

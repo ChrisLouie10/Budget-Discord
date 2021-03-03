@@ -19,7 +19,7 @@ export default function LeaveGroupServerForm(props){
     async function leaveGroupServer(){
         if (props.groupServerId && mounted){
             setLoading(true);
-            await fetch('http://localhost:3000/api/groupServer/leave', {
+            await fetch('/api/groupServer/leave', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -4,9 +4,11 @@
   "description": "Discord but better",
   "main": "app.js",
   "scripts": {
+    "heroku-postbuild": "cd client && npm install && npm run build",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "devStart": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
     "test": "jest --forceExit --verbose false --coverage"
   },
   "repository": {
@@ -29,6 +31,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.8",
     "node": "^15.4.0",
+    "path": "^0.12.7",
     "websocket": "^1.0.33",
     "ws": "^7.4.1"
   },

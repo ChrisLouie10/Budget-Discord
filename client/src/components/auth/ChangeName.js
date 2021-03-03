@@ -16,7 +16,7 @@ export default function ChangeName(props) {
 
     try{
       setLoading(true);
-      await fetch('http://localhost:3000/api/user/change-name', {
+      await fetch('/api/user/change-name', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

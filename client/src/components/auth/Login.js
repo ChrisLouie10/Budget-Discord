@@ -24,7 +24,7 @@ export default function Login() {
     try{
       setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/user/login', {
+      await fetch('/api/user/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

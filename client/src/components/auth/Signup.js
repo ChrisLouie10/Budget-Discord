@@ -21,7 +21,7 @@ export default function Signup() {
     setError('');
     setLoading(true);
     try{
-      fetch('http://localhost:3000/api/user/register', {
+      fetch('/api/user/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

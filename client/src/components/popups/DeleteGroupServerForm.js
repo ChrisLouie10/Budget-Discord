@@ -20,7 +20,7 @@ export default function DeleteGroupServerForm(props){
     async function deleteCurrentServer(){
         if (props.groupServerId && mounted){
             setLoading(true);
-            await fetch('http://localhost:3000/api/groupServer/delete', {
+            await fetch('/api/groupServer/delete', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

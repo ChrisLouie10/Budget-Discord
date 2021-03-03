@@ -23,7 +23,7 @@ export default function DeleteChannelForm(props){
         const numOfTextChannels = Object.keys(props.groupServers[props.groupServerId].textChannels).length;
         if (mounted &&  numOfTextChannels > 1){
             setLoading(true);
-            await fetch('http://localhost:3000/api/groupServer/delete-channel', {
+            await fetch('/api/groupServer/delete-channel', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
