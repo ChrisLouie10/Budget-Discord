@@ -8,7 +8,7 @@
     "npm": "6.x"
   },
   "scripts": {
-    "heroku-postbuild": "cd client && npm install && npm run build && rm -rf ~/node_modules/babel-jest ~/node_modules/jest && cd .. && rm -rf ~/node_modules/babel-jest ~/node_modules/jest",
+    "heroku-postbuild": "cd client && npm install && npm run build",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "devStart": "concurrently \"npm run server\" \"npm run client\"",
@@ -41,7 +41,6 @@
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
-    "jest": "^26.6.3",
     "nodemon": "^2.0.6",
     "supertest": "^6.1.3"
   }
