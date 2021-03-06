@@ -10,7 +10,7 @@ export default function FriendRequests(props) {
 
     try{
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/accept-friend-request', {
+      await fetch('/api/friends/accept-friend-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

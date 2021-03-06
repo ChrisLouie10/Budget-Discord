@@ -10,7 +10,7 @@ export default function SearchFriends(props) {
     try{
       props.setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/send-friend-request', {
+      await fetch('/api/friends/send-friend-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

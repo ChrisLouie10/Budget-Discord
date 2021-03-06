@@ -34,8 +34,9 @@ wss.on('connection', function connection(ws, incoming) {
       return;
     }
   
-    //set the websocket client's serverId to the serverId of its message
+    //set the websocket client's serverId and textChannelId to the serverId and textChannelId of its message
     ws.serverId = parsedMessage.serverId;
+    ws.textChannelId = parsedMessage.textChannelId;
 
     //if the ws client is requesting for a chat log
     if (parsedMessage.type === "chatLog"){

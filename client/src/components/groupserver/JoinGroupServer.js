@@ -11,7 +11,7 @@ export default function JoinGroupServer(props){
     useEffect(async ()=>{
         let groupServerId;
         if (props.computedMatch.params.inviteCode){
-            await fetch('http://localhost:3000/api/groupServer/join', {
+            await fetch('/api/groupServer/join', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

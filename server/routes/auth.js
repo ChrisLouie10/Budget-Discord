@@ -40,12 +40,10 @@ router.post('/register', async (req, res) => {
     });
 
     try{
-        console.log('working1');
         const newUser = await user.save();
         console.log(process.env.SECRET_AUTH_TOKEN);
         //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
-        console.log('working1');
         return res.status(201).json({success: true, message: 'Success', Authentication: token});
     }catch(err) {
         return res.status(500).json({success: false, message: err});

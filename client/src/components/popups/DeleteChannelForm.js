@@ -1,22 +1,13 @@
-import React, {useState, useEffect} from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 
 export default function DeleteChannelForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const history = useHistory();
     const [textChannelName] = useState(props.groupServers[props.groupServerId].textChannels[props.textChannelId].name);
     const [input, setInput] = useState("");
     const [mounted, setMounted] = useState(true);
     const [loading, setLoading] = useState(false);
-
-    useEffect(()=>{
-        return function(){
-            setMounted(false);
-            controller.abort();
-        };
-    }, []);
 
     async function deleteCurrentChannel(){
         //We want group servers to have at least one channel. So don't delete if there is only one channel left.
@@ -34,8 +25,7 @@ export default function DeleteChannelForm(props){
                     groupServerId: props.groupServerId,
                     textChannelId: props.textChannelId,
                     userId: props.userId
-                }),
-                signal
+                })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (data.success){

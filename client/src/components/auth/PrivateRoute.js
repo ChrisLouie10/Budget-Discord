@@ -1,11 +1,11 @@
-require("dotenv").config();
 import React, { useState, useEffect, useRef } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import GroupServer from '../groupserver/GroupServer.js';
 import JoinGroupServer from '../groupserver/JoinGroupServer.js'
 import ServersList from '../ServersList.js';
 import Loading from './Loading';
-const ws = new WebSocket("ws://localhost:1000");
+
+let ws;
 
 // Component creating a private route
 export default function PrivateRoute({ component: Component, ...rest}) {
@@ -15,6 +15,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(true);
+  const [uri, setUri] = useState(cleanUpURI(window.location.href));
   const [groupServers, setGroupServers] = useState({});
 
   const [user, _setUser] = useState();
@@ -32,6 +33,9 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   };
 
   useEffect(async () => {
+    //ws = new WebSocket("wss://budget-discord-server.herokuapp.com/");
+    ws = new WebSocket(process.env.REACT_APP_wssURI);
+
     //Set up websocket
     if (ws){
       ws.addEventListener('message', handleWSSMessage);
@@ -54,22 +58,24 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }).catch(error => (mounted ? setSuccess(false): null));
 
     //Populate groupServers state
-    await fetch("/api/groupServer/find", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': localStorage.getItem('Authorization')
-        },
-        body: JSON.stringify({
-            type: "find",
-            userId: userRef.current._id
-        }),
-        signal
-    }).then(response => { if(mounted) return response.json(); })
-      .then((data) => {
-        if (data.success) setGroupServers({...data.groupServers});     
-        else console.log(data.message); 
-    });
+    if (userRef.current){
+      await fetch("/api/groupServer/find", {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': localStorage.getItem('Authorization')
+          },
+          body: JSON.stringify({
+              type: "find",
+              userId: userRef.current._id
+          }),
+          signal
+      }).then(response => { if(mounted) return response.json(); })
+        .then((data) => {
+          if (data.success) setGroupServers({...data.groupServers});     
+          else console.log(data.message); 
+      });
+    }
 
     setLoading(false);
 
@@ -91,6 +97,23 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     }
   }
 
+  // Looks for the 3rd "/" and removes every character after it.
+  // i.e http://localhost:3000/dashboard
+  // becomes http://localhost:3000
+  function cleanUpURI(_uri){
+    let dashes = 0;
+    for(let i = 0; i < _uri.length; i++){
+      if (_uri[i] == '/'){
+        dashes++;
+      }
+      if (dashes === 3){
+        _uri = _uri.substring(0, i);
+        break;
+      }
+    }
+    return _uri;
+  }
+
   function handleWSSMessage(message){
     if (mounted){
       let parsedMessage;
@@ -102,10 +125,15 @@ export default function PrivateRoute({ component: Component, ...rest}) {
       }
 
       //Check whether message from ws server is valid
-      if (parsedMessage.type === "message"){
+      if (parsedMessage.type === "duplicateMessage"){
         let _chatLogs = {...chatLogsRef.current};
         const index = _chatLogs[parsedMessage.textChannelId].length - 1;
         _chatLogs[parsedMessage.textChannelId][index] = parsedMessage.message;
+        setChatLogs({..._chatLogs});
+      }
+      else if (parsedMessage.type === "message"){
+        let _chatLogs = {...chatLogsRef.current};
+        _chatLogs[parsedMessage.textChannelId].push(parsedMessage.message);
         setChatLogs({..._chatLogs});
       }
     }
@@ -150,6 +178,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
               chatLogs={(Component === GroupServer) ? chatLogs : undefined}
               setChatLogs={(Component === GroupServer) ? setChatLogs : undefined}
               sendMessage={(Component === GroupServer) ? sendMessage : undefined}
+              uri={uri}
               user={user} 
               setUser={setUser}
               props={props}/> 

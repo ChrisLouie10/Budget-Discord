@@ -8,11 +8,10 @@
     "npm": "6.x"
   },
   "scripts": {
-    "heroku-postbuild": "cd client && npm install && npm run build",
     "server": "nodemon server.js",
-    "client": "npm start --prefix client",
+    "client": "cd .. && npm start --prefix client",
     "devStart": "concurrently \"npm run server\" \"npm run client\"",
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "test": "jest --forceExit --verbose false --coverage"
   },
   "repository": {
@@ -32,16 +31,16 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "http": "0.0.1-security",
+    "http-proxy-middleware": "^1.0.6",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.8",
     "node": "^15.4.0",
-    "path": "^0.12.7",
     "websocket": "^1.0.33",
-    "ws": "^7.4.1",
-    "concurrently": "^5.3.0",
-    "nodemon": "^2.0.6"
+    "ws": "^7.4.1"
   },
   "devDependencies": {
+    "concurrently": "^5.3.0",
+    "nodemon": "^2.0.6",
     "supertest": "^6.1.3"
   }
 }

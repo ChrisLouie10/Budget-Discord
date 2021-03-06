@@ -33,9 +33,12 @@ export default function Signup() {
         })
       }).then(response => { return response.json()})
         .then(data => {
-        if(!data.success) setError(data.message);
+        if(!data.success) {
+          setError(data.message);
+          console.log(data.message);
+        }
         else {
-          localStorage.setItem('Authorization', data.Authorization);
+          localStorage.setItem('Authorization', data.Authentication);
           history.push("/dashboard");
         }
       });

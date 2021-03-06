@@ -1,22 +1,13 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState } from 'react';
 
 export default function CreateServerForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const [input, setInput] = useState(props.user.name + "'s Server");
     const [loading, setLoading] = useState(false);
-
-    useEffect(()=>{
-        return function cleanup(){
-            controller.abort();
-        }
-    }, []);
 
     async function handleSubmit(e){
         e.preventDefault();
         setLoading(true);
-
         try{
             fetch('/api/groupServer/create', {
               method: 'POST',
@@ -28,8 +19,7 @@ export default function CreateServerForm(props){
                 type: "create",
                 name: input,
                 userId: props.user._id
-              }),
-              signal
+              })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if(data.success){
@@ -37,6 +27,7 @@ export default function CreateServerForm(props){
                         groupServers[data.groupServerId] = data.groupServer;
                         props.setGroupServers({...groupServers});
                     }
+                    else console.log(data.message);
                 });
         }finally{
             setLoading(false);

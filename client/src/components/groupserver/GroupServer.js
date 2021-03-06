@@ -20,7 +20,7 @@ export default function GroupServer(props){
     useEffect(async ()=>{
         if (props.user){
             try{
-                await fetch('http://localhost:3000/api/groupServer/verify', {
+                await fetch('/api/groupServer/verify', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export default function GroupServer(props){
                         groupServerId: props.computedMatch.params.groupServerId,
                         textChannelId: props.computedMatch.params.textChannelId ? 
                                         props.computedMatch.params.textChannelId : 
-                                        Object.keys(props.groupServers[groupServerId].textChannels)[0]
+                                        Object.keys(props.groupServers[props.computedMatch.params.groupServerId].textChannels)[0]
                     })
                 }).then(response => { return response.json(); })
                     .then(async (data) => {
@@ -67,6 +67,7 @@ export default function GroupServer(props){
                     <>
                         <div className="col-1" style={{minHeight: "100vh", background: "#292929"}}>
                             <ServerSidebar 
+                            uri={props.uri}
                             user={props.user} 
                             setUser={props.setUser} 
                             groupServers={props.groupServers} 

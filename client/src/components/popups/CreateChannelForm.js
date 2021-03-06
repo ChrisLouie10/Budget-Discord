@@ -1,19 +1,11 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState } from 'react';
 import { useHistory } from "react-router-dom";
 
 export default function CreateChannelForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const [input, setInput] = useState("new-channel");
     const [loading, setLoading] = useState(false);
     const history = useHistory();
-
-    useEffect(()=>{
-        return function cleanup(){
-            controller.abort();
-        }
-    }, []);
 
     async function handleSubmit(e){
         e.preventDefault();
@@ -31,8 +23,7 @@ export default function CreateChannelForm(props){
                 name: input,
                 userId: props.userId,
                 groupServerId: props.groupServerId
-              }),
-              signal
+              })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if(data.success) {

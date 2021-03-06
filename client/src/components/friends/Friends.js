@@ -23,7 +23,7 @@ export default function Friend(props) {
       setError('');
       setLoading(true);
       setFriendResults([]);
-      await fetch('http://localhost:3000/api/friends/find-users', {
+      await fetch('/api/friends/find-users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export default function Friend(props) {
 
   useEffect(async () =>{
     setShowFriendRequests(false);
-    await fetch('http://localhost:3000/api/friends/get-friend-requests', {
+    await fetch('/api/friends/get-friend-requests', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export default function Friend(props) {
         if(data.success) setFriendRequests(data.friendRequests);
         else setError(data.message);
       })
-    await fetch('http://localhost:3000/api/friends/get-friends', {
+    await fetch('/api/friends/get-friends', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

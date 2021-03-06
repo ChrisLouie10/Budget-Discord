@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 export default function InviteForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const [loading, setLoading] = useState(false);
     const [inviteUrl, setInviteUrl] = useState("");
     const [expiration, setExpiration] = useState("30");
@@ -11,10 +9,7 @@ export default function InviteForm(props){
 
     useEffect(()=>{
         if (props.groupServers[props.groupServerId].inviteCode)
-            setInviteUrl("http://localhost:5000/join/"+props.groupServers[props.groupServerId].inviteCode);
-        return function cleanup(){
-            controller.abort();
-        }
+            setInviteUrl(props.uri+"/join/"+props.groupServers[props.groupServerId].inviteCode);
     }, []);
 
     async function generateInviteLink(e){
@@ -34,12 +29,11 @@ export default function InviteForm(props){
                     groupServerId: props.groupServerId,
                     expiration: parseInt(expiration),
                     limit: parseInt(limit)
-                }),
-                signal
+                })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (data.success){
-                        setInviteUrl("http://localhost:5000/join/"+data.code);
+                        setInviteUrl(props.uri+"/join/"+data.code);
                         let groupServers = {...props.groupServers};
                         groupServers[props.groupServerId].inviteCode = data.code;
                         props.setGroupServers({...groupServers}); 

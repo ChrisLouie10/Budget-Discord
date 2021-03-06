@@ -2,7 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3000",
+  "proxy": "https://budget-discord-server.herokuapp.com/",
   "dependencies": {
     "@material-ui/core": "^4.11.2",
     "bootstrap": "^4.5.3",

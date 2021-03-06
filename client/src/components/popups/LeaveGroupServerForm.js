@@ -3,8 +3,6 @@ import { useHistory } from "react-router-dom";
 
 export default function LeaveGroupServerForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const [mounted, setMounted] = useState(true);
     const history = useHistory();
     const [loading, setLoading] = useState(false);
@@ -12,7 +10,6 @@ export default function LeaveGroupServerForm(props){
     useEffect(()=>{
         return function(){
             setMounted(false);
-            controller.abort();
         };
     }, []);
 
@@ -29,8 +26,7 @@ export default function LeaveGroupServerForm(props){
                     type: "leave",
                     groupServerId: props.groupServerId,
                     userId: props.userId
-                }),
-                signal
+                })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (data.success && mounted){

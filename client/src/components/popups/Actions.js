@@ -63,6 +63,7 @@ export default function Actions(props){
                     </DialogTitle>
                     <DialogContent>
                         <InviteForm
+                            uri={props.uri}
                             userId={props.user._id}
                             groupServers={props.groupServers}
                             setGroupServers={props.setGroupServers}

@@ -10,7 +10,7 @@ export default function FriendsList(props) {
     try{
       props.setError('');
       setLoading(true);
-      await fetch('http://localhost:3000/api/friends/delete-friend', {
+      await fetch('/api/friends/delete-friend', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

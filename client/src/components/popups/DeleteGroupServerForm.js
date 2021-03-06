@@ -3,8 +3,6 @@ import { useHistory } from "react-router-dom";
 
 export default function DeleteGroupServerForm(props){
 
-    const controller = new AbortController();
-    const { signal } = controller;
     const [mounted, setMounted] = useState(true);
     const history = useHistory();
     const [input, setInput] = useState("");
@@ -13,7 +11,6 @@ export default function DeleteGroupServerForm(props){
     useEffect(()=>{
         return function(){
             setMounted(false);
-            controller.abort();
         };
     }, []);
 
@@ -30,8 +27,7 @@ export default function DeleteGroupServerForm(props){
                     type: "delete",
                     groupServerId: props.groupServerId,
                     userId: props.userId
-                }),
-                signal
+                })
             }).then(response => { return response.json(); })
                 .then((data) => {
                     if (data.success){

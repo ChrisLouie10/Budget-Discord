@@ -67,6 +67,7 @@ export default function ServersList(props){
                     <li onClick = {() => {if(!openPopupActions) {setOpenPopupActions(true); setActionDialog(0);}}}>
                         <Link className="text-reset" to="#">Actions</Link>  
                             <Actions
+                                uri={props.uri}
                                 mounted={mounted}
                                 openPopup={openPopupActions}
                                 setOpenPopup={setOpenPopupActions}
