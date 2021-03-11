@@ -37,7 +37,7 @@ export default function Login() {
         })
     }
   }
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.loginForm}>
@@ -51,6 +51,9 @@ export default function Login() {
             )}
             {errors.email && errors.email.type === 'maxLength' && (
               <Text style={styles.error}>Email must be 64 characters or less</Text>
+            )}
+            {errors.email && errors.email.type === 'pattern' && (
+              <Text style={styles.error}>Please enter a valid email</Text>
             )}
             <Controller
               control={control}
@@ -70,42 +73,42 @@ export default function Login() {
                 />
               )}
               name="email"
-              rules={{ required: true, maxLength: 64 }}
+              rules={{ required: true, maxLength: 64, pattern: /\S+@\S+\.\S+/ }}
               defaultValue=""
             />
           </View>
-            <View style={styles.input}>
-              {errors.password && errors.password.type === 'required' && (
-                <Text style={styles.error}>Please enter your password</Text>
+          <View style={styles.input}>
+            {errors.password && errors.password.type === 'required' && (
+              <Text style={styles.error}>Please enter your password</Text>
+            )}
+            {errors.password && errors.password.type === 'minLength' && (
+              <Text style={styles.error}>Password must be at least 10 characters</Text>
+            )}
+            {errors.password && errors.password.type === 'maxLength' && (
+              <Text style={styles.error}>Password must be 32 characters or less</Text>
+            )}
+            <Controller
+              control={control}
+              render={(props) => (
+                <TextInput
+                  style={styles.textInput}
+                  onBlur={props.onBlur}
+                  onChange={props.onChange}
+                  value={props.value}
+                  ref={props.ref}
+                  placeholder='Password'
+                  textContentType='password'
+                  autoCapitalize='none'
+                  autoCompleteType='password'
+                  autoCorrect={false}
+                  secureTextEntry={true}
+                  onSubmitEditing={handleSubmit(onSubmit)}
+                />
               )}
-              {errors.password && errors.password.type === 'minLength' && (
-                <Text style={styles.error}>Password must be at least 10 characters</Text>
-              )}
-              {errors.password && errors.password.type === 'maxLength' && (
-                <Text style={styles.error}>Password must be 32 characters or less</Text>
-              )}
-              <Controller
-                control={control}
-                render={(props) => (
-                  <TextInput
-                    style={styles.textInput}
-                    onBlur={props.onBlur}
-                    onChange={props.onChange}
-                    value={props.value}
-                    ref={props.ref}
-                    placeholder='Password'
-                    textContentType='password'
-                    autoCapitalize='none'
-                    autoCompleteType='password'
-                    autoCorrect={false}
-                    secureTextEntry={true}
-                    onSubmitEditing={handleSubmit(onSubmit)}
-                  />
-                )}
-                name="password"
-                rules={{ required: true, minLength: 10, maxLength: 32 }}
-                defaultValue=""
-              />
+              name="password"
+              rules={{ required: true, minLength: 10, maxLength: 32 }}
+              defaultValue=""
+            />
           </View>
         </View>
         <View style={styles.bottomSection}>
@@ -126,19 +129,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: '100vh'
   },
+  bottomSection: {
+    flex: .25,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   button: {
     alignItems: 'center',
     backgroundColor: '#009dff',
     borderColor: '#009dff',
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 5,
+    borderRadius: '0.25rem',
     justifyContent: 'center',
-    marginLeft: 39,
-    height: 45,
-    width: 90
+    height: '3rem',
+    paddingLeft: '1rem',
+    paddingRight: '1rem'
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: '1rem',
     color: '#fff'
   },
   error: {
@@ -147,11 +155,11 @@ const styles = StyleSheet.create({
     paddingLeft: '10%'
   },
   loginForm: {
-    width: 400,
-    height: 325,
+    width: '25rem',
+    height: '21rem',
     borderColor: '#dbdbdb',
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 5
+    borderRadius: '.25rem'
   },
   header: {
     flex: .25,
@@ -160,15 +168,11 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontWeight: 'bold',
-    fontSize: 30
+    fontSize: '2rem'
   },
   mainContent: {
     flex: .5,
     alignItems: 'center',
-  },
-  bottomSection: {
-    flex: .25,
-    justifyContent: 'center'
   },
   input: {
     flex: 1,
@@ -177,15 +181,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   signup: {
-    paddingTop: 10,
-    fontSize: 15
+    paddingTop: '1rem',
+    fontSize: '.9rem'
   },
   textInput: {
-    height: 50,
+    height: '3rem',
     width: '80%',
     borderColor: '#dbdbdb',
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 5,
-    paddingHorizontal: 10
+    borderRadius: '.25rem',
+    paddingHorizontal: '.66rem'
   }
 });

@@ -58,15 +58,15 @@ router.post('/login', async (req, res) =>{
 
     // Validate data before adding user
     const {error} = loginValidation(req.body);
-    if(error) return res.status(400).json({success: false, message: 'Invalid login details', error: error});
+    if(error) return res.status(400).json({success: false, message: error.details[0].message});
 
     // Check if the user's email is already in the database
     const user = await User.findOne({email: req.body.email});
-    if(!user) return res.status(400).json({success: false, message: 'Invalid email address', error: {email: 'Invalid email address'}});
+    if(!user) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
     
     // Check if password is valid
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if(!validPass) return res.status(400).json({success: false, message: 'Invalid password', error: {password: 'Invalid password'}});
+    if(!validPass) return res.status(400).json({success: false, message: 'Email or password is incorrect'});
 
     //Create and assign a token to a user
     const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
@@ -76,7 +76,7 @@ router.post('/login', async (req, res) =>{
         await User.updateOne(query, set);
         return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
     }catch(err){
-        return res.status(500).json({success: false, message: 'Failed to log in', error: {login: 'Failed to log in'}});
+        return res.status(500).json({success: false, message: 'Failed to log in'});
     }
 });
 
