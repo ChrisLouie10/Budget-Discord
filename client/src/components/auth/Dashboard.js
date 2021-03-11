@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Link, useHistory } from "react-router-dom";
 // Simple private account information.
 
@@ -26,27 +27,102 @@ export default function Dashboard(props) {
   }
 
   return (
-    <div className="col-11 my-auto">
-      <div className="card mx-auto" style={{maxWidth: "400px"}}>
-        <div className="card-body">
-          <div className="card-header text-center mb-4">
-            <h2>Profile</h2>
-          </div>
-          {error && <div className="alert alert-danger" role="alert">{error}</div>}
-          <div>
-            <strong>Name:</strong> {props.user.name} #{props.user.number_id}
-          </div>
-          <div>
-            <strong>Email:</strong> {props.user.email}
-          </div>
-          <Link to="/change-name" className="btn btn-primary w-100 mt-3">Change Name</Link>
-          <Link to="/change-password" className="btn btn-primary w-100 mt-3">Change Password</Link>
-          <Link to="/delete-account" className="btn btn-danger w-100 mt-3">Delete Account</Link>
-        </div>
-      </div>
-      <div className="w-100 text-center mt-2">
-        <button type="button" className="btn btn-link" onClick={handleLogout}>Log Out</button>
-      </div>
-    </div>
+    <View style={styles.container}>
+      <View style={styles.profileForm}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Profile</Text>
+        </View>
+        <View style={styles.mainContent}>
+          <Text style={styles.main}><strong>Name:</strong> {props.user.name} #{props.user.number_id}</Text>
+          <Text style={styles.main}><strong>Email:</strong> {props.user.email}</Text>
+        </View>
+        <View style={styles.bottomSection}>
+          <TouchableOpacity style={styles.button} >
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='change-name'>Change Name</Link></Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} >
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='change-password'>Change Password</Link></Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dangerButton} >
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='delete-account'>Delete Account</Link></Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <TouchableOpacity onPress={handleLogout}>
+          <Text style={styles.logout}>Log Out</Text>
+        </TouchableOpacity>
+    </View>
   )
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh'
+  },
+  bottomSection: {
+    flex: .6,
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+    marginLeft: '5%',
+    marginRight: '5%'
+  },
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#009dff',
+    borderColor: '#009dff',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: '0.25rem',
+    justifyContent: 'center',
+    height: '3rem',
+    paddingLeft: '1rem',
+    paddingRight: '1rem'
+  },
+  dangerButton: {
+    alignItems: 'center',
+    backgroundColor: '#de0000',
+    borderColor: '#de0000',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: '0.25rem',
+    justifyContent: 'center',
+    height: '3rem',
+    paddingLeft: '1rem',
+    paddingRight: '1rem'
+  },
+  buttonText: {
+    fontSize: '1rem',
+    color: '#fff'
+  },
+  profileForm: {
+    width: '25rem',
+    height: '21rem',
+    borderColor: '#dbdbdb',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: '.25rem',
+    marginBottom: '1rem'
+  },
+  header: {
+    flex: .2,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: '2rem'
+  },
+  logout: {
+    color: '#009dff',
+    fontSize: '1rem'
+  },
+  main: {
+    fontSize: '1.1rem'
+  },
+  mainContent: {
+    flex: .2,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginLeft: '5%'
+  }
+});
