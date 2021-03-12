@@ -202,7 +202,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-    minHeight: '100vh'
+    minHeight: '100vh',
+    maxHeight: '100vh'
   },
   mainContentContainer: {
     flexGrow: 1,

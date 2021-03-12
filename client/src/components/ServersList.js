@@ -73,17 +73,17 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        marginLeft: '15px',
-        marginRight: '15px',
-        marginTop: '15px',
-        marginBottom: '15px',
-        width: '120px'
+        marginLeft: '5px',
+        marginRight: '5px',
+        marginTop: '10px',
+        marginBottom: '10px',
+        minWidth: '120px'
     },
     option: {
         paddingTop: '7px'
     },
     serverList: {
-        paddingLeft: '15px'
+        paddingLeft: '5px'
     },
     header: {
         alignItems: 'center'

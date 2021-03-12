@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Link } from "react-router-dom";
-import RightClickMenu from "./popups/RightClickMenu.js";
 import Actions from "./popups/Actions.js";
 
 export default function ServersList(props){
@@ -31,35 +30,54 @@ export default function ServersList(props){
     function displayTextChannels(){
         if (props.groupServers[props.groupServerId]){ 
             return(
-                <>
-                {
-                    Object.entries(props.groupServers[props.groupServerId].textChannels).map(([key, value]) => {
-                        return(
-                            <li key={key}>
-                            {
-                                props.textChannelId === key ?
-                                <Link style={{color: "#b5fff3"}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
-                                    {value.name}
-
-                                </Link>
-                                :
-                                <Link className="text-reset" onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
-                                    {value.name}
-
-                                </Link>
-                            }
-                            </li>
-                        )
-                    })
-                }
-                </>
+                Object.entries(props.groupServers[props.groupServerId].textChannels).map(([key, value]) => {
+                    return(
+                        <Text style={styles.option} key={key}>
+                        {
+                            props.textChannelId === key ?
+                            <Link style={{color: "#b5fff3", textDecoration: 'none'}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                {value.name}
+                            </Link>
+                            :
+                            <Link style={{color: "#fff", textDecoration: 'none'}} onContextMenu={handleRightClick} to={{pathname: "/group/"+props.groupServerId+"/"+key}}>
+                                {value.name}
+                            </Link>
+                        }
+                        </Text>
+                    )
+                })
             )
         }
     }
 
     return (
         <View style={styles.container}>
-
+            <View style={styles.header}>
+                <Text style={styles.title}>{groupServerName}</Text>
+            </View>
+            <View style={styles.textChannels}>
+                <TouchableOpacity onPress={() => {if(!openPopupActions){setOpenPopupActions(true); setActionDialog(0);}}}>
+                    <Text style={styles.option}>
+                        Actions
+                        <Actions
+                            uri={props.uri}
+                            mounted={mounted}
+                            openPopup={openPopupActions}
+                            setOpenPopup={setOpenPopupActions}
+                            actionDialog={actionDialog}
+                            setActionDialog={setActionDialog}
+                            user = {props.user}
+                            setUser = {props.setUser}
+                            groupServerName = {groupServerName}
+                            groupServers = {props.groupServers}
+                            setGroupServers = {props.setGroupServers}
+                            groupServerId = {props.groupServerId}
+                            textChannelId = {props.textChannelId}
+                        />
+                    </Text>
+                </TouchableOpacity>
+                {displayTextChannels()}
+            </View>
         </View>
     );
 };
@@ -68,15 +86,27 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        marginLeft: '15px',
-        marginRight: '15px',
-        marginTop: '15px',
-        marginBottom: '15px',
+        marginLeft: '5px',
+        marginRight: '5px',
+        marginTop: '10px',
+        marginBottom: '10px',
         minWidth: '200px',
     },
+    header: {
+        alignItems: 'center'
+    },
     option: {
+        color: '#fff',
         paddingTop: '7px'
     },
+    textChannels: {
+        paddingLeft: '5px'
+    },
+    title: {
+        color: '#fff',
+        fontSize: '16px',
+        fontWeight: 'bold'
+    }
 });
 /*
 <nav id="server-side-bar">
