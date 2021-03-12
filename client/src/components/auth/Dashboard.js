@@ -38,19 +38,19 @@ export default function Dashboard(props) {
         </View>
         <View style={styles.bottomSection}>
           <TouchableOpacity style={styles.button} >
-            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='change-name'>Change Name</Link></Text>
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='/change-name'>Change Name</Link></Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} >
-            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='change-password'>Change Password</Link></Text>
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='/change-password'>Change Password</Link></Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dangerButton} >
-            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='delete-account'>Delete Account</Link></Text>
+            <Text style={styles.buttonText}><Link style={{color: '#fff', textDecoration: 'none'}} to='/delete-account'>Delete Account</Link></Text>
           </TouchableOpacity>
         </View>
       </View>
       <TouchableOpacity onPress={handleLogout}>
-          <Text style={styles.logout}>Log Out</Text>
-        </TouchableOpacity>
+        <Text style={styles.logout}>Log Out</Text>
+      </TouchableOpacity>
     </View>
   )
 };

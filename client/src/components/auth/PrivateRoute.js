@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { Redirect, Route } from 'react-router-dom';
 import GroupServer from '../groupserver/GroupServer.js';
 import JoinGroupServer from '../groupserver/JoinGroupServer.js'
@@ -156,7 +157,68 @@ export default function PrivateRoute({ component: Component, ...rest}) {
   }
 
   if(!loading) return (
-    <div className="container-fluid">
+    <View style={styles.container}>
+      <Route
+        {...rest}
+        render={(props) =>{
+          return (success) ? 
+          <>
+            <View style={styles.serverListContainer}>
+              <ServersList 
+                user={user} 
+                setUser={setUser} 
+                groupServerId={rest.computedMatch.params.groupServerId}
+                groupServers={groupServers}
+                setGroupServers={setGroupServers}
+              />
+            </View>
+            <View style={styles.mainContentContainer}>
+              <Component
+                {...rest} 
+                groupServers={(Component === GroupServer || Component === JoinGroupServer) ? groupServers : undefined} 
+                setGroupServers={(Component === GroupServer || Component === JoinGroupServer) ? setGroupServers : undefined}
+                chatLogs={(Component === GroupServer) ? chatLogs : undefined}
+                setChatLogs={(Component === GroupServer) ? setChatLogs : undefined}
+                sendMessage={(Component === GroupServer) ? sendMessage : undefined}
+                uri={uri}
+                user={user} 
+                setUser={setUser}
+                props={props}
+              /> 
+            </View>
+          </>
+          : 
+          <Redirect to="/login" />;
+        }}
+      ></Route>
+    </View>
+  );
+  else{
+    return <Loading/>
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: 'row',
+    minHeight: '100vh'
+  },
+  mainContentContainer: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    minWidth: '350px'
+  },
+  serverListContainer: {
+    backgroundColor: '#212121',
+    flexDirection: 'column',
+    minWidth: '150px'
+  }
+});
+
+/*
+<div className="container-fluid">
       <div className="row">
       <Route
         {...rest}
@@ -189,8 +251,4 @@ export default function PrivateRoute({ component: Component, ...rest}) {
       ></Route>
       </div>
     </div>
-  );
-  else{
-    return <Loading/>
-  }
-}
+*/

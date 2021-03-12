@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Redirect } from 'react-router-dom';
 import TextChannel from './textchat/TextChannel.js';
 import ServerSidebar from '../ServerSidebar.js';
@@ -60,30 +61,33 @@ export default function GroupServer(props){
        <>
            {
                loading ?
-               <p>Loading</p>
+               <Text>Loading</Text>
                :
                 ((userAccess) ? 
                 (
                     <>
-                        <div className="col-1" style={{minHeight: "100vh", background: "#292929"}}>
+                        <View style={styles.channelsContainer}>
                             <ServerSidebar 
-                            uri={props.uri}
-                            user={props.user} 
-                            setUser={props.setUser} 
-                            groupServers={props.groupServers} 
-                            setGroupServers={props.setGroupServers}
-                            groupServerId={props.computedMatch.params.groupServerId}
-                            textChannelId={props.computedMatch.params.textChannelId ? 
-                                        props.computedMatch.params.textChannelId : Object.keys(props.groupServers[props.computedMatch.params.groupServerId].textChannels)[0]}
+                                uri={props.uri}
+                                user={props.user} 
+                                setUser={props.setUser} 
+                                groupServers={props.groupServers} 
+                                setGroupServers={props.setGroupServers}
+                                groupServerId={props.computedMatch.params.groupServerId}
+                                textChannelId={props.computedMatch.params.textChannelId ? 
+                                            props.computedMatch.params.textChannelId : Object.keys(props.groupServers[props.computedMatch.params.groupServerId].textChannels)[0]}
                             />
-                        </div>
-                        <TextChannel 
-                        sendMessage={sendMessage} 
-                        chatLogs={props.chatLogs} 
-                        setChatLogs={props.setChatLogs}
-                        textChannelId={props.computedMatch.params.textChannelId ? 
-                                        props.computedMatch.params.textChannelId : Object.keys(props.groupServers[props.computedMatch.params.groupServerId].textChannels)[0]}
-                        user={props.user}/>
+                        </View>
+                        <View style={styles.mainContentContainer}>
+                            <TextChannel 
+                                sendMessage={sendMessage} 
+                                chatLogs={props.chatLogs} 
+                                setChatLogs={props.setChatLogs}
+                                textChannelId={props.computedMatch.params.textChannelId ? 
+                                                props.computedMatch.params.textChannelId : Object.keys(props.groupServers[props.computedMatch.params.groupServerId].textChannels)[0]}
+                                user={props.user}
+                            /> 
+                        </View>
                     </>
                 )
                 :
@@ -92,3 +96,17 @@ export default function GroupServer(props){
        </>
     );
 }
+
+const styles = StyleSheet.create({
+    mainContentContainer: {
+        flexGrow: 1,
+        flexDirection: 'column',
+        backgroundColor: '#fff',
+        height: '100%'
+    },
+    channelsContainer: {
+        backgroundColor: '#292929',
+        flexDirection: 'column',
+        height: '100%',
+    }
+});
