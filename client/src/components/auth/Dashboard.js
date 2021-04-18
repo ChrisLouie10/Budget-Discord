@@ -17,7 +17,7 @@ export default function Dashboard(props) {
       }
     }).then(response => { return response.json()})
       .then(data => {
-      if(!data.success) setError(response.statusText);
+      if(!data.success) setError(data.statusText);
       else{
         localStorage.removeItem('Authorization');
         history.push('/login');

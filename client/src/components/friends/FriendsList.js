@@ -10,6 +10,7 @@ export default function FriendsList(props) {
     try{
       props.setError('');
       setLoading(true);
+      props.handleFriendDelete(props.friend);
       await fetch('/api/friends/delete-friend', {
         method: 'DELETE',
         headers: {
@@ -36,9 +37,9 @@ export default function FriendsList(props) {
     <div className="d-flex m-2 mx-auto" style={{maxWidth: "800px"}} key={props.friend.id}>
       <p className="mr-auto p-2">{props.friend.name} #{props.friend.numberID} </p>
       <button 
-        disabled={loading || pressed} 
+        disabled={loading} 
         className="btn btn-primary" 
-        onClick={handleFriendDelete}>{pressed ? "Removed" : "Remove Friend"}
+        onClick={handleFriendDelete}>Remove Friend
       </button>
     </div>
   )

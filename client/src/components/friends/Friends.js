@@ -3,6 +3,7 @@ import { Form, Button, Alert, Container } from 'react-bootstrap';
 import FriendRequests from './FriendRequests';
 import FriendsList from './FriendsList';
 import SearchFriends from './SearchFriends';
+import searchArrayForIndex from '../../lib/searchArrayForIndex';
 
 // Simple Login page
 
@@ -52,6 +53,22 @@ export default function Friend(props) {
     }
   }
 
+  const handleFriendDelete = (friendToDelete) => {
+    const index = searchArrayForIndex(friendToDelete.id, 'id', friends);
+    const newFriends = [...friends]
+    newFriends.splice(index, 1);
+    if(index > -1) setFriends(newFriends);  }
+
+  const handleFriendAccept = (friendToAccept) => {
+    const index = searchArrayForIndex(friendToAccept.id, 'id', friendRequests);
+    const newFriendRequests =[...friendRequests]
+    newFriendRequests.splice(index, 1)
+    if(index > -1) setFriendRequests(newFriendRequests);
+    const newFriends = [...friends];
+    newFriends.push(friendToAccept);
+    setFriends(newFriends)
+  };
+
   useEffect(async () =>{
     setShowFriendRequests(false);
     await fetch('/api/friends/get-friend-requests', {
@@ -83,9 +100,9 @@ export default function Friend(props) {
 
   return (
     <div className="col-11 my-auto bg-secondary d-flex-column" style={{minHeight: "100vh"}}>
-      {showFriendRequests ? friends.map((friend) => <FriendsList setError={setError} key={friend.id} friend={friend} />) : <div></div> }
+      {showFriendRequests ? friends.map((friend) => <FriendsList handleFriendDelete={handleFriendDelete} setError={setError} key={friend.id} friend={friend} />) : <div></div> }
       <hr />
-      {showFriendRequests ? friendRequests.map((friend) => <FriendRequests setError={setError} key={friend.id} friend={friend} />) : <div> </div>}
+      {showFriendRequests ? friendRequests.map((friend) => <FriendRequests handleFriendAccept={handleFriendAccept} setError={setError} key={friend.id} friend={friend} />) : <div> </div>}
       <div className="card mx-auto" style={{maxWidth: "400px"}}>
         <div className="card-body bg-light">
           <div className="card-header text-center mb-4">

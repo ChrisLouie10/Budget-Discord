@@ -6,9 +6,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const verify = require ('../auth/verifyToken');
 
-//Validation
-const Joi = require('@hapi/joi');
-
 router.get('/verify', verify, (req, res) => {
     if(req.user) return res.status(200).json({success: true, message: 'Success', user: req.user});
     else return res.status(401).json({success: false, message: 'Denied Access'});
@@ -71,9 +68,6 @@ router.post('/login', async (req, res) =>{
     //Create and assign a token to a user
     const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
     try{
-        const query = { email: user.email };
-        const set = { $set: { token: token } };
-        await User.updateOne(query, set);
         return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
     }catch(err){
         return res.status(500).json({success: false, message: 'Failed to log in'});
