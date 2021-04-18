@@ -10,6 +10,7 @@ export default function FriendRequests(props) {
 
     try{
       setLoading(true);
+      props.handleFriendAccept(props.friend);
       await fetch('/api/friends/accept-friend-request', {
         method: 'POST',
         headers: {
