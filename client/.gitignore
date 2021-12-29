@@ -12,6 +12,7 @@ package-lock.json
 
 # production
 /build
+.netlify
 debug.log
 
 # misc
