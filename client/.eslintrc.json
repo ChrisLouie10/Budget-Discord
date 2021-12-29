@@ -18,8 +18,19 @@
     ],
     "rules": {
         "linebreak-style": 0,
+        "max-len": 0,
         "no-console": 0,
         "no-underscore-dangle": 0,
-        "eqeqeq": 0
+        "no-nested-ternary": 0,
+        "react/no-unescaped-entities": 0,
+        "react/jsx-no-bind": 0,
+        "react/jsx-no-useless-fragment": 0,
+        "eqeqeq": 0,
+        "import/no-named-as-default": 0,
+        "import/no-named-as-default-member": 0,
+        "jsx-a11y/no-noninteractive-element-interactions": 0,
+        "jsx-a11y/click-events-have-key-events": 0,
+        "jsx-a11y/anchor-is-valid": 0,
+        "jsx-a11y/label-has-associated-control": 0
     }
 }
