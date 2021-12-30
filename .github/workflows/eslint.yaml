@@ -1,0 +1,28 @@
+name: 'ESLint Tests'
+
+on:
+  pull_request:
+
+jobs:
+  run-express-lint:
+    name: Run Express Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        working-directory: ./server
+        run: npm ci
+      - name: Rum Linter
+        working-directory: ./server
+        run: npm run lint
+  run-react-lint:
+    name: Run React Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        working-directory: ./client
+        run: npm ci
+      - name: Run Linter
+        working-directory: ./client
+        run: npm run lint
