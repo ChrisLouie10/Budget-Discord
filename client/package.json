@@ -24,7 +24,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "lint:jsx": "eslint --ext .jsx --ignore-path .gitignore",
+    "lint:jsx": "eslint --ext .jsx --ignore-path .gitignore .",
     "lint": "npm run lint:jsx"
   },
   "browserslist": {
