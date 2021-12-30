@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const app = express();
 //const clienturi = process.env.clienturi || 'http://localhost:5000';
 // Mongodb
@@ -25,6 +26,7 @@ const routerRoute = require('../routes/router.js');
 // Use cors to allow cross origin resource sharing
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Route Middlewares
 app.use(routerRoute);

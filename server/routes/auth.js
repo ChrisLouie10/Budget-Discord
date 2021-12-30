@@ -41,13 +41,15 @@ router.post('/register', async (req, res) => {
         console.log(process.env.SECRET_AUTH_TOKEN);
         //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
+        res.cookie('token', token, { httpOnly: true, maxAge: 3600000 }); 
         return res.status(201).json({success: true, message: 'Success', Authentication: token});
-    }catch(err) {
+    } catch(err) {
         return res.status(500).json({success: false, message: err});
     }
 });
 
 router.delete('/logout', verify, async (req, res) =>{
+    res.cookie('token', '', { httpOnly: true, maxAge: 1});  
     return res.status(200).json({success: true, message: 'Success'});
 })
 
@@ -68,8 +70,9 @@ router.post('/login', async (req, res) =>{
     //Create and assign a token to a user
     const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
     try{
+        res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
         return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
-    }catch(err){
+    } catch(err){
         return res.status(500).json({success: false, message: 'Failed to log in'});
     }
 });

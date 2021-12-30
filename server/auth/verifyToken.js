@@ -6,10 +6,8 @@ const User = require('../models/User');
 // returns an error if false
 
 const verify = async function (req, res, next){
-
-    // check if user has an access token
-    let token = req.header('Authorization');
-    if(token.startsWith('Bearer ')) token = token.slice(7, token.length);
+    // get token from cookies
+    const token = req.cookies.token;
 
     // verify access token
     if(token){
@@ -26,7 +24,7 @@ const verify = async function (req, res, next){
                 });
             }
         });
-    }else{
+    } else{
         res.status(401).json({
             success: false,
             message: 'Auth token is not supplied'
