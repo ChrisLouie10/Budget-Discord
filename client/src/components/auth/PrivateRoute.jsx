@@ -201,6 +201,5 @@ export default function PrivateRoute({ component: Component, ...rest }) {
 }
 
 PrivateRoute.propTypes = {
-  // eslint-disable-next-line
   component: PropTypes.any.isRequired,
 };

@@ -54,6 +54,7 @@ wss.on('connection', (ws) => {
           ws.send(JSON.stringify(msg));
         }
       });
+      // eslint-disable-next-line
     }
     // if the ws client is sending a new message
     else if (parsedMessage.type === 'message') {
