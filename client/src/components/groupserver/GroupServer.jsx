@@ -4,9 +4,10 @@ import { Redirect } from 'react-router-dom';
 import TextChannel from './textchat/TextChannel';
 import ServerSidebar from '../ServerSidebar';
 
-export default function GroupServer({
-  user, computedMatch, groupServers, sendMessage, chatLogs, setChatLogs, uri, setUser, setGroupServers,
-}) {
+export default function GroupServer(props) {
+  const {
+    user, rest, groupServers, sendMessage, chatLogs, setChatLogs, uri, setUser, setGroupServers,
+  } = props;
   const [mounted, setMounted] = useState(true);
   const [loading, setLoading] = useState(true);
   const [userAccess, setUserAccess] = useState(false);
@@ -29,10 +30,10 @@ export default function GroupServer({
           body: JSON.stringify({
             type: 'verify',
             userId: user._id,
-            groupServerId: computedMatch.params.groupServerId,
-            textChannelId: computedMatch.params.textChannelId
-              ? computedMatch.params.textChannelId
-              : Object.keys(groupServers[computedMatch.params.groupServerId].textChannels)[0],
+            groupServerId: rest.computedMatch.params.groupServerId,
+            textChannelId: rest.computedMatch.params.textChannelId
+              ? rest.computedMatch.params.textChannelId
+              : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0],
           }),
         }).then((response) => response.json())
           .then(async (data) => {
@@ -44,12 +45,12 @@ export default function GroupServer({
         if (mounted) setLoading(false);
       }
     } else setUserAccess(false);
-  }, [computedMatch.params.groupServerId]);
+  }, [rest.computedMatch.params.groupServerId]);
 
   function _sendMessage(message) {
-    const { groupServerId } = computedMatch.params;
-    const textChannelId = computedMatch.params.textChannelId
-      ? computedMatch.params.textChannelId : Object.keys(groupServers[groupServerId].textChannels)[0];
+    const { groupServerId } = rest.computedMatch.params;
+    const textChannelId = rest.computedMatch.params.textChannelId
+      ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[groupServerId].textChannels)[0];
 
     // Send message over to server
     sendMessage(message, groupServerId, textChannelId);
@@ -70,17 +71,17 @@ export default function GroupServer({
                     setUser={setUser}
                     groupServers={groupServers}
                     setGroupServers={setGroupServers}
-                    groupServerId={computedMatch.params.groupServerId}
-                    textChannelId={computedMatch.params.textChannelId
-                      ? computedMatch.params.textChannelId : Object.keys(groupServers[computedMatch.params.groupServerId].textChannels)[0]}
+                    groupServerId={rest.computedMatch.params.groupServerId}
+                    textChannelId={rest.computedMatch.params.textChannelId
+                      ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0]}
                   />
                 </div>
                 <TextChannel
                   sendMessage={_sendMessage}
                   chatLogs={chatLogs}
                   setChatLogs={setChatLogs}
-                  textChannelId={computedMatch.params.textChannelId
-                    ? computedMatch.params.textChannelId : Object.keys(groupServers[computedMatch.params.groupServerId].textChannels)[0]}
+                  textChannelId={rest.computedMatch.params.textChannelId
+                    ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0]}
                   user={user}
                 />
               </>
@@ -94,13 +95,14 @@ export default function GroupServer({
 GroupServer.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   user: PropTypes.object.isRequired,
+  // eslint-disable-next-line
+  rest: PropTypes.object,
+  // eslint-disable-next-line
+  groupServers: PropTypes.object,
   // eslint-disable-next-line react/forbid-prop-types
-  computedMatch: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  groupServers: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  chatLogs: PropTypes.array.isRequired,
-  groupServerId: PropTypes.string.isRequired,
+  chatLogs: PropTypes.object.isRequired,
+  // eslint-disable-next-line react/require-default-props
+  groupServerId: PropTypes.string,
   uri: PropTypes.string.isRequired,
   setUser: PropTypes.func.isRequired,
   setChatLogs: PropTypes.func.isRequired,

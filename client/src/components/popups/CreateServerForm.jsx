@@ -59,9 +59,11 @@ export default function CreateServerForm({
 }
 
 CreateServerForm.propTypes = {
-  // eslint-disable-next-line
+  // eslint-disable-next-line react/forbid-prop-types
   user: PropTypes.object.isRequired,
-  groupServers: PropTypes.string.isRequired,
+  // eslint-disable-next-line react/forbid-prop-types
+  groupServers: PropTypes.object.isRequired,
   setGroupServers: PropTypes.func.isRequired,
-  setOpenPopup: PropTypes.func.isRequired,
+  // eslint-disable-next-line react/require-default-props
+  setOpenPopup: PropTypes.func,
 };

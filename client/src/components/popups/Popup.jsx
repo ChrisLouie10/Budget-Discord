@@ -26,6 +26,6 @@ Popup.propTypes = {
   title: PropTypes.string.isRequired,
   // eslint-disable-next-line
   children: PropTypes.any.isRequired,
-  openPopup: PropTypes.func.isRequired,
+  openPopup: PropTypes.bool.isRequired,
   setOpenPopup: PropTypes.func.isRequired,
 };

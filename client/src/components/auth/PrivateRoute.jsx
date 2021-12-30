@@ -163,7 +163,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
       <div className="container-fluid">
         <div className="row">
           <Route
-            render={(props) => ((success)
+            render={() => ((success)
               ? (
                 <>
                   <div className="col-1" style={{ minHeight: '100vh', background: '#212121' }}>
@@ -186,7 +186,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
                     uri={uri}
                     user={user}
                     setUser={setUser}
-                    props={props}
+                    rest={rest}
                   />
                 </>
               )

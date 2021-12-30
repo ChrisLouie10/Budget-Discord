@@ -10,12 +10,14 @@ export default function DeleteGroupServerForm({
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // eslint-disable-next-line
+  useEffect(() => function () {
     setMounted(false);
   }, []);
 
   async function deleteCurrentServer() {
     if (groupServerId && mounted) {
+      console.log('Gonna try to delete or something');
       setLoading(true);
       await fetch('/api/groupServer/delete', {
         method: 'POST',

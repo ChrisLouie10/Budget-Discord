@@ -9,7 +9,8 @@ export default function LeaveGroupServerForm({
   const history = useHistory();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // eslint-disable-next-line
+  useEffect(() => function () {
     setMounted(false);
   }, []);
 

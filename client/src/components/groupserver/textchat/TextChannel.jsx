@@ -117,7 +117,7 @@ export default function TextChannel({
 
 TextChannel.propTypes = {
   // eslint-disable-next-line
-  chatLogs: PropTypes.array.isRequired,
+  chatLogs: PropTypes.object.isRequired,
   // eslint-disable-next-line
   user: PropTypes.object.isRequired,
   textChannelId: PropTypes.string.isRequired,
