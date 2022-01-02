@@ -1,16 +1,16 @@
-const request = require("supertest");
-const app = require("../servers/app");
+const request = require('supertest');
+const app = require('../servers/app');
 
 let token;
 
 beforeEach(async () => {
-  let loginResponse = await request(app)
+  const loginResponse = await request(app)
     .post('/api/user/register')
-    .set({'Content-Type': 'application/json'})
+    .set({ 'Content-Type': 'application/json' })
     .send({
       name: 'sdafgasdf',
-      email: "fgdhdfgh@sgfdgsdfg.com", 
-      password: "sdfgsdfgsdfg"
+      email: 'fgdhdfgh@sgfdgsdfg.com',
+      password: 'sdfgsdfgsdfg',
     });
   expect(loginResponse.statusCode).toBe(201);
   expect(loginResponse.body.Authentication).toBeDefined();
@@ -18,30 +18,30 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  let logoutResponse = await request(app)
+  const logoutResponse = await request(app)
     .delete('/api/user/delete-account')
     .set({
-      'Authorization': token, 
-      'Content-Type': 'application/json'
+      Authorization: token,
+      'Content-Type': 'application/json',
     })
     .send({
-      password: "sdfgsdfgsdfg"
+      password: 'sdfgsdfgsdfg',
     });
   expect(logoutResponse.statusCode).toBe(200);
 });
 
-describe("Testing Auth", () => {
-  test("Verify: should verify out token", async () =>{
-    let verifyResponse = await request(app)
-      .get("/api/user/verify")
+describe('Testing Auth', () => {
+  test('Verify: should verify out token', async () => {
+    const verifyResponse = await request(app)
+      .get('/api/user/verify')
       .set({
-        'Authorization': token, 
-        'Content-Type': 'application/json'
+        Authorization: token,
+        'Content-Type': 'application/json',
       });
     expect(verifyResponse.body.success).toBe(true);
   });
 
-    // let token;
+  // let token;
   // test("Login: should return a token", async() =>{
   //   let loginResponse = await request(app)
   //     .post("/api/user/login")
