@@ -5,8 +5,7 @@ const TextChannel = require('./models/TextChannel');
 const app = require('./servers/app');
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ clientTracking: false, noServer: true });
-// const wssPort = process.env.wssPort || 1000;
+const wss = new WebSocket.Server({ server });
 const serverPort = process.env.PORT || 5000;
 
 const wsclients = {};
