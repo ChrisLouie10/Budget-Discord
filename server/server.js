@@ -6,7 +6,6 @@ const app = require('./servers/app');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-// const wssPort = process.env.wssPort || 1000;
 const serverPort = process.env.PORT || 5000;
 
 const wsclients = {};
