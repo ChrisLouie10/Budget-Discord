@@ -1,16 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+
 const app = express();
-//const clienturi = process.env.clienturi || 'http://localhost:5000';
+// const clienturi = process.env.clienturi || 'http://localhost:5000';
 // Mongodb
 const mongoose = require('mongoose');
+
 const mongodburi = process.env.mongodburi || 'mongodb://localhost/budget-discord';
-//const mongodburi = 'mongodb://localhost/budget-discord';
+// const mongodburi = 'mongodb://localhost/budget-discord';
 
 mongoose.connect(mongodburi, {
-  useUnifiedTopology: true,  
+  useUnifiedTopology: true,
   useNewUrlParser: true,
-  useFindAndModify: false
+  useFindAndModify: false,
 });
 const db = mongoose.connection;
 db.on('error', (error) => console.log(error));
@@ -19,8 +21,8 @@ db.once('open', () => console.log('Connected to Database'));
 // Import Routes
 const authRoute = require('../routes/auth');
 const friendsRoute = require('../routes/friends');
-const groupServerRoute = require('../routes/groupServer.js');
-const routerRoute = require('../routes/router.js');
+const groupServerRoute = require('../routes/groupServer');
+const routerRoute = require('../routes/router');
 
 // Use cors to allow cross origin resource sharing
 app.use(cors());
