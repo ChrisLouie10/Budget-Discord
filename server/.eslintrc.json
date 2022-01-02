@@ -10,6 +10,7 @@
     "parserOptions": {
         "ecmaVersion": 13
     },
+    "ignorePatterns": "tests/**",
     "rules": {
         "linebreak-style": 0,
         "no-console": 0,

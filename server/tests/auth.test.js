@@ -1,4 +1,3 @@
-/*
 const request = require('supertest');
 const app = require('../servers/app');
 
@@ -55,4 +54,3 @@ describe('Testing Auth', () => {
   //   token = loginResponse.body.Authentication;
   // });
 });
-*/
