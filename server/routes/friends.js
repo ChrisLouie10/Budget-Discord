@@ -1,19 +1,7 @@
-const User = require('../db/models/User');
 const router = require('express').Router();
+const User = require('../db/models/User');
 const verify = require('../auth/verifyToken');
-
-async function addFriend(userId, friendId) {
-  const queryUser = { _id: userId };
-  const setUserPush = { $push: { friends: friendId } };
-  const setUserPull = { $pull: { friend_request: friendId } };
-
-  const queryFriend = { _id: friendId };
-  const setFriend = { $push: { friends: userId } };
-
-  await User.updateOne(queryUser, setUserPush);
-  await User.updateOne(queryUser, setUserPull);
-  await User.updateOne(queryFriend, setFriend);
-}
+const { addFriend } = require('../db/calls/friend');
 
 router.post('/find-users', verify, async (req, res) => {
   if (req.body.friendNumber != '') {

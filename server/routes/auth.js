@@ -11,39 +11,7 @@ const {
   deleteAccountValidation,
 } = require('../auth/validation');
 const verify = require('../auth/verifyToken');
-
-function binarySearch(arr, val) {
-  let start = 0;
-  let end = arr.length - 1;
-
-  while (start <= end) {
-    const mid = Math.floor((start + end) / 2);
-
-    if (arr[mid] == val) return true;
-    if (arr[mid] < val) start = mid + 1;
-    else end = mid - 1;
-  }
-
-  return false;
-}
-
-async function generateRandomNumberID(name) {
-  let numberID = Math.floor(Math.random() * Math.floor(1000));
-  const userNumberIDs = await User.find({ name });
-  /*
-  if (userNumberIDs.length == 1000) {
-    return res.status(400).json({
-      success: false,
-      message: `Username unavailable: Too many called${req.body.name}`
-    });
-  }
-  */
-  while (binarySearch(userNumberIDs, numberID)) {
-    numberID += 647;
-    numberID = numberID < 1000 ? numberID : numberID - 1000;
-  }
-  return numberID;
-}
+const { createUser, generateRandomNumberId } = require('../db/calls/user');
 
 router.get('/verify', verify, (req, res) => {
   if (req.user) return res.status(200).json({ success: true, message: 'Success', user: req.user });
@@ -64,24 +32,11 @@ router.post('/register', async (req, res) => {
   const hashPassword = await bcrypt.hash(req.body.password, salt);
 
   // Generate a non copy of a number id
-  const numberID = await generateRandomNumberID(req.body.name);
+  const numberId = await generateRandomNumberId(req.body.name);
 
-  // Add user to database
-  const user = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password: hashPassword,
-    number_id: numberID,
-  });
-
-  try {
-    const newUser = await user.save();
-    // Create and assign a jwt to a user
-    const token = await jwt.sign({ _id: newUser._id }, process.env.SECRET_AUTH_TOKEN);
-    return res.status(201).json({ success: true, message: 'Success', Authentication: token });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err });
-  }
+  return createUser(req.body.name, req.body.email, hashPassword, numberId)
+    .then((token) => res.status(201).json({ success: true, message: 'Success', Authentication: token }))
+    .catch((err) => res.status(500).json({ success: false, message: err }));
 });
 
 router.delete('/logout', verify, async (req, res) => res.status(200).json({ success: true, message: 'Success' }));
@@ -142,7 +97,7 @@ router.patch('/change-name', verify, async (req, res) => {
 
   // Update name
   try {
-    const numberID = await generateRandomNumberID(req.body.name);
+    const numberID = await generateRandomNumberId(req.body.name);
     const query = { _id: req.user._id };
     const set = { $set: { name: req.body.name, number_id: numberID } };
     await User.updateOne(query, set);
