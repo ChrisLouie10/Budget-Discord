@@ -1,5 +1,5 @@
 require('dotenv').config();
-const User = require('../models/User');
+const User = require('../db/models/User');
 const router = require('express').Router();
 const { registerValidation, loginValidation, updatePasswordValidation, updateNameValidation, deleteAccountValidation } = require('../auth/validation');
 const bcrypt = require('bcryptjs');
@@ -38,7 +38,6 @@ router.post('/register', async (req, res) => {
 
     try{
         const newUser = await user.save();
-        console.log(process.env.SECRET_AUTH_TOKEN);
         //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
         return res.status(201).json({success: true, message: 'Success', Authentication: token});

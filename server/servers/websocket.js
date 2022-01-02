@@ -1,5 +1,5 @@
 const express = require('express');
-const TextChannel = require("../models/TextChannel");
+const TextChannel = require("../db/models/TextChannel");
 const WebSocket = require('ws');
 const http = require('http');
 

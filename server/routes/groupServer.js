@@ -1,8 +1,8 @@
-const User = require("../models/User");
-const GroupServer = require("../models/GroupServer.js");
-const TextChannel = require("../models/TextChannel.js");
-const ChatLog = require("../models/ChatLog.js");
-const Invite = require("../models/Invite");
+const User = require("../db/models/User");
+const GroupServer = require("../db/models/GroupServer.js");
+const TextChannel = require("../db/models/TextChannel.js");
+const ChatLog = require("../db/models/ChatLog.js");
+const Invite = require("../db/models/Invite");
 const router = require("express").Router();
 const verify = require("../auth/verifyToken");
 

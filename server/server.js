@@ -1,5 +1,5 @@
 require('dotenv').config();
-const TextChannel = require("./models/TextChannel.js");
+const TextChannel = require("./db/models/TextChannel.js");
 const WebSocket = require('ws');
 const http = require('http');
 const app = require('./servers/app');

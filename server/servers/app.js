@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-//const clienturi = process.env.clienturi || 'http://localhost:5000';
+const clienturi = process.env.clienturi || 'http://localhost:5000';
 // Mongodb
 const mongoose = require('mongoose');
 const mongodburi = process.env.mongodburi || 'mongodb://localhost/budget-discord';
