@@ -5,7 +5,7 @@ const http = require('http');
 // project imports
 const app = require('./express');
 const TextChannel = require('../models/TextChannel');
-const generateUniqueSessionId = require('../lib/utils');
+const { generateUniqueSessionId } = require('../lib/utils');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
