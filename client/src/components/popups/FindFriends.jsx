@@ -53,7 +53,6 @@ export default function FindFriend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: JSON.stringify({
           friendID: id,
@@ -102,7 +101,6 @@ export default function FindFriend() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-
         },
         body: JSON.stringify({
           friendID: id,
