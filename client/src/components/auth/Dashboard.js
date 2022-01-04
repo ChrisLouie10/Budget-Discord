@@ -11,15 +11,11 @@ export default function Dashboard(props) {
     setError('');
 
     await fetch('/api/user/logout', {
-      method: 'DELETE',
-      headers: {
-        'Authorization': localStorage.getItem('Authorization')
-      }
+      method: 'DELETE'
     }).then(response => { return response.json()})
       .then(data => {
       if(!data.success) setError(data.statusText);
       else{
-        localStorage.removeItem('Authorization');
         history.push('/login');
       }
     });

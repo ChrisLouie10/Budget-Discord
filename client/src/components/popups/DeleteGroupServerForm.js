@@ -20,8 +20,7 @@ export default function DeleteGroupServerForm(props){
             await fetch('/api/groupServer/delete', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('Authorization')
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     type: "delete",

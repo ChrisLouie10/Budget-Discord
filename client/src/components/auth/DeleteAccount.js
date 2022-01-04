@@ -23,8 +23,7 @@ export default function DeleteAccount(props) {
       await fetch('/api/user/delete-account', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           password: passwordRef.current.value

@@ -45,8 +45,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
     await fetch("/api/user/verify", {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('Authorization')
+        'Content-Type': 'application/json'
       },
     }).then(response => { if(mounted) return response.json() })
       .then((data) => { 
@@ -62,8 +61,7 @@ export default function PrivateRoute({ component: Component, ...rest}) {
       await fetch("/api/groupServer/find", {
           method: 'POST',
           headers: {
-              'Content-Type': 'application/json',
-              'Authorization': localStorage.getItem('Authorization')
+              'Content-Type': 'application/json'
           },
           body: JSON.stringify({
               type: "find",

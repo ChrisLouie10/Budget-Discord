@@ -14,8 +14,7 @@ export default function FriendRequests(props) {
       await fetch('/api/friends/accept-friend-request', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendID: props.friend.id

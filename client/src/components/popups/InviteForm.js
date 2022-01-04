@@ -20,8 +20,7 @@ export default function InviteForm(props){
             await fetch('/api/groupServer/create-invite', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('Authorization')
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     type: 'create-invite',

@@ -23,8 +23,7 @@ export default function GroupServer(props){
                 await fetch('/api/groupServer/verify', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': localStorage.getItem('Authorization')
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         type: 'verify',

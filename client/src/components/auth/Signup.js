@@ -38,7 +38,6 @@ export default function Signup() {
           console.log(data.message);
         }
         else {
-          localStorage.setItem('Authorization', data.Authentication);
           history.push("/dashboard");
         }
       });

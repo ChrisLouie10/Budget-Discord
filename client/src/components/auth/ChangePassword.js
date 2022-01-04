@@ -24,8 +24,7 @@ export default function ChangePassword(props) {
       await fetch('/api/user/change-password', {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           email: user.email,

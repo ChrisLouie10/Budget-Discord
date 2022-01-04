@@ -24,8 +24,7 @@ export default function FindFriend(props) {
       await fetch('/api/friends/find', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendName: friendNameRef.current.value
@@ -58,8 +57,7 @@ export default function FindFriend(props) {
       await fetch('/api/friends/send-friend-request', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendID: id
@@ -85,8 +83,7 @@ export default function FindFriend(props) {
       await fetch('/api/friends/accept-friend-request', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendID: id
@@ -112,8 +109,7 @@ export default function FindFriend(props) {
       await fetch('/api/friends/delete-friend', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendID: id
@@ -135,8 +131,7 @@ export default function FindFriend(props) {
     await fetch('/api/friends/get-friend-requests', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('Authorization')
+        'Content-Type': 'application/json'
       },
     }).then(response => {
       return response.json()})
@@ -147,8 +142,7 @@ export default function FindFriend(props) {
     await fetch('/api/friends/get-friends', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('Authorization')
+        'Content-Type': 'application/json'
       },
     }).then(response => {
       return response.json()})

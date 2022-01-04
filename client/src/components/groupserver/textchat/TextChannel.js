@@ -11,8 +11,7 @@ export default function TextChannel(props){
       await fetch('/api/groupServer/get-chat-log', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           type: 'get-chat-log',

@@ -12,8 +12,7 @@ export default function CreateServerForm(props){
             fetch('/api/groupServer/create', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('Authorization')
+                'Content-Type': 'application/json'
               },
               body: JSON.stringify({
                 type: "create",

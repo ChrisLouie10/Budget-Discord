@@ -27,8 +27,7 @@ export default function Friend(props) {
       await fetch('/api/friends/find-users', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendName: friendNameRef.current.value,
@@ -74,8 +73,7 @@ export default function Friend(props) {
     await fetch('/api/friends/get-friend-requests', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('Authorization')
+        'Content-Type': 'application/json'
       },
     }).then(response => {
       return response.json()})
@@ -86,8 +84,7 @@ export default function Friend(props) {
     await fetch('/api/friends/get-friends', {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('Authorization')
+        'Content-Type': 'application/json'
       },
     }).then(response => {
       return response.json()})

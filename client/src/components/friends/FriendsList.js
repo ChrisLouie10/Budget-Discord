@@ -14,8 +14,7 @@ export default function FriendsList(props) {
       await fetch('/api/friends/delete-friend', {
         method: 'DELETE',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           friendID: props.friend.id

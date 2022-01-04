@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
         //Create and assign a jwt to a user
         const token = await jwt.sign({_id: newUser._id}, process.env.SECRET_AUTH_TOKEN);
         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 }); 
-        return res.status(201).json({success: true, message: 'Success', Authentication: token});
+        return res.status(201).json({success: true, message: 'Success'});
     } catch(err) {
         return res.status(500).json({success: false, message: err});
     }
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) =>{
     const token = jwt.sign({_id: user._id}, process.env.SECRET_AUTH_TOKEN, {expiresIn: '1h'});
     try{
         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
-        return res.status(201).json({success: true, message: 'Success', Authorization: 'Bearer ' + token});
+        return res.status(201).json({success: true, message: 'Success'});
     } catch(err){
         return res.status(500).json({success: false, message: 'Failed to log in'});
     }
