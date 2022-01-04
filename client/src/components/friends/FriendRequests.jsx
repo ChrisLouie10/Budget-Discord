@@ -16,7 +16,6 @@ export default function FriendRequests({ setError, friend, handleFriendAccept })
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: friend.id,

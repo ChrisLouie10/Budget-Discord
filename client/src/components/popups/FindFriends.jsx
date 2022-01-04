@@ -24,7 +24,6 @@ export default function FindFriend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendName: friendNameRef.current.value,
@@ -54,7 +53,6 @@ export default function FindFriend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: id,
@@ -79,7 +77,6 @@ export default function FindFriend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: id,
@@ -104,7 +101,6 @@ export default function FindFriend() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: id,
@@ -125,7 +121,6 @@ export default function FindFriend() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {
@@ -136,7 +131,6 @@ export default function FindFriend() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {

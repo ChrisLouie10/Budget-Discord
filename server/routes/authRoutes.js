@@ -31,6 +31,11 @@ router.get('/', verify, async (req, res) => {
   return res.status(401).json({ success: false, message: 'Denied Access' });
 });
 
+router.delete('/logout', verify, async (req, res) => {
+  res.cookie('token', '', { httpOnly: true, maxAge: 1 });
+  return res.status(200).json({ success: true, message: 'Success' });
+});
+
 router.post('/register', async (req, res) => {
   // Validate data before adding user
   const { error } = registerValidation(req.body);
@@ -41,7 +46,10 @@ router.post('/register', async (req, res) => {
 
   // Create User and return jwt to user.
   return createUser(req.body.name, req.body.email, await hashPassword(req.body.password))
-    .then((token) => res.status(201).json({ success: true, message: 'Success', Authentication: token }))
+    .then((token) => {
+      res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
+      return res.status(201).json({ success: true, message: 'Success' });
+    })
     .catch((err) => res.status(500).json({ success: false, message: err }));
 });
 
@@ -61,7 +69,8 @@ router.post('/login', async (req, res) => {
   // Create and assign a token to a user
   const token = generateToken(user._id);
   try {
-    return res.status(201).json({ success: true, message: 'Success', Authorization: `Bearer ${token}` });
+    res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
+    return res.status(201).json({ success: true, message: 'Success' });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to log in' });
   }

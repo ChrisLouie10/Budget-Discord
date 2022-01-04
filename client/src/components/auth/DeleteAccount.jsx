@@ -24,7 +24,6 @@ export default function DeleteAccount() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           password: passwordRef.current.value,

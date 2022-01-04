@@ -22,7 +22,6 @@ export default function InviteForm({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'create-invite',

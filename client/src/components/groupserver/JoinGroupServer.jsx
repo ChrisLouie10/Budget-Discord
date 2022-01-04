@@ -17,7 +17,6 @@ export default function JoinGroupServer({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'join',

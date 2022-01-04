@@ -30,7 +30,6 @@ export default function Friend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendName: friendNameRef.current.value,
@@ -74,7 +73,6 @@ export default function Friend() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {
@@ -85,7 +83,6 @@ export default function Friend() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {

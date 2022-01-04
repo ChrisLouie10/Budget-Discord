@@ -19,7 +19,6 @@ export default function ChangeName() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           name: nameRef.current.value,

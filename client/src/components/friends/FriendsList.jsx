@@ -18,7 +18,6 @@ export default function FriendsList({ setError, handleFriendDelete, friend }) {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: friend.id,

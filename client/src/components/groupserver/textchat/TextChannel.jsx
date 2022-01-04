@@ -14,7 +14,6 @@ export default function TextChannel({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'get-chat-log',

@@ -26,7 +26,6 @@ export default function ChangePassword({ user }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           email: user.email,

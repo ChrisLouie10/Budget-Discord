@@ -15,7 +15,6 @@ export default function SearchFriends({ friend, setError }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: friend.id,

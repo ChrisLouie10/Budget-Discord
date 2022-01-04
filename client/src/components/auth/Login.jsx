@@ -33,7 +33,6 @@ export default function Login() {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            localStorage.setItem('Authorization', data.Authorization);
             history.push('/dashboard');
           } else setError(data.message);
         });

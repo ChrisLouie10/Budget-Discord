@@ -9,8 +9,16 @@ export default function Dashboard({ user }) {
 
   async function handleLogout() {
     setError('');
-    localStorage.removeItem('Authorization');
-    history.push('/login');
+
+    await fetch('/api/user/logout', {
+      method: 'DELETE',
+    }).then((response) => response.json())
+      .then((data) => {
+        if (!data.success) setError(data.statusText);
+        else {
+          history.push('/login');
+        }
+      });
   }
 
   return (
