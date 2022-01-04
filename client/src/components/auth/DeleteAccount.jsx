@@ -20,7 +20,7 @@ export default function DeleteAccount() {
 
     try {
       setLoading(true);
-      await fetch('/api/user/delete-account', {
+      await fetch('/api/user', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

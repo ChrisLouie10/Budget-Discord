@@ -15,8 +15,8 @@ export default function ChangeName() {
 
     try {
       setLoading(true);
-      await fetch('/api/user/change-name', {
-        method: 'PATCH',
+      await fetch('/api/user/name', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: localStorage.getItem('Authorization'),

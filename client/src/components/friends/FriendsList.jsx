@@ -14,7 +14,7 @@ export default function FriendsList({ setError, handleFriendDelete, friend }) {
       setError('');
       setLoading(true);
       handleFriendDelete(friend);
-      await fetch('/api/friends/delete-friend', {
+      await fetch('/api/friends', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export default function FriendsList({ setError, handleFriendDelete, friend }) {
   }
 
   return (
-    <div className="d-flex m-2 mx-auto" style={{ maxWidth: '800px' }} key={friend.id}>
+    <div className="d-flex m-2 mx-auto" style={{ maxWidth: '800px' }}>
       <p className="mr-auto p-2">
         {friend.name}
         {' '}

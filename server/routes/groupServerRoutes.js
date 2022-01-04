@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const User = require('../models/User');
-const GroupServer = require('../models/GroupServer');
-const TextChannel = require('../models/TextChannel');
-const Invite = require('../models/Invite');
-const verify = require('../auth/verifyToken');
+const User = require('../db/models/User');
+const GroupServer = require('../db/models/GroupServer');
+const TextChannel = require('../db/models/TextChannel');
+const Invite = require('../db/models/Invite');
+const { verify } = require('../lib/utils/tokenUtils');
 
 // expiration is in minutes
 // 0 limit = infinite use
