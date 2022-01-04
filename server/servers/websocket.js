@@ -1,98 +1,107 @@
-const express = require('express');
-const TextChannel = require("../models/TextChannel");
+// package imports
 const WebSocket = require('ws');
 const http = require('http');
 
-const server = http.createServer(express);
-const wss = new WebSocket.Server({server});
+// project imports
+const app = require('./express');
+const TextChannel = require('../db/models/TextChannel');
+const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
 
-let wsclients = {};
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+const wsclients = {};
 
-const generateUniqueSessionId = () => {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-  }
-  return s4() + s4() + '-' + s4();
-};
-//On WebSocket Server connection add an event listener
-//Echo back data received from a client to every client
-wss.on('connection', function connection(ws, incoming) {
-  //For every new websocket client, give it a unique session id
-  //to help identify it
+// On WebSocket Server connection add an event listener
+// Echo back data received from a client to every client
+wss.on('connection', (ws) => {
+  // For every new websocket client, give it a unique session id
+  // to help identify it
   const sessionId = generateUniqueSessionId();
-  ws.sessionId = sessionId;
-  wsclients[sessionId] = ws;
+  const wsclient = ws;
+  wsclient.sessionId = sessionId;
+  wsclients[sessionId] = wsclient;
 
-  ws.on('message', (message) => {
-    //if the message can't be parsed, then skip it as all ws clients'
-    //messages should be parsable
-    let parsedMessage;
-    try{
-      parsedMessage = JSON.parse(message);
-    } catch (e) {
-      console.log("Message from ws client could not be parsed!", message);
+  ws.on('message', (msgStr) => {
+    // if the message can't be parsed, then skip it as all ws clients'
+    // messages should be parsable
+    let messageObj;
+    try {
+      messageObj = JSON.parse(msgStr);
+    } catch {
+      console.log('Message from ws client could not be parsed!', msgStr);
       return;
     }
-  
-    //set the websocket client's serverId and textChannelId to the serverId and textChannelId of its message
-    ws.serverId = parsedMessage.serverId;
-    ws.textChannelId = parsedMessage.textChannelId;
 
-    //if the ws client is requesting for a chat log
-    if (parsedMessage.type === "chatLog"){
-      //look for the ws client's text channel
-      TextChannel.findById(parsedMessage.textChannelId, (err, textChannel) => {
-        if (err){
-          console.log("An error occured when trying to access the DB for a specific text channel! (chatLog)");
+    wsclient.serverId = messageObj.serverId;
+    wsclient.textChannelId = messageObj.textChannelId;
+
+    // if the ws client is requesting for a chat log
+    if (messageObj.type === 'chatLog') {
+      // look for the ws client's text channel
+      TextChannel.findById(messageObj.textChannelId).exec().then((textChannel) => {
+        // if a text channel is found, send its chat log to the ws client
+        if (textChannel !== null) {
+          const msg = {
+            type: 'chatLog',
+            chatLog: textChannel.chat_log,
+          };
+          ws.send(JSON.stringify(msg));
         }
-        //if a text channel is found, send its chat log to the ws client
-        else if (textChannel !== null){
-          const message = {
-            type: "chatLog",
-            chatLog: textChannel.chat_log
-          }
-          ws.send(JSON.stringify(message));
-        }
-      });
+      }).catch((err) => {
+        console.log('An error occured when trying to access the DB for a specific text channel!');
+        console.error(err);
+      }); // eslint-disable-next-line brace-style
     }
-    //if the ws client is sending a new message
-    else if (parsedMessage.type === "message"){
+    // if the ws client is sending a new message
+    else if (messageObj.type === 'message') {
       const newMessage = {
-        content: parsedMessage.message.content,
-        author: parsedMessage.message.author,
-        index: parsedMessage.message.index,
-        timestamp: parsedMessage.message.timestamp
+        content: messageObj.message.content,
+        author: messageObj.message.author,
+        index: messageObj.message.index,
+        timestamp: messageObj.message.timestamp,
       };
-      //Find and update the text channel with the new message
-      TextChannel.findByIdAndUpdate(parsedMessage.textChannelId, {$push: {chat_log: newMessage}}, 
-      {new: true},
-      (err, textChannel) => {
-        if (err) console.log("An error occured when trying to access and update the DB for a specific text channel! (message)");
-        else if (textChannel !== null){
-          //Echo this message to EVERY websocket clients with the same serverId
+      // Find and update the text channel with the new message
+      TextChannel.findByIdAndUpdate(
+        messageObj.textChannelId,
+        { $push: { chat_log: newMessage } },
+        { new: true },
+      ).then((textChannel) => {
+        if (textChannel !== null) {
+          // Echo this message to EVERY websocket clients with the same serverId
           const data = {
-            type: "message",
+            type: 'message',
             message: newMessage,
-            textChannelId: parsedMessage.textChannelId
-          }
-          for (let key in wsclients){
-            if (wsclients[key].readyState === WebSocket.OPEN && wsclients[key].serverId === ws.serverId){
-              wsclients[key].send(JSON.stringify(data));
+            textChannelId: messageObj.textChannelId,
+          };
+          Object.keys(wsclients).forEach((key) => {
+            if (wsclients[key].readyState === WebSocket.OPEN
+              && wsclients[key].serverId === ws.serverId) {
+              if (wsclients[key].sessionId !== ws.sessionId) {
+                wsclients[key].send(JSON.stringify(data));
+              } else {
+                const duplicate = {
+                  type: 'duplicateMessage',
+                  message: newMessage,
+                  textChannelId: messageObj.textChannelId,
+                };
+                wsclients[key].send(JSON.stringify(duplicate));
+              }
             }
-          }
-        }
-        else console.log("Failed to update text channel", parsedMessage.textChannelId, "with a new message.");
+          });
+        } else console.log('Failed to update text channel', messageObj.textChannelId, 'with a new message.');
+      }).catch((err) => {
+        console.log('An error occured when accessing the DB for text channels');
+        console.error(err);
       });
     }
   });
 
-  ws.on('close',() => {
-    delete wsclients[ws.sessionId];
-    console.log("ws deleted:", ws.sessionId);
-    console.log("Current number of ws clients connected:", Object.keys(wsclients).length);
+  ws.on('close', () => {
+    delete wsclients[wsclient.sessionId];
+    console.log('Current number of ws clients connected:', Object.keys(wsclients).length);
   });
 
-  console.log("Current number of ws clients connected:", Object.keys(wsclients).length);
+  console.log('Current number of ws clients connected:', Object.keys(wsclients).length);
 });
 
 module.exports = server;
