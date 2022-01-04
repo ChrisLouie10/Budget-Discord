@@ -13,4 +13,6 @@ function binarySearch(arr, val) {
   return false;
 }
 
-module.exports = binarySearch;
+module.exports = {
+  binarySearch,
+};

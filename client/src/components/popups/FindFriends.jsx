@@ -50,7 +50,7 @@ export default function FindFriend() {
     try {
       setError('');
       setLoading(true);
-      await fetch('/api/friends/send-friend-request', {
+      await fetch('/api/friends/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export default function FindFriend() {
     try {
       setError('');
       setLoading(true);
-      await fetch('/api/friends/accept-friend-request', {
+      await fetch('/api/friends/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export default function FindFriend() {
     try {
       setError('');
       setLoading(true);
-      await fetch('/api/friends/delete-friend', {
+      await fetch('/api/friends/', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

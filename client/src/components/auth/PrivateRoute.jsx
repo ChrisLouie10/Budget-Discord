@@ -113,7 +113,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
     }
 
     // Verify user
-    await fetch('/api/user/verify', {
+    await fetch('/api/user', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

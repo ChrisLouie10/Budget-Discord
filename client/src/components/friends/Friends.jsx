@@ -26,7 +26,7 @@ export default function Friend() {
       setError('');
       setLoading(true);
       setFriendResults([]);
-      await fetch('/api/friends/find-users', {
+      await fetch('/api/friends/find', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

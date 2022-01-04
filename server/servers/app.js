@@ -19,17 +19,15 @@ db.on('error', (error) => console.log(error));
 db.once('open', () => console.log('Connected to Database'));
 
 // Import Routes
-const authRoute = require('../routes/auth');
-const friendsRoute = require('../routes/friends');
-const groupServerRoute = require('../routes/groupServer');
-const routerRoute = require('../routes/router');
+const authRoute = require('../routes/authRoutes');
+const friendsRoute = require('../routes/friendRoutes');
+const groupServerRoute = require('../routes/groupServerRoutes');
 
 // Use cors to allow cross origin resource sharing
 app.use(cors());
 app.use(express.json());
 
 // Route Middlewares
-app.use(routerRoute);
 app.use('/api/user', authRoute);
 app.use('/api/friends', friendsRoute);
 app.use('/api/groupServer', groupServerRoute);

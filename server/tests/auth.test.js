@@ -33,7 +33,7 @@ afterEach(async () => {
 describe('Testing Auth', () => {
   test('Verify: should verify out token', async () => {
     const verifyResponse = await request(app)
-      .get('/api/user/verify')
+      .get('/api/user')
       .set({
         Authorization: token,
         'Content-Type': 'application/json',
