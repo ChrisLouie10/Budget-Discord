@@ -1,12 +1,43 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, {
+  useState, useEffect, useContext, useMemo,
+} from 'react';
 import { useParams } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { Context } from '../../../Store';
+import Loading from '../../Loading';
 
 export default function TextChannel() {
   const [state, setState] = useContext(Context);
+  const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
-  const { textChannelId } = useParams();
+  const { groupServerId, textChannelId } = useParams();
+
+  // Repeatedly attempts to contact ws server with "callback" until ws server is online
+  function waitForWSConnection(callback, interval) {
+    const { ws } = state;
+    if (ws) {
+      if (ws.readyState === WebSocket.OPEN) callback();
+      else {
+        setTimeout(() => {
+          waitForWSConnection(callback, interval);
+        }, interval);
+      }
+    }
+  }
+
+  function sendMessage(message) {
+    const { ws } = state;
+    // Create data
+    const data = {
+      type: 'message',
+      textChannelId,
+      serverId: groupServerId,
+      message,
+    };
+    // Send data over to ws server
+    waitForWSConnection(() => {
+      ws.send(JSON.stringify(data));
+    }, 500);
+  }
 
   useEffect(async () => {
     const { user, chatLogs } = state;
@@ -27,19 +58,17 @@ export default function TextChannel() {
         .then((response) => response.json())
         .then((data) => {
           const currState = { ...state };
-          const _chatLogs = { ...chatLogs };
+          const _chatLogs = currState.chatLogs;
           _chatLogs[textChannelId] = data.chatLog;
-          currState.chatLogs = _chatLogs;
           setState(currState);
         });
     }
+    setLoading(false);
   }, [textChannelId]);
 
   function handleChatBoxSubmit(e) {
     e.preventDefault();
-    // Check whether input is not just an empty string
     if (input !== '') {
-      // Create a message object
       const message = {
         content: input,
         index: Object.keys(state.chatLogs).length + 1,
@@ -47,11 +76,14 @@ export default function TextChannel() {
         timestamp: new Date(),
         notSent: true,
       };
-      // Send the message object over to client
-      state.chatLogs[textChannelId].push(message);
-      // Send the message object over to the server
-      // sendMessage(message);
-      // Clear chat box
+      // update client chatlogs
+      const currState = { ...state };
+      const { chatLogs } = state;
+      chatLogs[textChannelId].push(message);
+      currState.chatLogs = chatLogs;
+      setState(currState);
+      // update server chatlogs
+      sendMessage(message);
       setInput('');
     }
   }
@@ -63,30 +95,16 @@ export default function TextChannel() {
   // Displays messages
   // If a message is not "sent" then it will be displayed with a dark gray color
   // Otherwise, sent messages will be light gray
-  // eslint-disable-next-line
-  function displayChat() {
+  const displayChat = useMemo(() => {
     if (state.chatLogs[textChannelId]) {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
             {
-                Object.entries(state.chatLogs[textChannelId]).map(([key, value]) => {
-                  if (value.notSent) {
-                    return (
-                      <p className="ml-2 #858585" key={key}>
-                        {value.author}
-                        {' '}
-                        (
-                        {new Date(value.timestamp).toLocaleString()}
-                        ):
-                        <br />
-                        {value.content}
-                      </p>
-                    );
-                  }
-
+              Object.entries(state.chatLogs[textChannelId]).map(([key, value]) => {
+                if (value.notSent) {
                   return (
-                    <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
+                    <p className="ml-2 #858585" key={key}>
                       {value.author}
                       {' '}
                       (
@@ -96,17 +114,30 @@ export default function TextChannel() {
                       {value.content}
                     </p>
                   );
-                })
-              }
+                }
+                return (
+                  <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
+                    {value.author}
+                    {' '}
+                    (
+                    {new Date(value.timestamp).toLocaleString()}
+                    ):
+                    <br />
+                    {value.content}
+                  </p>
+                );
+              })
+            }
           </div>
         </div>
       );
-    }
-  }
+    } return <div />;
+  }, [state.chatLogs[textChannelId]]);
 
+  if (loading) return <Loading />;
   return (
     <div className="col-10 align-self-end w-100" style={{ minHeight: '100vh', background: '#303030' }}>
-      {displayChat()}
+      {displayChat}
       <form className="w-75 mb-2" style={{ position: 'absolute', bottom: '0' }}>
         <div className="form-row">
           <div className="col">
@@ -118,15 +149,3 @@ export default function TextChannel() {
     </div>
   );
 }
-
-/*
-TextChannel.propTypes = {
-  // eslint-disable-next-line
-  chatLogs: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-  textChannelId: PropTypes.string.isRequired,
-  sendMessage: PropTypes.func.isRequired,
-  setChatLogs: PropTypes.func.isRequired,
-};
-*/

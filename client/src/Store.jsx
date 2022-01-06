@@ -2,10 +2,11 @@ import React, { useState, createContext } from 'react';
 import PropTypes from 'prop-types';
 
 const initialState = {
-  chatLogs: {},
-  groupServers: {},
+  ws: {},
   user: {},
   params: {},
+  chatLogs: {},
+  groupServers: {},
 };
 
 export const Context = createContext();

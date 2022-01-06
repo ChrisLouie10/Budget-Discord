@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { Context } from '../Store';
 import Actions from './popups/Actions';
 
@@ -17,7 +16,7 @@ export default function ServerSidebar() {
   }, []);
 
   useEffect(() => {
-    if (state.groupServers) {
+    if (state.groupServers[groupServerId]) {
       setGroupServerName(state.groupServers[groupServerId].name);
     }
   }, [groupServerId]);
@@ -28,7 +27,6 @@ export default function ServerSidebar() {
     }
   }
 
-  // eslint-disable-next-line
   function displayTextChannels() {
     if (state.groupServers[groupServerId]) {
       return (
@@ -42,14 +40,12 @@ export default function ServerSidebar() {
                       // eslint-disable-next-line
                       <Link style={{ color: '#b5fff3' }} onContextMenu={handleRightClick} to={{ pathname: `/group/${groupServerId}/${key}` }}>
                         {value.name}
-
                       </Link>
                     )
                     : (
                       // eslint-disable-next-line
                       <Link className="text-reset" onContextMenu={handleRightClick} to={{ pathname: `/group/${groupServerId}/${key}` }}>
                         {value.name}
-
                       </Link>
                     )
                   }
@@ -58,7 +54,7 @@ export default function ServerSidebar() {
             }
         </>
       );
-    }
+    } return <li />;
   }
 
   return (
@@ -76,7 +72,12 @@ export default function ServerSidebar() {
           }}
           >
             <Link className="text-reset" to="#">Actions</Link>
-            <Actions />
+            <Actions
+              openPopup={openPopupActions}
+              setOpenPopup={setOpenPopupActions}
+              actionDialog={actionDialog}
+              setActionDialog={setActionDialog}
+            />
           </li>
           {displayTextChannels()}
         </ul>

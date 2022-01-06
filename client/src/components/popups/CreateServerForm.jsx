@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { Context } from '../../Store';
 
-export default function CreateServerForm() {
+export default function CreateServerForm({ setOpenPopup }) {
   // const [input, setInput] = useState(`${user.name}'s Server`);
+  const [state, setState] = useContext(Context);
   const [input, setInput] = useState('Server');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    /*
+
     try {
       fetch('/api/groupServer/create', {
         method: 'POST',
@@ -19,26 +21,27 @@ export default function CreateServerForm() {
         body: JSON.stringify({
           type: 'create',
           name: input,
-          userId: user._id,
+          userId: state.user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            const _groupServers = { ...groupServers };
-            _groupServers[data.groupServerId] = data.groupServer;
-            setGroupServers({ ..._groupServers });
+            const currState = { ...state };
+            const groupServers = { ...state.groupServers };
+            groupServers[data.groupServerId] = data.groupServer;
+            currState.groupServers = groupServers;
+            setState(currState);
           } else console.log(data.message);
         });
     } finally {
       setLoading(false);
       setOpenPopup(false);
     }
-    */
   }
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     setInput(e.target.value);
-  };
+  }
 
   return (
     <form>
@@ -58,14 +61,6 @@ export default function CreateServerForm() {
   );
 }
 
-/*
 CreateServerForm.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  user: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  // eslint-disable-next-line react/require-default-props
-  setOpenPopup: PropTypes.func,
+  setOpenPopup: PropTypes.func.isRequired,
 };
-*/

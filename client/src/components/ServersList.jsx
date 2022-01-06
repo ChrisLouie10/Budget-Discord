@@ -8,7 +8,7 @@ import CreateServerForm from './popups/CreateServerForm';
 export default function ServersList() {
   const [state, setState] = useContext(Context);
   const [groupServerId, setGroupServerId] = useState('');
-  const [groupServers, setGroupServers] = useState(null);
+  const [groupServers, setGroupServers] = useState({});
   const [openPopupCreate, setOpenPopupCreate] = useState(false);
   const params = useParams();
 
@@ -21,39 +21,37 @@ export default function ServersList() {
 
   // Displays the group servers the user is a member of
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page
-  // eslint-disable-next-line
+
   function displayServers() {
-    if (groupServers) {
-      return (
-        <>
-          {
-            // eslint-disable-next-line
-            Object.entries(groupServers).map(([key, value]) => {
-              if (value) {
-                const textChannelId = Object.keys(value.textChannels)[0];
-                return (
-                  <li key={key}>
-                    {
-                      key === groupServerId
-                        ? (
-                          <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                            {value.name}
-                          </Link>
-                        )
-                        : (
-                          <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                            {value.name}
-                          </Link>
-                        )
-                      }
-                  </li>
-                );
-              }
-            })
-          }
-        </>
-      );
-    }
+    return (
+      <>
+        {
+          // eslint-disable-next-line
+          Object.entries(groupServers).map(([key, value]) => {
+            if (value) {
+              const textChannelId = Object.keys(value.textChannels)[0];
+              return (
+                <li key={key}>
+                  {
+                    key === groupServerId
+                      ? (
+                        <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                          {value.name}
+                        </Link>
+                      )
+                      : (
+                        <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                          {value.name}
+                        </Link>
+                      )
+                    }
+                </li>
+              );
+            }
+          })
+        }
+      </>
+    );
   }
 
   return (
@@ -62,7 +60,6 @@ export default function ServersList() {
         <div>
           <h5 className="text-white">Budget-Discord</h5>
         </div>
-
         <ul className="list-unstyled text-white">
           <li>
             <Link className="text-reset" to="/dashboard">Dashboard</Link>
@@ -71,6 +68,14 @@ export default function ServersList() {
             <Link className="text-reset" to="/friends">Friends</Link>
           </li>
           {displayServers()}
+
+        </ul>
+      </nav>
+    </div>
+  );
+}
+
+/*
           <li onClick={() => { if (!openPopupCreate) setOpenPopupCreate(true); }}>
             <Link className="text-reset" to="#">Create Server</Link>
             <Popup
@@ -81,8 +86,4 @@ export default function ServersList() {
               <CreateServerForm />
             </Popup>
           </li>
-        </ul>
-      </nav>
-    </div>
-  );
-}
+*/

@@ -17,7 +17,6 @@ export default function GroupServer() {
   useEffect(async () => {
     if (groupServerId) {
       try {
-        console.log(params);
         await fetch('/api/groupServer/verify', {
           method: 'POST',
           headers: {
@@ -37,7 +36,7 @@ export default function GroupServer() {
         setLoading(false);
       }
     }
-  }, [useParams()]);
+  }, [params]);
 
   if (loading) return <Loading />;
   if (!userAccess) return <Redirect to="/dashboard" />;
@@ -50,23 +49,3 @@ export default function GroupServer() {
     </>
   );
 }
-
-/*
-GroupServer.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  user: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  rest: PropTypes.object,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object,
-  // eslint-disable-next-line react/forbid-prop-types
-  chatLogs: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/require-default-props
-  groupServerId: PropTypes.string,
-  uri: PropTypes.string.isRequired,
-  setUser: PropTypes.func.isRequired,
-  setChatLogs: PropTypes.func.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
-};
-*/
