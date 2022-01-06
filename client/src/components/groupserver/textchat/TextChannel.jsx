@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { Context } from '../../../Store';
 
-export default function TextChannel({
-  chatLogs, setChatLogs, user, textChannelId, sendMessage,
-}) {
+export default function TextChannel() {
+  const [state, setState] = useContext(Context);
   const [input, setInput] = useState('');
+  const { textChannelId } = useParams();
 
   useEffect(async () => {
+    const { user, chatLogs } = state;
     // If the chat log for the text channel with the id "props.textChannelId"
     // doesn't exist in the client, then retrieve it from the server
     if (!chatLogs[textChannelId]) {
@@ -23,9 +26,11 @@ export default function TextChannel({
       })
         .then((response) => response.json())
         .then((data) => {
+          const currState = { ...state };
           const _chatLogs = { ...chatLogs };
           _chatLogs[textChannelId] = data.chatLog;
-          setChatLogs(_chatLogs);
+          currState.chatLogs = _chatLogs;
+          setState(currState);
         });
     }
   }, [textChannelId]);
@@ -37,15 +42,15 @@ export default function TextChannel({
       // Create a message object
       const message = {
         content: input,
-        index: Object.keys(chatLogs).length + 1,
-        author: user.name,
+        index: Object.keys(state.chatLogs).length + 1,
+        author: state.user.name,
         timestamp: new Date(),
         notSent: true,
       };
       // Send the message object over to client
-      chatLogs[textChannelId].push(message);
+      state.chatLogs[textChannelId].push(message);
       // Send the message object over to the server
-      sendMessage(message);
+      // sendMessage(message);
       // Clear chat box
       setInput('');
     }
@@ -60,12 +65,12 @@ export default function TextChannel({
   // Otherwise, sent messages will be light gray
   // eslint-disable-next-line
   function displayChat() {
-    if (chatLogs[textChannelId]) {
+    if (state.chatLogs[textChannelId]) {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
             {
-                Object.entries(chatLogs[textChannelId]).map(([key, value]) => {
+                Object.entries(state.chatLogs[textChannelId]).map(([key, value]) => {
                   if (value.notSent) {
                     return (
                       <p className="ml-2 #858585" key={key}>
@@ -114,6 +119,7 @@ export default function TextChannel({
   );
 }
 
+/*
 TextChannel.propTypes = {
   // eslint-disable-next-line
   chatLogs: PropTypes.object.isRequired,
@@ -123,3 +129,4 @@ TextChannel.propTypes = {
   sendMessage: PropTypes.func.isRequired,
   setChatLogs: PropTypes.func.isRequired,
 };
+*/

@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { Context } from '../../Store';
 // Simple private account information.
 
-export default function Dashboard({ user }) {
+export default function Dashboard() {
+  const [state, setState] = useContext(Context);
   const [error, setError] = useState('');
   const history = useHistory();
 
   async function handleLogout() {
-    setError('');
-
     await fetch('/api/user/logout', {
       method: 'DELETE',
     }).then((response) => response.json())
@@ -32,15 +31,15 @@ export default function Dashboard({ user }) {
           <div>
             <strong>Name:</strong>
             {' '}
-            {user.name}
+            {state.user.name}
             {' '}
             #
-            {user.number_id}
+            {state.user.number_id}
           </div>
           <div>
             <strong>Email:</strong>
             {' '}
-            {user.email}
+            {state.user.email}
           </div>
           <Link to="/change-name" className="btn btn-primary w-100 mt-3">Change Name</Link>
           <Link to="/change-password" className="btn btn-primary w-100 mt-3">Change Password</Link>
@@ -53,8 +52,3 @@ export default function Dashboard({ user }) {
     </div>
   );
 }
-
-Dashboard.propTypes = {
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired
-};

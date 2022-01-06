@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+
+import { Context } from '../Store';
 import Popup from './popups/Popup';
 import CreateServerForm from './popups/CreateServerForm';
 
-export default function ServersList(props) {
-  const {
-    groupServers, setGroupServers, groupServerId, user,
-  } = props;
+export default function ServersList() {
+  const [state, setState] = useContext(Context);
+  const [groupServerId, setGroupServerId] = useState('');
+  const [groupServers, setGroupServers] = useState(null);
   const [openPopupCreate, setOpenPopupCreate] = useState(false);
+  const params = useParams();
+
+  useEffect(() => {
+    setGroupServers(state.groupServers);
+    if (params) {
+      setGroupServerId(params.groupServerId);
+    }
+  }, [state.groupServers, params]);
 
   // Displays the group servers the user is a member of
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page
@@ -25,7 +34,7 @@ export default function ServersList(props) {
                 return (
                   <li key={key}>
                     {
-                      groupServerId === key
+                      key === groupServerId
                         ? (
                           <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
                             {value.name}
@@ -69,11 +78,7 @@ export default function ServersList(props) {
               openPopup={openPopupCreate}
               setOpenPopup={setOpenPopupCreate}
             >
-              <CreateServerForm
-                user={user}
-                groupServers={groupServers}
-                setGroupServers={setGroupServers}
-              />
+              <CreateServerForm />
             </Popup>
           </li>
         </ul>
@@ -81,13 +86,3 @@ export default function ServersList(props) {
     </div>
   );
 }
-
-// https://reactjs.org/docs/typechecking-with-proptypes.html
-ServersList.propTypes = {
-  // eslint-disable-next-line
-    groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-};

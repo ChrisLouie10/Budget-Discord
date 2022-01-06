@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import Store from '../Store';
 import Signup from './auth/Signup';
 import Dashboard from './auth/Dashboard';
 import Login from './auth/Login';
@@ -24,20 +25,22 @@ export default function App() {
   */
 
   return (
-    <Router>
-      <Switch>
-        <PrivateRoute exact path="/" component={Dashboard} />
-        <PrivateRoute exact path="/friends" component={Friends} />
-        <PrivateRoute exact path="/dashboard" component={Dashboard} />
-        <PrivateRoute exact path="/change-name" component={ChangeName} />
-        <PrivateRoute exact path="/change-password" component={ChangePassword} />
-        <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
-        <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
-        <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
-        <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer} />
-        <Route path="/signup" component={Signup} />
-        <Route path="/login" component={Login} />
-      </Switch>
-    </Router>
+    <Store>
+      <Router>
+        <Switch>
+          <PrivateRoute exact path="/" component={Dashboard} />
+          <PrivateRoute exact path="/friends" component={Friends} />
+          <PrivateRoute exact path="/dashboard" component={Dashboard} />
+          <PrivateRoute exact path="/change-name" component={ChangeName} />
+          <PrivateRoute exact path="/change-password" component={ChangePassword} />
+          <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
+          <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
+          <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
+          <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer} />
+          <Route path="/signup" component={Signup} />
+          <Route path="/login" component={Login} />
+        </Switch>
+      </Router>
+    </Store>
   );
 }

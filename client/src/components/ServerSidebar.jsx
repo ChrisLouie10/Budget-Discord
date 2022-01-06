@@ -1,24 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Context } from '../Store';
 import Actions from './popups/Actions';
 
-export default function ServerSidebar(props) {
-  const {
-    groupServers, groupServerId, uri, user, setUser, setGroupServers, textChannelId,
-  } = props;
+export default function ServerSidebar() {
+  const [state, setState] = useContext(Context);
   const [mounted, setMounted] = useState(true);
   const [groupServerName, setGroupServerName] = useState('Group Server');
   const [actionDialog, setActionDialog] = useState(0);
   const [openPopupActions, setOpenPopupActions] = useState(false);
+  const { groupServerId, textChannelId } = useParams();
 
   useEffect(() => function cleanup() {
     setMounted(false);
   }, []);
 
   useEffect(() => {
-    if (groupServers) {
-      setGroupServerName(groupServers[groupServerId].name);
+    if (state.groupServers) {
+      setGroupServerName(state.groupServers[groupServerId].name);
     }
   }, [groupServerId]);
 
@@ -30,11 +30,11 @@ export default function ServerSidebar(props) {
 
   // eslint-disable-next-line
   function displayTextChannels() {
-    if (groupServers[groupServerId]) {
+    if (state.groupServers[groupServerId]) {
       return (
         <>
           {
-            Object.entries(groupServers[groupServerId].textChannels).map(([key, value]) => (
+            Object.entries(state.groupServers[groupServerId].textChannels).map(([key, value]) => (
               <li key={key}>
                 {
                   textChannelId === key
@@ -76,21 +76,7 @@ export default function ServerSidebar(props) {
           }}
           >
             <Link className="text-reset" to="#">Actions</Link>
-            <Actions
-              uri={uri}
-              mounted={mounted}
-              openPopup={openPopupActions}
-              setOpenPopup={setOpenPopupActions}
-              actionDialog={actionDialog}
-              setActionDialog={setActionDialog}
-              user={user}
-              setUser={setUser}
-              groupServerName={groupServerName}
-              groupServers={groupServers}
-              setGroupServers={setGroupServers}
-              groupServerId={groupServerId}
-              textChannelId={textChannelId}
-            />
+            <Actions />
           </li>
           {displayTextChannels()}
         </ul>
@@ -98,20 +84,3 @@ export default function ServerSidebar(props) {
     </nav>
   );
 }
-
-// https://reactjs.org/docs/typechecking-with-proptypes.html
-ServerSidebar.propTypes = {
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  textChannelId: PropTypes.string,
-  uri: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-  setUser: PropTypes.func.isRequired,
-};
-
-ServerSidebar.defaultProps = {
-  textChannelId: '',
-};

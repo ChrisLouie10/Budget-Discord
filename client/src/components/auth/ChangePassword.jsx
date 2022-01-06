@@ -1,16 +1,17 @@
-import React, { useRef, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useRef, useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { Context } from '../../Store';
 
 // // Simple Update Profile page
 
-export default function ChangePassword({ user }) {
-  const oldPasswordRef = useRef();
-  const passwordRef = useRef();
-  const passwordConfirmRef = useRef();
+export default function ChangePassword() {
+  const [state, setState] = useContext(Context);
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
   const history = useHistory();
+  const oldPasswordRef = useRef();
+  const passwordRef = useRef();
+  const passwordConfirmRef = useRef();
 
   // eslint-disable-next-line
   async function handleSubmit(e) {
@@ -28,7 +29,7 @@ export default function ChangePassword({ user }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: user.email,
+          email: state.user.email,
           oldPassword: oldPasswordRef.current.value,
           password: passwordRef.current.value,
         }),
@@ -73,8 +74,3 @@ export default function ChangePassword({ user }) {
     </div>
   );
 }
-
-ChangePassword.propTypes = {
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired
-};

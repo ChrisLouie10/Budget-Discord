@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
-import Loading from '../auth/Loading';
+import Loading from '../Loading';
 
 export default function JoinGroupServer({
   computedMatch, user, groupServers, setGroupServers,

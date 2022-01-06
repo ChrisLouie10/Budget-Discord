@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-export default function CreateServerForm({
-  user, groupServers, setGroupServers, setOpenPopup,
-}) {
-  const [input, setInput] = useState(`${user.name}'s Server`);
+export default function CreateServerForm() {
+  // const [input, setInput] = useState(`${user.name}'s Server`);
+  const [input, setInput] = useState('Server');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    /*
     try {
       fetch('/api/groupServer/create', {
         method: 'POST',
@@ -33,6 +33,7 @@ export default function CreateServerForm({
       setLoading(false);
       setOpenPopup(false);
     }
+    */
   }
 
   const handleInputChange = (e) => {
@@ -57,6 +58,7 @@ export default function CreateServerForm({
   );
 }
 
+/*
 CreateServerForm.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   user: PropTypes.object.isRequired,
@@ -66,3 +68,4 @@ CreateServerForm.propTypes = {
   // eslint-disable-next-line react/require-default-props
   setOpenPopup: PropTypes.func,
 };
+*/
