@@ -1,0 +1,17 @@
+name: 'Jest Tests'
+
+on:
+  pull_request:
+
+jobs:
+  run-jest:
+    name: Run Jest Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        working-directory: ./server
+        run: npm ci
+      - name: Run Jest
+        working-directory: ./server
+        run: npm run test
