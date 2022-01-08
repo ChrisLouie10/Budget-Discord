@@ -29,7 +29,7 @@ afterAll(async () => {
   expect(logoutResponse.statusCode).toBe(200);
 });
 
-describe('Testing Auth', () => {
+describe('Testing basic auth methods', () => {
 
   test('Verify: should verify cookie', async () => {
     const verifyResponse = await request(app)
