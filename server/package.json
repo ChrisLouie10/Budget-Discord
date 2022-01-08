@@ -14,7 +14,7 @@
     "start": "node server.js",
     "lint:js": "eslint --ext .js --ignore-path .gitignore .",
     "lint": "npm run lint:js",
-    "test": "jest --forceExit --verbose false --coverage"
+    "test": "jest --config ./jest/jest.config.js"
   },
   "repository": {
     "type": "git",
@@ -47,6 +47,7 @@
     "eslint": "^8.5.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
+    "jest": "^27.4.7",
     "nodemon": "^2.0.6",
     "supertest": "^6.1.3"
   }
