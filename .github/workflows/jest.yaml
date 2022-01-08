@@ -13,6 +13,7 @@ jobs:
         working-directory: ./server
         run: npm ci
       - name: create env file
+        working-directory: ./server
         run: |
           touch .env
           echo MONGO_TEST_SERVER=${{ secrets.MONGO_TEST_SERVER }} >> .env
