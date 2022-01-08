@@ -3,6 +3,9 @@ name: 'Jest Tests'
 on:
   pull_request:
 
+env: 
+  MONGO_TEST_SERVER: secret_key
+
 jobs:
   run-jest:
     name: Run Jest Tests
@@ -12,6 +15,10 @@ jobs:
       - name: Install modules
         working-directory: ./server
         run: npm ci
+      - name: create env file
+        run: |
+          touch .env
+          echo MONGO_TEST_SERVER=${{ env.MONGO_TEST_SERVER }} >> .env
       - name: Run Jest
         working-directory: ./server
         run: npm run test
