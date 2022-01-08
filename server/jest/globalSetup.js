@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // eslint-disable-next-line
 beforeAll(async () => {
-  await mongoose.connect('mongodb://localhost/budget-discord-test-env', {
+  await mongoose.connect(process.env.MONGO_TEST_SERVER, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
