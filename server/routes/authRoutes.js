@@ -86,7 +86,7 @@ router.put('/password', verify, async (req, res) => {
   if (!validPass) return res.status(400).json({ success: false, message: 'Old Password is Incorrect' });
 
   // Update password
-  return updateUserPassword(req.user._id, hashPassword(req.body.password))
+  return updateUserPassword(req.user._id, await hashPassword(req.body.password))
     .then(() => res.status(200).json({ success: true, message: 'Success' }))
     .catch(() => res.status(500).json({ success: false, message: 'Failed to change password' }));
 });

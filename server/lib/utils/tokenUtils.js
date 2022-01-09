@@ -5,7 +5,7 @@ const { findUser } = require('../../db/dao/userDao');
 // returns the user's data if true
 // returns an error if false
 
-const verify = async function (req, res, next) {
+const verify = async (req, res, next) => {
   // get token from cookies
   const { token } = req.cookies;
 

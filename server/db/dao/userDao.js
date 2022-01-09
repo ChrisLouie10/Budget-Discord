@@ -45,11 +45,10 @@ async function updateUserName(id, name) {
 async function updateUserPassword(id, password) {
   const query = { _id: id };
   const set = { $set: { password } };
-  console.log(set);
   return User.updateOne(query, set);
 }
 
-function deleteUser(query) {
+async function deleteUser(query) {
   return User.deleteOne(query);
 }
 
