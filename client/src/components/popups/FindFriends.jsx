@@ -117,7 +117,7 @@ export default function FindFriend() {
 
   useEffect(async () => {
     setShowFriendRequests(false);
-    await fetch('/api/friends/get-friend-requests', {
+    await fetch('/api/friends/requests', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export default function FindFriend() {
         if (data.success) setFriendRequests(data.friendRequests);
         else setError(data.message);
       });
-    await fetch('/api/friends/get-friends', {
+    await fetch('/api/friends', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -98,17 +98,14 @@ router.post('/accept', verify, async (req, res) => {
 
 router.get('/requests', verify, async (req, res) => {
   const friendRequest = req.user.friend_request;
-  const promises = friendRequest.map(async (friendID) => {
-    const results = await findUser({ _id: friendID });
-    const users = results.map((friendReq) => ({
-      id: friendReq._id,
-      name: friendReq.name,
-      numberID: friendReq.number_id,
-    }));
-    return users;
-  });
-  let friendRequestUsers = await Promise.all(promises);
-  friendRequestUsers = friendRequestUsers.map((request) => request[0]);
+  if (friendRequest.length == 0) return res.status(200).json({ success: true, message: 'Success' });
+  const promises = friendRequest.map((friendID) => findUser({ _id: friendID })
+    .then((userData) => ({
+      id: userData._id,
+      name: userData.name,
+      numberID: userData.number_id,
+    })));
+  const friendRequestUsers = await Promise.all(promises);
 
   return res.status(200).json({
     success: true,
@@ -119,17 +116,13 @@ router.get('/requests', verify, async (req, res) => {
 
 router.get('/', verify, async (req, res) => {
   const userFriends = req.user.friends;
-  const promises = userFriends.map(async (friendID) => {
-    const results = await findUser({ _id: friendID });
-    const friends = results.map((friend) => ({
+  const promises = userFriends.map((friendID) => findUser({ _id: friendID })
+    .then((friend) => ({
       id: friend._id,
       name: friend.name,
       numberID: friend.number_id,
-    }));
-    return friends;
-  });
-  let friends = await Promise.all(promises);
-  friends = friends.map((friend) => friend[0]);
+    })));
+  const friends = await Promise.all(promises);
 
   return res.status(200).json({ success: true, message: 'Success', friends });
 });
