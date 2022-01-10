@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const User = require('../db/models/User');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   addFriend,
@@ -7,8 +6,10 @@ const {
   deleteFriend,
 } = require('../db/dao/friendDao');
 const {
-  findUser,
-  findUsersWithName,
+  findUserById,
+  findUsersByIds,
+  findUserByNameAndNumber,
+  findUsersByName,
 } = require('../db/dao/userDao');
 const {
   findFriendValidation,
@@ -20,7 +21,7 @@ router.post('/find', verify, async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
   // Find all users of a specific name
-  let users = await findUsersWithName(req.body.friendName);
+  let users = await findUsersByName(req.body.friendName);
 
   // Store specific friend if number id is passed
 
@@ -32,10 +33,7 @@ router.post('/find', verify, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Invalid number' });
     }
     if (numberId < 0 || numberId > 999) return res.status(404).json({ success: false, message: 'Invalid number' });
-    const specifiedFriend = await findUser({
-      name: req.body.friendName,
-      number_id: parseInt(req.body.friendNumber, 10),
-    });
+    const specifiedFriend = await findUserByNameAndNumber(req.body.friendName, numberId);
 
     // Move specified friend to the front of the array
     if (specifiedFriend) {
@@ -69,7 +67,7 @@ router.post('/send', verify, async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
   // Check if friend exists
-  const friend = await findUser({ _id: req.body.friendID });
+  const friend = await findUserById(req.body.friendID);
   if (!friend) return res.status(404).json({ success: false, message: 'User does not exist' });
 
   // Check if users are already friends
@@ -100,7 +98,7 @@ router.post('/accept', verify, async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
   // Check if friend exists
-  const friend = await User.findOne({ _id: req.body.friendID });
+  const friend = await findUserById(req.body.friendID);
   if (!friend) return res.status(404).json({ success: false, message: 'User does not exist' });
 
   // Check if users are already friends
@@ -119,37 +117,35 @@ router.post('/accept', verify, async (req, res) => {
 router.get('/requests', verify, async (req, res) => {
   const friendRequest = req.user.friend_request;
   if (friendRequest.length == 0) return res.status(200).json({ success: true, message: 'Success' });
-  const promises = friendRequest.map((friendID) => findUser({ _id: friendID })
-    .then((userData) => ({
-      id: userData._id,
-      name: userData.name,
-      numberID: userData.number_id,
-    })));
-  const friendRequestUsers = await Promise.all(promises);
+  let users = await findUsersByIds(friendRequest);
+  users = users.map((userData) => ({
+    id: userData._id,
+    name: userData.name,
+    numberID: userData.number_id,
+  }));
 
   return res.status(200).json({
     success: true,
     message: 'Success',
-    friendRequests: friendRequestUsers,
+    friendRequests: users,
   });
 });
 
 router.get('/', verify, async (req, res) => {
   const userFriends = req.user.friends;
-  const promises = userFriends.map((friendID) => findUser({ _id: friendID })
-    .then((friend) => ({
-      id: friend._id,
-      name: friend.name,
-      numberID: friend.number_id,
-    })));
-  const friends = await Promise.all(promises);
+  let friends = await findUsersByIds(userFriends);
+  friends = friends.map((userData) => ({
+    id: userData._id,
+    name: userData.name,
+    numberID: userData.number_id,
+  }));
 
   return res.status(200).json({ success: true, message: 'Success', friends });
 });
 
 router.delete('/', verify, async (req, res) => {
   console.log(req.query.friendId);
-  const friend = await findUser({ _id: req.query.friendId });
+  const friend = await findUserById(req.query.friendId);
   if (!friend) return res.status(400).json({ success: false, message: 'Friend cannot be found' });
 
   return deleteFriend(req.user._id, req.query.friendId)
