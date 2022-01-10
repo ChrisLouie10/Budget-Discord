@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { Context } from '../../Store';
 
-export default function DeleteGroupServerForm({
-  groupServerId, userId, groupServers, setGroupServers, groupServerName,
-}) {
+export default function DeleteGroupServerForm() {
+  const [state, setState] = useContext(Context);
   const [mounted, setMounted] = useState(true);
-  const history = useHistory();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
+  const { groupServerId } = useParams();
 
   // eslint-disable-next-line
   useEffect(() => function () {
@@ -27,15 +27,16 @@ export default function DeleteGroupServerForm({
         body: JSON.stringify({
           type: 'delete',
           groupServerId,
-          userId,
+          userId: state.user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
             history.push('/dashboard');
-            const _groupServers = { ...groupServers };
-            delete _groupServers[groupServerId];
-            setGroupServers({ ..._groupServers });
+            const currState = { ...state };
+            const groupServers = currState;
+            delete groupServers[groupServerId];
+            setState(currState);
           } else console.log(data.message);
         });
     }
@@ -47,7 +48,7 @@ export default function DeleteGroupServerForm({
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (input === groupServerName) deleteCurrentServer();
+    if (input === state.groupServers[groupServerId].name) deleteCurrentServer();
   }
 
   return (
@@ -55,7 +56,7 @@ export default function DeleteGroupServerForm({
       <div className="form-group">
         <p>
           Type "
-          {groupServerName}
+          {state.groupServers[groupServerId].name}
           " to confirm deletion
         </p>
         <input
@@ -70,12 +71,3 @@ export default function DeleteGroupServerForm({
     </form>
   );
 }
-
-DeleteGroupServerForm.propTypes = {
-  groupServerId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  groupServerName: PropTypes.string.isRequired,
-};

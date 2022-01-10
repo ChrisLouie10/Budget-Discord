@@ -100,7 +100,7 @@ router.post('/create-channel', verify, async (req, res) => {
     if (groupServer !== null) {
       // Check whether the user attempting to create a new channel is
       // the owner of the groupServer or an admin
-      let permission = groupServer.owner === req.body.userId;
+      let permission = groupServer.owner == req.body.userId;
       if (!permission) {
         groupServer.admins.forEach((admin) => {
           if (admin === req.body.userId) {

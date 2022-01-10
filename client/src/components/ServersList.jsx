@@ -68,14 +68,6 @@ export default function ServersList() {
             <Link className="text-reset" to="/friends">Friends</Link>
           </li>
           {displayServers()}
-
-        </ul>
-      </nav>
-    </div>
-  );
-}
-
-/*
           <li onClick={() => { if (!openPopupCreate) setOpenPopupCreate(true); }}>
             <Link className="text-reset" to="#">Create Server</Link>
             <Popup
@@ -86,4 +78,8 @@ export default function ServersList() {
               <CreateServerForm />
             </Popup>
           </li>
-*/
+        </ul>
+      </nav>
+    </div>
+  );
+}

@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { Context } from '../../Store';
 
-export default function CreateChannelForm({
-  userId, groupServerId, groupServers, setGroupServers, setOpenPopup,
-}) {
+export default function CreateChannelForm({ setOpenPopup }) {
+  const [state, setState] = useContext(Context);
   const [input, setInput] = useState('new-channel');
   const [loading, setLoading] = useState(false);
   const history = useHistory();
+  const { groupServerId } = useParams();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -22,16 +23,17 @@ export default function CreateChannelForm({
         body: JSON.stringify({
           type: 'create-channel',
           name: input,
-          userId,
+          userId: state.user._id,
           groupServerId,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            const _groupServers = { ...groupServers };
+            const currState = { ...state };
+            const { groupServers } = currState;
             newTextChannelId = data.textChannelId;
-            _groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
-            setGroupServers({ ..._groupServers });
+            groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
+            setState(currState);
             setLoading(false);
             setOpenPopup(false);
           }
@@ -64,10 +66,5 @@ export default function CreateChannelForm({
 }
 
 CreateChannelForm.propTypes = {
-  userId: PropTypes.string.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
   setOpenPopup: PropTypes.func.isRequired,
 };

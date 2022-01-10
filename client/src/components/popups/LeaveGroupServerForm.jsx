@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { Context } from '../../Store';
 
-export default function LeaveGroupServerForm({
-  groupServerId, userId, groupServers, setGroupServers, setUser, setOpenPopup, groupServerName,
-}) {
+const propTypes = {
+  setOpenPopup: PropTypes.func.isRequired,
+};
+
+export default function LeaveGroupServerForm({ setOpenPopup }) {
+  const [state, setState] = useContext(Context);
   const [mounted, setMounted] = useState(true);
-  const history = useHistory();
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
+  const { groupServerId } = useParams();
 
   // eslint-disable-next-line
   useEffect(() => function () {
@@ -25,16 +30,17 @@ export default function LeaveGroupServerForm({
         body: JSON.stringify({
           type: 'leave',
           groupServerId,
-          userId,
+          userId: state.user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success && mounted) {
             history.push('/dashboard');
-            const _groupServers = { ...groupServers };
-            delete _groupServers[groupServerId];
-            setGroupServers({ ..._groupServers });
-            setUser(data.user);
+            const currState = { ...state };
+            const groupServers = currState;
+            delete groupServers[groupServerId];
+            currState.user = data.user;
+            setState(currState);
           } else console.log(data.message);
         });
     }
@@ -56,7 +62,7 @@ export default function LeaveGroupServerForm({
         <p>
           Are you sure you want to leave
           {' '}
-          {groupServerName}
+          {state.groupServers[groupServerId].name}
           ? You won't
           be able to rejoin unless you are re-invited.
         </p>
@@ -67,13 +73,4 @@ export default function LeaveGroupServerForm({
   );
 }
 
-LeaveGroupServerForm.propTypes = {
-  groupServerId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  setUser: PropTypes.func.isRequired,
-  setOpenPopup: PropTypes.func.isRequired,
-  groupServerName: PropTypes.string.isRequired,
-};
+LeaveGroupServerForm.propTypes = propTypes;

@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { Context } from '../../Store';
 
 export default function CreateServerForm({ setOpenPopup }) {
-  // const [input, setInput] = useState(`${user.name}'s Server`);
   const [state, setState] = useContext(Context);
-  const [input, setInput] = useState('Server');
+  const [input, setInput] = useState(`${state.user.name}'s Server`);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
