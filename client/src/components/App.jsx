@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import Store from '../contexts/Store';
+import StoreProvider from '../contexts/Store';
 import UserProvider from '../contexts/user-context';
 import GroupServersProvider from '../contexts/groupServers-context';
 import ChatLogsProvider from '../contexts/chatLogs-context';
@@ -28,7 +28,7 @@ export default function App() {
   */
 
   return (
-    <Store>
+    <StoreProvider>
       <UserProvider>
         <GroupServersProvider>
           <ChatLogsProvider>
@@ -50,6 +50,6 @@ export default function App() {
           </ChatLogsProvider>
         </GroupServersProvider>
       </UserProvider>
-    </Store>
+    </StoreProvider>
   );
 }

@@ -7,7 +7,7 @@ const initialState = {
 
 export const Context = createContext();
 
-export default function Store({ children }) {
+export default function StoreProvider({ children }) {
   const [state, setState] = useState(initialState);
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -15,7 +15,7 @@ export default function Store({ children }) {
   );
 }
 
-Store.propTypes = {
+StoreProvider.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   children: PropTypes.any.isRequired,
 };
