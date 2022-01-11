@@ -8,13 +8,14 @@ export default function ServersList(props) {
   const {
     groupServers, setGroupServers, groupServerId, user,
   } = props;
-  const [openPopupCreate, setOpenPopupCreate] = useState(false);
+  const [openPopup, setOpenPopup] = useState(false);
 
   // Displays the group servers the user is a member of
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page
   // eslint-disable-next-line
   function displayServers() {
     if (groupServers) {
+      console.log(groupServers);
       return (
         <>
           {
@@ -62,12 +63,12 @@ export default function ServersList(props) {
             <Link className="text-reset" to="/friends">Friends</Link>
           </li>
           {displayServers()}
-          <li onClick={() => { if (!openPopupCreate) setOpenPopupCreate(true); }}>
+          <li onClick={() => { if (!openPopup) setOpenPopup(true); }}>
             <Link className="text-reset" to="#">Create Server</Link>
             <Popup
               title="Create New Server"
-              openPopup={openPopupCreate}
-              setOpenPopup={setOpenPopupCreate}
+              openPopup={openPopup}
+              setOpenPopup={setOpenPopup}
             >
               <CreateServerForm
                 user={user}
@@ -85,7 +86,7 @@ export default function ServersList(props) {
 // https://reactjs.org/docs/typechecking-with-proptypes.html
 ServersList.propTypes = {
   // eslint-disable-next-line
-    groupServers: PropTypes.object.isRequired,
+  groupServers: PropTypes.object.isRequired,
   setGroupServers: PropTypes.func.isRequired,
   groupServerId: PropTypes.string.isRequired,
   // eslint-disable-next-line
