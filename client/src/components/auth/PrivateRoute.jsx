@@ -57,7 +57,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
           setUser(data.user);
           if (data.success) {
             const currState = { ...state };
-            const ws = new WebSocket(process.env.REACT_APP_wssURI);
+            const ws = new WebSocket(process.env.REACT_APP_WSS_URI);
             if (ws) {
               ws.addEventListener('message', handleWSSMessage);
             }

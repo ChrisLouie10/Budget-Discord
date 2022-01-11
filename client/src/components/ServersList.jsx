@@ -1,13 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-import { Context } from '../contexts/Store';
 import { GroupServersContext } from '../contexts/groupServers-context';
 import Popup from './popups/Popup';
 import CreateServerForm from './popups/CreateServerForm';
 
 export default function ServersList() {
-  const [state, setState] = useContext(Context);
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [groupServerId, setGroupServerId] = useState('');
   const [openPopupCreate, setOpenPopupCreate] = useState(false);

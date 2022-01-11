@@ -35,25 +35,8 @@ wss.on('connection', (ws) => {
     wsclient.serverId = messageObj.serverId;
     wsclient.textChannelId = messageObj.textChannelId;
 
-    // if the ws client is requesting for a chat log
-    if (messageObj.type === 'chatLog') {
-      // look for the ws client's text channel
-      TextChannel.findById(messageObj.textChannelId).exec().then((textChannel) => {
-        // if a text channel is found, send its chat log to the ws client
-        if (textChannel !== null) {
-          const msg = {
-            type: 'chatLog',
-            chatLog: textChannel.chat_log,
-          };
-          ws.send(JSON.stringify(msg));
-        }
-      }).catch((err) => {
-        console.log('An error occured when trying to access the DB for a specific text channel!');
-        console.error(err);
-      }); // eslint-disable-next-line brace-style
-    }
     // if the ws client is sending a new message
-    else if (messageObj.type === 'message') {
+    if (messageObj.type === 'message') {
       const newMessage = {
         content: messageObj.message.content,
         author: messageObj.message.author,
@@ -74,6 +57,7 @@ wss.on('connection', (ws) => {
             textChannelId: messageObj.textChannelId,
           };
           Object.keys(wsclients).forEach((key) => {
+            console.log(`${wsclients[key].readyState} === ${WebSocket.OPEN} && ${wsclients[key].serverId} === ${ws.serverId} && ${wsclients[key].sessionId} !== ${ws.sessionId}`);
             if (wsclients[key].readyState === WebSocket.OPEN
               && wsclients[key].serverId === ws.serverId) {
               if (wsclients[key].sessionId !== ws.sessionId) {
@@ -98,10 +82,10 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     delete wsclients[wsclient.sessionId];
-    console.log('Current number of ws clients connected:', Object.keys(wsclients).length);
+    console.log('DISCONNECTED Current number of ws clients connected:', Object.keys(wsclients).length);
   });
 
-  console.log('Current number of ws clients connected:', Object.keys(wsclients).length);
+  console.log('NEW CONNECTION Current number of ws clients connected:', Object.keys(wsclients).length);
 });
 
 module.exports = server;

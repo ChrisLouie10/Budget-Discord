@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 export default function DeleteGroupServerForm() {
-  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [mounted, setMounted] = useState(true);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,16 +29,15 @@ export default function DeleteGroupServerForm() {
         body: JSON.stringify({
           type: 'delete',
           groupServerId,
-          userId: state.user._id,
+          userId: user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
             history.push('/dashboard');
-            const currState = { ...state };
-            const groupServers = currState;
-            delete groupServers[groupServerId];
-            setState(currState);
+            const _groupServers = { ...groupServers };
+            delete _groupServers[groupServerId];
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     }
@@ -48,7 +49,7 @@ export default function DeleteGroupServerForm() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (input === state.groupServers[groupServerId].name) deleteCurrentServer();
+    if (input === groupServers[groupServerId].name) deleteCurrentServer();
   }
 
   return (
@@ -56,7 +57,7 @@ export default function DeleteGroupServerForm() {
       <div className="form-group">
         <p>
           Type "
-          {state.groupServers[groupServerId].name}
+          {groupServers[groupServerId].name}
           " to confirm deletion
         </p>
         <input

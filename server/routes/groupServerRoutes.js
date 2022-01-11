@@ -225,7 +225,7 @@ router.post('/find', verify, async (req, res) => {
           groupServers,
         });
       });
-    } else res.status(200).json({ success: false, message: 'No group servers found.', groupServers: null });
+    } else res.status(200).json({ success: true, message: 'No group servers found.', groupServers: {} });
   } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
 });
 

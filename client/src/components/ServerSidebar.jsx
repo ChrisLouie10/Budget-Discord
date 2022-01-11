@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Context } from '../contexts/Store';
 import { GroupServersContext } from '../contexts/groupServers-context';
 import Actions from './popups/Actions';
 
 export default function ServerSidebar() {
-  const [state, setState] = useContext(Context);
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [mounted, setMounted] = useState(true);
   const [groupServerName, setGroupServerName] = useState('Group Server');

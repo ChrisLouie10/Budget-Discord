@@ -1,12 +1,14 @@
 import React, { useState, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 export default function DeleteChannelForm() {
   const history = useHistory();
   const { groupServerId, textChannelId } = useParams();
-  const [state, setState] = useContext(Context);
-  const [textChannelName] = useState(state.groupServers[groupServerId].textChannels[textChannelId].name);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
+  const [textChannelName] = useState(groupServers[groupServerId].textChannels[textChannelId].name);
   const [input, setInput] = useState('');
   // eslint-disable-next-line
   const [mounted, setMounted] = useState(true);
@@ -14,7 +16,7 @@ export default function DeleteChannelForm() {
 
   async function deleteCurrentChannel() {
     // We want group servers to have at least one channel. So don't delete if there is only one channel left.
-    const numOfTextChannels = Object.keys(state.groupServers[groupServerId].textChannels).length;
+    const numOfTextChannels = Object.keys(groupServers[groupServerId].textChannels).length;
     if (mounted && numOfTextChannels > 1) {
       setLoading(true);
       await fetch('/api/groupServer/delete-channel', {
@@ -26,16 +28,15 @@ export default function DeleteChannelForm() {
           type: 'delete-channel',
           groupServerId,
           textChannelId,
-          userId: state.user._id,
+          userId: user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
             history.push('/dashboard');
-            const currState = { ...state };
-            const { groupServers } = currState;
-            delete groupServers[groupServerId].textChannels[textChannelId];
-            setState(currState);
+            const _groupServers = { ...groupServers };
+            delete _groupServers[groupServerId].textChannels[textChannelId];
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     }

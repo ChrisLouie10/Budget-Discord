@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 export default function InviteForm() {
-  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [loading, setLoading] = useState(false);
   const [inviteUrl, setInviteUrl] = useState('');
   const [expiration, setExpiration] = useState('30');
@@ -11,17 +13,15 @@ export default function InviteForm() {
   const { groupServerId } = useParams();
 
   useEffect(() => {
-    const { groupServers } = state;
     const groupServer = groupServers[groupServerId];
     if (groupServer.inviteCode) {
-      setInviteUrl(`uri/join/${groupServers[groupServerId].inviteCode}`);
+      setInviteUrl(`${process.env.REACT_APP_URI}/join/${groupServers[groupServerId].inviteCode}`);
     }
   }, [groupServerId]);
 
   async function generateInviteLink(e) {
     e.preventDefault();
     setLoading(true);
-    const { user } = state;
     try {
       await fetch('/api/groupServer/create-invite', {
         method: 'POST',
@@ -38,11 +38,10 @@ export default function InviteForm() {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            setInviteUrl(`uri/join/${data.code}`);
-            const currState = { ...state };
-            const { groupServers } = currState;
-            groupServers[groupServerId].inviteCode = data.code;
-            setState(currState);
+            setInviteUrl(`${process.env.REACT_APP_URI}/join/${data.code}`);
+            const _groupServers = { ...groupServers };
+            _groupServers[groupServerId].inviteCode = data.code;
+            setGroupServers(_groupServers);
           }
         });
     } finally { setLoading(false); }

@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 const propTypes = {
   setOpenPopup: PropTypes.func.isRequired,
 };
 
 export default function LeaveGroupServerForm({ setOpenPopup }) {
-  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [mounted, setMounted] = useState(true);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -30,17 +32,16 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
         body: JSON.stringify({
           type: 'leave',
           groupServerId,
-          userId: state.user._id,
+          userId: user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success && mounted) {
             history.push('/dashboard');
-            const currState = { ...state };
-            const groupServers = currState;
-            delete groupServers[groupServerId];
-            currState.user = data.user;
-            setState(currState);
+            const _groupServers = { ...groupServers };
+            delete _groupServers[groupServerId];
+            setUser(data.user);
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     }
@@ -62,7 +63,7 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
         <p>
           Are you sure you want to leave
           {' '}
-          {state.groupServers[groupServerId].name}
+          {groupServers[groupServerId].name}
           ? You won't
           be able to rejoin unless you are re-invited.
         </p>

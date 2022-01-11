@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 export default function CreateChannelForm({ setOpenPopup }) {
-  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [input, setInput] = useState('new-channel');
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -23,17 +25,16 @@ export default function CreateChannelForm({ setOpenPopup }) {
         body: JSON.stringify({
           type: 'create-channel',
           name: input,
-          userId: state.user._id,
+          userId: user._id,
           groupServerId,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            const currState = { ...state };
-            const { groupServers } = currState;
+            const _groupServers = { ...groupServers };
             newTextChannelId = data.textChannelId;
-            groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
-            setState(currState);
+            _groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
+            setGroupServers(_groupServers);
             setLoading(false);
             setOpenPopup(false);
           }

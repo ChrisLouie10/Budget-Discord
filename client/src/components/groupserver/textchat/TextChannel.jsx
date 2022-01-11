@@ -63,6 +63,15 @@ export default function TextChannel() {
           const _chatLogs = { ...chatLogs };
           _chatLogs[textChannelId] = data.chatLog;
           setChatLogs(_chatLogs);
+        })
+        .then(() => {
+          const data = {
+            textChannelId,
+            serverId: groupServerId,
+          };
+          waitForWSConnection(() => {
+            state.ws.send(JSON.stringify(data));
+          }, 500);
         });
     }
     setLoading(false);
@@ -132,7 +141,7 @@ export default function TextChannel() {
         </div>
       );
     } return <div />;
-  }, [chatLogs]);
+  }, [chatLogs, textChannelId]);
 
   if (loading) return <Loading />;
   return (

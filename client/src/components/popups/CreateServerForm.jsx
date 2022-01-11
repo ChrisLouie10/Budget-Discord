@@ -1,10 +1,12 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
 export default function CreateServerForm({ setOpenPopup }) {
-  const [state, setState] = useContext(Context);
-  const [input, setInput] = useState(`${state.user.name}'s Server`);
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
+  const [input, setInput] = useState(`${user.name}'s Server`);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
@@ -20,16 +22,14 @@ export default function CreateServerForm({ setOpenPopup }) {
         body: JSON.stringify({
           type: 'create',
           name: input,
-          userId: state.user._id,
+          userId: user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            const currState = { ...state };
-            const groupServers = { ...state.groupServers };
-            groupServers[data.groupServerId] = data.groupServer;
-            currState.groupServers = groupServers;
-            setState(currState);
+            const _groupServers = { ...groupServers };
+            _groupServers[data.groupServerId] = data.groupServer;
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     } finally {
@@ -61,5 +61,11 @@ export default function CreateServerForm({ setOpenPopup }) {
 }
 
 CreateServerForm.propTypes = {
-  setOpenPopup: PropTypes.func.isRequired,
+  setOpenPopup: PropTypes.func,
+};
+
+CreateServerForm.defaultProps = {
+  setOpenPopup: () => {
+    console.log('No function provided for Create Server Form');
+  },
 };
