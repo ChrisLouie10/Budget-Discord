@@ -21,7 +21,6 @@ export default function LeaveGroupServerForm({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'leave',

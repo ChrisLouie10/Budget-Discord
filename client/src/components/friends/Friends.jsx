@@ -14,7 +14,6 @@ export default function Friend() {
   const friendNumberRef = useRef();
   const [friends, setFriends] = useState([]);
   const [friendResults, setFriendResults] = useState([]);
-  const [showFriendRequests, setShowFriendRequests] = useState(false);
   const [friendRequests, setFriendRequests] = useState([]);
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
@@ -26,11 +25,10 @@ export default function Friend() {
       setError('');
       setLoading(true);
       setFriendResults([]);
-      await fetch('/api/friends/find-users', {
+      await fetch('/api/friends/find', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendName: friendNameRef.current.value,
@@ -69,37 +67,33 @@ export default function Friend() {
   };
 
   useEffect(async () => {
-    setShowFriendRequests(false);
-    await fetch('/api/friends/get-friend-requests', {
+    await fetch('/api/friends/requests', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {
         if (data.success) setFriendRequests(data.friendRequests);
         else setError(data.message);
       });
-    await fetch('/api/friends/get-friends', {
+    await fetch('/api/friends', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {
         if (data.success) setFriends(data.friends);
         else setError(data.message);
       });
-    setShowFriendRequests(true);
   }, []);
 
   return (
     <div className="col-11 my-auto bg-secondary d-flex-column" style={{ minHeight: '100vh' }}>
-      {showFriendRequests ? friends.map((friend) => <FriendsList handleFriendDelete={handleFriendDelete} setError={setError} key={friend.id} friend={friend} />) : <div /> }
+      {friends && friends.length > 0 ? friends.map((friend) => <FriendsList handleFriendDelete={handleFriendDelete} setError={setError} key={friend.id} friend={friend} />) : <div /> }
       <hr />
-      {showFriendRequests ? friendRequests.map((friend) => <FriendRequests handleFriendAccept={handleFriendAccept} setError={setError} key={friend.id} friend={friend} />) : <div> </div>}
+      {friendRequests && friendRequests.length > 0 ? friendRequests.map((friend) => <FriendRequests handleFriendAccept={handleFriendAccept} setError={setError} key={friend.id} friend={friend} />) : <div> </div>}
       <div className="card mx-auto" style={{ maxWidth: '400px' }}>
         <div className="card-body bg-light">
           <div className="card-header text-center mb-4">

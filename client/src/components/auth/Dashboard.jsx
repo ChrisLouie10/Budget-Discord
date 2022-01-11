@@ -12,14 +12,10 @@ export default function Dashboard({ user }) {
 
     await fetch('/api/user/logout', {
       method: 'DELETE',
-      headers: {
-        Authorization: localStorage.getItem('Authorization'),
-      },
     }).then((response) => response.json())
       .then((data) => {
         if (!data.success) setError(data.statusText);
         else {
-          localStorage.removeItem('Authorization');
           history.push('/login');
         }
       });

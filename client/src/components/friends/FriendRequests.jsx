@@ -12,11 +12,10 @@ export default function FriendRequests({ setError, friend, handleFriendAccept })
     try {
       setLoading(true);
       handleFriendAccept(friend);
-      await fetch('/api/friends/accept-friend-request', {
+      await fetch('/api/friends/accept', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: friend.id,

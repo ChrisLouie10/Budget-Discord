@@ -22,11 +22,10 @@ export default function ChangePassword({ user }) {
 
     try {
       setLoading(true);
-      await fetch('/api/user/change-password', {
-        method: 'PATCH',
+      await fetch('/api/user/password', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           email: user.email,

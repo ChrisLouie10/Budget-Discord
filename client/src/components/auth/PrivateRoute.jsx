@@ -113,11 +113,10 @@ export default function PrivateRoute({ component: Component, ...rest }) {
     }
 
     // Verify user
-    await fetch('/api/user/verify', {
+    await fetch('/api/user', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: localStorage.getItem('Authorization'),
       },
     }).then((response) => response.json())
       .then((data) => {
@@ -134,7 +133,6 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'find',

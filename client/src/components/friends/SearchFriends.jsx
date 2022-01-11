@@ -11,11 +11,10 @@ export default function SearchFriends({ friend, setError }) {
     try {
       setError('');
       setLoading(true);
-      await fetch('/api/friends/send-friend-request', {
+      await fetch('/api/friends/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           friendID: friend.id,

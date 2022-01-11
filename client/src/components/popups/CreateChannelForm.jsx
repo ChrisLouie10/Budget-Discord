@@ -18,7 +18,6 @@ export default function CreateChannelForm({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: localStorage.getItem('Authorization'),
         },
         body: JSON.stringify({
           type: 'create-channel',
