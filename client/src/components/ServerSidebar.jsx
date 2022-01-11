@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Actions from './popups/Actions';
+import Popup from './popups/Popup';
 
 export default function ServerSidebar(props) {
   const {
@@ -9,8 +10,9 @@ export default function ServerSidebar(props) {
   } = props;
   const [mounted, setMounted] = useState(true);
   const [groupServerName, setGroupServerName] = useState('Group Server');
+  const [actionTitle, setActionTitle] = useState('Actions');
   const [actionDialog, setActionDialog] = useState(0);
-  const [openPopupActions, setOpenPopupActions] = useState(false);
+  const [openPopup, setOpenPopup] = useState(false);
 
   useEffect(() => function cleanup() {
     setMounted(false);
@@ -69,28 +71,35 @@ export default function ServerSidebar(props) {
       <div className="row">
         <ul className="list-unstyled text-white">
           <li onClick={() => {
-            if (!openPopupActions) {
-              setOpenPopupActions(true);
+            if (!openPopup) {
+              setOpenPopup(true);
+              setActionTitle('Actions');
               setActionDialog(0);
             }
           }}
           >
             <Link className="text-reset" to="#">Actions</Link>
-            <Actions
-              uri={uri}
-              mounted={mounted}
-              openPopup={openPopupActions}
-              setOpenPopup={setOpenPopupActions}
-              actionDialog={actionDialog}
-              setActionDialog={setActionDialog}
-              user={user}
-              setUser={setUser}
-              groupServerName={groupServerName}
-              groupServers={groupServers}
-              setGroupServers={setGroupServers}
-              groupServerId={groupServerId}
-              textChannelId={textChannelId}
-            />
+            <Popup
+              title={actionTitle}
+              openPopup={openPopup}
+              setOpenPopup={setOpenPopup}
+            >
+              <Actions
+                uri={uri}
+                mounted={mounted}
+                actionDialog={actionDialog}
+                setActionTitle={setActionTitle}
+                setActionDialog={setActionDialog}
+                setOpenPopup={setOpenPopup}
+                user={user}
+                setUser={setUser}
+                groupServerName={groupServerName}
+                groupServers={groupServers}
+                setGroupServers={setGroupServers}
+                groupServerId={groupServerId}
+                textChannelId={textChannelId}
+              />
+            </Popup>
           </li>
           {displayTextChannels()}
         </ul>

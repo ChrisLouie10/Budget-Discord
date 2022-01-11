@@ -10,7 +10,7 @@ export default function Popup({
   };
 
   return (
-    <Dialog open={openPopup} maxWidth="md" onEscapeKeyDown={closePopup}>
+    <Dialog open={openPopup} maxWidth="md" onClose={closePopup}>
       <div className="pull-right">
         <button type="button" className="close" aria-label="Close" onClick={closePopup}>
           <span aria-hidden="true">&times;</span>
