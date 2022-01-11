@@ -7,7 +7,7 @@ import CreateServerForm from './popups/CreateServerForm';
 export default function ServersList() {
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [groupServerId, setGroupServerId] = useState('');
-  const [openPopupCreate, setOpenPopupCreate] = useState(false);
+  const [openPopup, setOpenPopup] = useState(false);
   const params = useParams();
 
   useEffect(() => {
@@ -65,12 +65,12 @@ export default function ServersList() {
             <Link className="text-reset" to="/friends">Friends</Link>
           </li>
           {displayServers()}
-          <li onClick={() => { if (!openPopupCreate) setOpenPopupCreate(true); }}>
+          <li onClick={() => { if (!openPopup) setOpenPopup(true); }}>
             <Link className="text-reset" to="#">Create Server</Link>
             <Popup
               title="Create New Server"
-              openPopup={openPopupCreate}
-              setOpenPopup={setOpenPopupCreate}
+              openPopup={openPopup}
+              setOpenPopup={setOpenPopup}
             >
               <CreateServerForm />
             </Popup>

@@ -57,7 +57,6 @@ wss.on('connection', (ws) => {
             textChannelId: messageObj.textChannelId,
           };
           Object.keys(wsclients).forEach((key) => {
-            console.log(`${wsclients[key].readyState} === ${WebSocket.OPEN} && ${wsclients[key].serverId} === ${ws.serverId} && ${wsclients[key].sessionId} !== ${ws.sessionId}`);
             if (wsclients[key].readyState === WebSocket.OPEN
               && wsclients[key].serverId === ws.serverId) {
               if (wsclients[key].sessionId !== ws.sessionId) {

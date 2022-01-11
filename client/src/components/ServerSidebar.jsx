@@ -2,13 +2,15 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { GroupServersContext } from '../contexts/groupServers-context';
 import Actions from './popups/Actions';
+import Popup from './popups/Popup';
 
 export default function ServerSidebar() {
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [mounted, setMounted] = useState(true);
   const [groupServerName, setGroupServerName] = useState('Group Server');
+  const [actionTitle, setActionTitle] = useState('Actions');
   const [actionDialog, setActionDialog] = useState(0);
-  const [openPopupActions, setOpenPopupActions] = useState(false);
+  const [openPopup, setOpenPopup] = useState(false);
   const { groupServerId, textChannelId } = useParams();
 
   useEffect(() => function cleanup() {
@@ -65,19 +67,27 @@ export default function ServerSidebar() {
       <div className="row">
         <ul className="list-unstyled text-white">
           <li onClick={() => {
-            if (!openPopupActions) {
-              setOpenPopupActions(true);
+            if (!openPopup) {
+              setOpenPopup(true);
+              setActionTitle('Actions');
               setActionDialog(0);
             }
           }}
           >
             <Link className="text-reset" to="#">Actions</Link>
-            <Actions
-              openPopup={openPopupActions}
-              setOpenPopup={setOpenPopupActions}
-              actionDialog={actionDialog}
-              setActionDialog={setActionDialog}
-            />
+            <Popup
+              title={actionTitle}
+              openPopup={openPopup}
+              setOpenPopup={setOpenPopup}
+            >
+              <Actions
+                mounted={mounted}
+                actionDialog={actionDialog}
+                setActionTitle={setActionTitle}
+                setActionDialog={setActionDialog}
+                setOpenPopup={setOpenPopup}
+              />
+            </Popup>
           </li>
           {displayTextChannels()}
         </ul>
