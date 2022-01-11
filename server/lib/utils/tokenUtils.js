@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { findUser } = require('../../db/dao/userDao');
+const { findUserById } = require('../../db/dao/userDao');
 
 // Middleware that checks if a user has a token
 // returns the user's data if true
@@ -20,7 +20,7 @@ const verify = async (req, res, next) => {
         });
       }
       // eslint-disable-next-line consistent-return
-      const user = await findUser({ _id: id._id });
+      const user = await findUserById(id._id);
       if (!user) {
         return res.status(401).json({
           success: false,

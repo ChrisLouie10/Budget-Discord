@@ -41,8 +41,10 @@ const deleteAccountValidation = (data) => {
   return schema.validate(data);
 };
 
-module.exports.registerValidation = registerValidation;
-module.exports.loginValidation = loginValidation;
-module.exports.updatePasswordValidation = updatePasswordValidation;
-module.exports.updateNameValidation = updateNameValidation;
-module.exports.deleteAccountValidation = deleteAccountValidation;
+module.exports = {
+  registerValidation,
+  loginValidation,
+  updatePasswordValidation,
+  updateNameValidation,
+  deleteAccountValidation,
+};
