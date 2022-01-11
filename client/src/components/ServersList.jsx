@@ -1,23 +1,23 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Context } from '../Store';
+import { Context } from '../contexts/Store';
+import { GroupServersContext } from '../contexts/groupServers-context';
 import Popup from './popups/Popup';
 import CreateServerForm from './popups/CreateServerForm';
 
 export default function ServersList() {
   const [state, setState] = useContext(Context);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [groupServerId, setGroupServerId] = useState('');
-  const [groupServers, setGroupServers] = useState({});
   const [openPopupCreate, setOpenPopupCreate] = useState(false);
   const params = useParams();
 
   useEffect(() => {
-    setGroupServers(state.groupServers);
     if (params) {
       setGroupServerId(params.groupServerId);
     }
-  }, [state.groupServers, params]);
+  }, [groupServers, params]);
 
   // Displays the group servers the user is a member of
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page

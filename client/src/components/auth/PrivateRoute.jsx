@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
+import { ChatLogsContext } from '../../contexts/chatLogs-context';
 import ServersList from '../ServersList';
 import Loading from '../Loading';
 
@@ -12,6 +15,9 @@ const propTypes = {
 
 // Component creating a private route
 export default function PrivateRoute({ component: Component, ...rest }) {
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
+  const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
   const [state, setState] = useContext(Context);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -24,19 +30,19 @@ export default function PrivateRoute({ component: Component, ...rest }) {
       return;
     }
 
-    const currState = { ...state };
-    const { chatLogs } = currState;
-    if (messageObject.type === 'duplicateMessage') {
-      const index = chatLogs[messageObject.textChannelId].length - 1;
-      chatLogs[messageObject.textChannelId][index] = messageObject.message;
-    } else if (messageObject.type === 'message') {
-      chatLogs[messageObject.textChannelId].push(messageObject.message);
-    }
-    setState(currState);
+    setChatLogs((currChatLogs) => {
+      const currLogs = { ...currChatLogs };
+      if (messageObject.type === 'duplicateMessage') {
+        const index = currLogs[messageObject.textChannelId].length - 1;
+        currLogs[messageObject.textChannelId][index] = messageObject.message;
+      } else if (messageObject.type === 'message') {
+        currLogs[messageObject.textChannelId].push(messageObject.message);
+      }
+      return currLogs;
+    });
   }
 
   useEffect(async () => {
-    const currState = { ...state };
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -48,26 +54,28 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         headers,
       }).then((response) => response.json())
         .then((data) => {
-          currState.user = data.user;
+          setUser(data.user);
           if (data.success) {
+            const currState = { ...state };
             const ws = new WebSocket(process.env.REACT_APP_wssURI);
             if (ws) {
               ws.addEventListener('message', handleWSSMessage);
             }
             currState.ws = ws;
+            setState(currState);
           }
           setSuccess(data.success);
           return data.user;
         })
-        .then(async (user) => {
+        .then(async (_user) => {
           let response;
-          if (user) {
+          if (_user) {
             response = await fetch('/api/groupServer/find', {
               method: 'POST',
               headers,
               body: JSON.stringify({
                 type: 'find',
-                userId: user._id,
+                userId: _user._id,
               }),
             });
             return response.json();
@@ -75,8 +83,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         })
         .then((data) => {
           if (data) {
-            currState.groupServers = data.groupServers;
-            setState(currState);
+            setGroupServers(data.groupServers);
           }
         });
     } catch {

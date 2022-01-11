@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 export default function DeleteGroupServerForm() {
   const [state, setState] = useContext(Context);

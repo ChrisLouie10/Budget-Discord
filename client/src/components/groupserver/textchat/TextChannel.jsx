@@ -2,11 +2,15 @@ import React, {
   useState, useEffect, useContext, useMemo,
 } from 'react';
 import { useParams } from 'react-router-dom';
-import { Context } from '../../../Store';
+import { Context } from '../../../contexts/Store';
+import { ChatLogsContext } from '../../../contexts/chatLogs-context';
+import { UserContext } from '../../../contexts/user-context';
 import Loading from '../../Loading';
 
 export default function TextChannel() {
   const [state, setState] = useContext(Context);
+  const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
+  const [user, setUser] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
   const { groupServerId, textChannelId } = useParams();
@@ -40,7 +44,6 @@ export default function TextChannel() {
   }
 
   useEffect(async () => {
-    const { user, chatLogs } = state;
     // If the chat log for the text channel with the id "props.textChannelId"
     // doesn't exist in the client, then retrieve it from the server
     if (!chatLogs[textChannelId]) {
@@ -57,10 +60,9 @@ export default function TextChannel() {
       })
         .then((response) => response.json())
         .then((data) => {
-          const currState = { ...state };
-          const _chatLogs = currState.chatLogs;
+          const _chatLogs = { ...chatLogs };
           _chatLogs[textChannelId] = data.chatLog;
-          setState(currState);
+          setChatLogs(_chatLogs);
         });
     }
     setLoading(false);
@@ -71,17 +73,15 @@ export default function TextChannel() {
     if (input !== '') {
       const message = {
         content: input,
-        index: Object.keys(state.chatLogs).length + 1,
-        author: state.user.name,
+        index: Object.keys(chatLogs).length + 1,
+        author: user.name,
         timestamp: new Date(),
         notSent: true,
       };
       // update client chatlogs
-      const currState = { ...state };
-      const { chatLogs } = state;
-      chatLogs[textChannelId].push(message);
-      currState.chatLogs = chatLogs;
-      setState(currState);
+      const _chatLogs = { ...chatLogs };
+      _chatLogs[textChannelId].push(message);
+      setChatLogs(_chatLogs);
       // update server chatlogs
       sendMessage(message);
       setInput('');
@@ -96,12 +96,12 @@ export default function TextChannel() {
   // If a message is not "sent" then it will be displayed with a dark gray color
   // Otherwise, sent messages will be light gray
   const displayChat = useMemo(() => {
-    if (state.chatLogs[textChannelId]) {
+    if (chatLogs[textChannelId]) {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
             {
-              Object.entries(state.chatLogs[textChannelId]).map(([key, value]) => {
+              Object.entries(chatLogs[textChannelId]).map(([key, value]) => {
                 if (value.notSent) {
                   return (
                     <p className="ml-2 #858585" key={key}>
@@ -132,7 +132,7 @@ export default function TextChannel() {
         </div>
       );
     } return <div />;
-  }, [state.chatLogs[textChannelId]]);
+  }, [chatLogs]);
 
   if (loading) return <Loading />;
   return (

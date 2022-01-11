@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 export default function DeleteChannelForm() {
   const history = useHistory();

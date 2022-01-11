@@ -4,7 +4,7 @@ import React, {
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Dialog, DialogTitle, DialogContent } from '@material-ui/core';
-import { Context } from '../../Store';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 import InviteForm from './InviteForm';
 import CreateChannelForm from './CreateChannelForm';
 import DeleteChannelForm from './DeleteChannelForm';
@@ -14,12 +14,11 @@ import LeaveGroupServerForm from './LeaveGroupServerForm';
 export default function Actions({
   openPopup, setOpenPopup, actionDialog, setActionDialog,
 }) {
-  const [state, setState] = useContext(Context);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [groupServerName, setGroupServerName] = useState('Group Server');
   const { groupServerId } = useParams();
 
   useEffect(() => {
-    const { groupServers } = state;
     const groupServer = groupServers[groupServerId];
     if (groupServer) {
       setGroupServerName(groupServer.name);
@@ -32,7 +31,7 @@ export default function Actions({
 
   // eslint-disable-next-line
   function displayContents() {
-    if (state.groupServers[groupServerId]) {
+    if (groupServers[groupServerId]) {
       if (actionDialog === 0) {
         return (
           <>
@@ -42,8 +41,8 @@ export default function Actions({
             <DialogContent>
               <ul className="list-unstyled">
                 {
-                              (state.groupServers[groupServerId].owner
-                              || state.groupServers[groupServerId].admin)
+                              (groupServers[groupServerId].owner
+                              || groupServers[groupServerId].admin)
                                 ? (
                                   <>
                                     <li onClick={() => setActionDialog(1)}>
@@ -63,7 +62,7 @@ export default function Actions({
                                 : <></>
                           }
                 {
-                              (!state.groupServers[groupServerId].owner)
+                              (!groupServers[groupServerId].owner)
                                 ? (
                                   <li onClick={() => setActionDialog(5)}>
                                     <a className="text-reset" role="button">Leave Group Server</a>

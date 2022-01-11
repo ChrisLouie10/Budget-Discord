@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 export default function InviteForm() {
   const [state, setState] = useContext(Context);

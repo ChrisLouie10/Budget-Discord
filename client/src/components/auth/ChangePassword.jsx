@@ -1,6 +1,6 @@
 import React, { useRef, useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 // // Simple Update Profile page
 

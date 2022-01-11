@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 
 const initialState = {
   ws: {},
-  user: {},
-  params: {},
-  chatLogs: {},
-  groupServers: {},
 };
 
 export const Context = createContext();

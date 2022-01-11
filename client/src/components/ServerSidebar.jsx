@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Context } from '../Store';
+import { Context } from '../contexts/Store';
+import { GroupServersContext } from '../contexts/groupServers-context';
 import Actions from './popups/Actions';
 
 export default function ServerSidebar() {
   const [state, setState] = useContext(Context);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [mounted, setMounted] = useState(true);
   const [groupServerName, setGroupServerName] = useState('Group Server');
   const [actionDialog, setActionDialog] = useState(0);
@@ -16,8 +18,8 @@ export default function ServerSidebar() {
   }, []);
 
   useEffect(() => {
-    if (state.groupServers[groupServerId]) {
-      setGroupServerName(state.groupServers[groupServerId].name);
+    if (groupServers[groupServerId]) {
+      setGroupServerName(groupServers[groupServerId].name);
     }
   }, [groupServerId]);
 
@@ -28,11 +30,11 @@ export default function ServerSidebar() {
   }
 
   function displayTextChannels() {
-    if (state.groupServers[groupServerId]) {
+    if (groupServers[groupServerId]) {
       return (
         <>
           {
-            Object.entries(state.groupServers[groupServerId].textChannels).map(([key, value]) => (
+            Object.entries(groupServers[groupServerId].textChannels).map(([key, value]) => (
               <li key={key}>
                 {
                   textChannelId === key

@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory, useParams } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 export default function CreateChannelForm({ setOpenPopup }) {
   const [state, setState] = useContext(Context);

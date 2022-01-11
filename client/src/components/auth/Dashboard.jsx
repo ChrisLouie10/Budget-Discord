@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Context } from '../../Store';
+import { UserContext } from '../../contexts/user-context';
 // Simple private account information.
 
 export default function Dashboard() {
-  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
   const [error, setError] = useState('');
   const history = useHistory();
 
@@ -31,15 +31,15 @@ export default function Dashboard() {
           <div>
             <strong>Name:</strong>
             {' '}
-            {state.user.name}
+            {user.name}
             {' '}
             #
-            {state.user.number_id}
+            {user.number_id}
           </div>
           <div>
             <strong>Email:</strong>
             {' '}
-            {state.user.email}
+            {user.email}
           </div>
           <Link to="/change-name" className="btn btn-primary w-100 mt-3">Change Name</Link>
           <Link to="/change-password" className="btn btn-primary w-100 mt-3">Change Password</Link>

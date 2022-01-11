@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
 
 export default function CreateServerForm({ setOpenPopup }) {
   const [state, setState] = useContext(Context);

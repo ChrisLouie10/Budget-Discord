@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
-import { Context } from '../../Store';
+import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
 import TextChannel from './textchat/TextChannel';
 import ServerSidebar from '../ServerSidebar';
 import Loading from '../Loading';
 
 export default function GroupServer() {
   const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [userAccess, setUserAccess] = useState(false);
   const params = useParams();
@@ -24,7 +26,7 @@ export default function GroupServer() {
           },
           body: JSON.stringify({
             type: 'verify',
-            userId: state.user._id,
+            userId: user._id,
             groupServerId,
             textChannelId: textChannelId || Object.keys(state.groupServers[groupServerId].textChannels)[0],
           }),
