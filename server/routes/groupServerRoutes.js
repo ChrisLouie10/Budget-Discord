@@ -100,7 +100,7 @@ router.post('/create-channel', verify, async (req, res) => {
     if (groupServer !== null) {
       // Check whether the user attempting to create a new channel is
       // the owner of the groupServer or an admin
-      let permission = groupServer.owner === req.body.userId;
+      let permission = groupServer.owner == req.body.userId;
       if (!permission) {
         groupServer.admins.forEach((admin) => {
           if (admin === req.body.userId) {
@@ -225,7 +225,7 @@ router.post('/find', verify, async (req, res) => {
           groupServers,
         });
       });
-    } else res.status(200).json({ success: false, message: 'No group servers found.', groupServers: null });
+    } else res.status(200).json({ success: true, message: 'No group servers found.', groupServers: {} });
   } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
 });
 

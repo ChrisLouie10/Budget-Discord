@@ -5,7 +5,7 @@ const { findUserById } = require('../../db/dao/userDao');
 // returns the user's data if true
 // returns an error if false
 
-const verify = async (req, res, next) => {
+async function verify(req, res, next) {
   // get token from cookies
   const { token } = req.cookies;
 
@@ -36,7 +36,7 @@ const verify = async (req, res, next) => {
       message: 'Auth token is not supplied',
     });
   }
-};
+}
 
 function generateToken(id) {
   return jwt.sign({ _id: id }, process.env.SECRET_AUTH_TOKEN, { expiresIn: '1h' });

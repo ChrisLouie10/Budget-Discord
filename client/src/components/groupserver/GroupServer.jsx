@@ -1,25 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Redirect, useParams } from 'react-router-dom';
+import { Context } from '../../contexts/Store';
+import { UserContext } from '../../contexts/user-context';
 import TextChannel from './textchat/TextChannel';
 import ServerSidebar from '../ServerSidebar';
+import Loading from '../Loading';
 
-export default function GroupServer(props) {
-  const {
-    user, rest, groupServers, sendMessage, chatLogs, setChatLogs, uri, setUser, setGroupServers,
-  } = props;
-  const [mounted, setMounted] = useState(true);
+export default function GroupServer() {
+  const [state, setState] = useContext(Context);
+  const [user, setUser] = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [userAccess, setUserAccess] = useState(false);
-
-  useEffect(async () => function cleanup() {
-    setMounted(false);
-  }, []);
+  const params = useParams();
+  const { groupServerId, textChannelId } = useParams();
 
   // Upon intialization, verify that the user is authorized to be in the group server
   // If the user is not authorized, userAccess = false which redirects the user to "/dashboard"
   useEffect(async () => {
-    if (user) {
+    if (groupServerId) {
       try {
         await fetch('/api/groupServer/verify', {
           method: 'POST',
@@ -29,82 +27,27 @@ export default function GroupServer(props) {
           body: JSON.stringify({
             type: 'verify',
             userId: user._id,
-            groupServerId: rest.computedMatch.params.groupServerId,
-            textChannelId: rest.computedMatch.params.textChannelId
-              ? rest.computedMatch.params.textChannelId
-              : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0],
+            groupServerId,
+            textChannelId: textChannelId || Object.keys(state.groupServers[groupServerId].textChannels)[0],
           }),
         }).then((response) => response.json())
           .then(async (data) => {
-            if (mounted) {
-              setUserAccess(data.access);
-            }
+            setUserAccess(data.access);
           });
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    } else setUserAccess(false);
-  }, [rest.computedMatch.params.groupServerId]);
+    }
+  }, [params]);
 
-  function _sendMessage(message) {
-    const { groupServerId } = rest.computedMatch.params;
-    const textChannelId = rest.computedMatch.params.textChannelId
-      ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[groupServerId].textChannels)[0];
-
-    // Send message over to server
-    sendMessage(message, groupServerId, textChannelId);
-  }
-
+  if (loading) return <Loading />;
+  if (!userAccess) return <Redirect to="/dashboard" />;
   return (
     <>
-      {
-        loading
-          ? <p>Loading</p>
-          : ((userAccess)
-            ? (
-              <>
-                <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
-                  <ServerSidebar
-                    uri={uri}
-                    user={user}
-                    setUser={setUser}
-                    groupServers={groupServers}
-                    setGroupServers={setGroupServers}
-                    groupServerId={rest.computedMatch.params.groupServerId}
-                    textChannelId={rest.computedMatch.params.textChannelId
-                      ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0]}
-                  />
-                </div>
-                <TextChannel
-                  sendMessage={_sendMessage}
-                  chatLogs={chatLogs}
-                  setChatLogs={setChatLogs}
-                  textChannelId={rest.computedMatch.params.textChannelId
-                    ? rest.computedMatch.params.textChannelId : Object.keys(groupServers[rest.computedMatch.params.groupServerId].textChannels)[0]}
-                  user={user}
-                />
-              </>
-            )
-            : <Redirect to="/dashboard" />)
-      }
+      <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
+        <ServerSidebar />
+      </div>
+      <TextChannel />
     </>
   );
 }
-
-GroupServer.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  user: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  rest: PropTypes.object,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object,
-  // eslint-disable-next-line react/forbid-prop-types
-  chatLogs: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/require-default-props
-  groupServerId: PropTypes.string,
-  uri: PropTypes.string.isRequired,
-  setUser: PropTypes.func.isRequired,
-  setChatLogs: PropTypes.func.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  sendMessage: PropTypes.func.isRequired,
-};

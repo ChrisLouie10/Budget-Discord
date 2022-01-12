@@ -1,51 +1,54 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { GroupServersContext } from '../contexts/groupServers-context';
 import Popup from './popups/Popup';
 import CreateServerForm from './popups/CreateServerForm';
 
-export default function ServersList(props) {
-  const {
-    groupServers, setGroupServers, groupServerId, user,
-  } = props;
+export default function ServersList() {
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
+  const [groupServerId, setGroupServerId] = useState('');
   const [openPopup, setOpenPopup] = useState(false);
+  const params = useParams();
+
+  useEffect(() => {
+    if (params) {
+      setGroupServerId(params.groupServerId);
+    }
+  }, [groupServers, params]);
 
   // Displays the group servers the user is a member of
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page
-  // eslint-disable-next-line
+
   function displayServers() {
-    if (groupServers) {
-      console.log(groupServers);
-      return (
-        <>
-          {
-            // eslint-disable-next-line
-            Object.entries(groupServers).map(([key, value]) => {
-              if (value) {
-                const textChannelId = Object.keys(value.textChannels)[0];
-                return (
-                  <li key={key}>
-                    {
-                      groupServerId === key
-                        ? (
-                          <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                            {value.name}
-                          </Link>
-                        )
-                        : (
-                          <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                            {value.name}
-                          </Link>
-                        )
-                      }
-                  </li>
-                );
-              }
-            })
-          }
-        </>
-      );
-    }
+    return (
+      <>
+        {
+          // eslint-disable-next-line
+          Object.entries(groupServers).map(([key, value]) => {
+            if (value) {
+              const textChannelId = Object.keys(value.textChannels)[0];
+              return (
+                <li key={key}>
+                  {
+                    key === groupServerId
+                      ? (
+                        <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                          {value.name}
+                        </Link>
+                      )
+                      : (
+                        <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                          {value.name}
+                        </Link>
+                      )
+                    }
+                </li>
+              );
+            }
+          })
+        }
+      </>
+    );
   }
 
   return (
@@ -54,7 +57,6 @@ export default function ServersList(props) {
         <div>
           <h5 className="text-white">Budget-Discord</h5>
         </div>
-
         <ul className="list-unstyled text-white">
           <li>
             <Link className="text-reset" to="/dashboard">Dashboard</Link>
@@ -70,11 +72,7 @@ export default function ServersList(props) {
               openPopup={openPopup}
               setOpenPopup={setOpenPopup}
             >
-              <CreateServerForm
-                user={user}
-                groupServers={groupServers}
-                setGroupServers={setGroupServers}
-              />
+              <CreateServerForm />
             </Popup>
           </li>
         </ul>
@@ -82,13 +80,3 @@ export default function ServersList(props) {
     </div>
   );
 }
-
-// https://reactjs.org/docs/typechecking-with-proptypes.html
-ServersList.propTypes = {
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-};

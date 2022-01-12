@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { UserContext } from '../../contexts/user-context';
 // Simple private account information.
 
-export default function Dashboard({ user }) {
+export default function Dashboard() {
+  const [user, setUser] = useContext(UserContext);
   const [error, setError] = useState('');
   const history = useHistory();
 
   async function handleLogout() {
-    setError('');
-
     await fetch('/api/user/logout', {
       method: 'DELETE',
     }).then((response) => response.json())
@@ -53,8 +52,3 @@ export default function Dashboard({ user }) {
     </div>
   );
 }
-
-Dashboard.propTypes = {
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired
-};
