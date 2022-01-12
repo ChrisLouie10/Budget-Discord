@@ -1,18 +1,20 @@
-import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
-import Loading from '../auth/Loading';
+import React, { useEffect, useContext } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
+import Loading from '../Loading';
 
-export default function JoinGroupServer({
-  computedMatch, user, groupServers, setGroupServers,
-}) {
+export default function JoinGroupServer() {
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const controller = new AbortController();
   const { signal } = controller;
   const history = useHistory();
+  const { inviteCode } = useParams();
 
   useEffect(async () => {
     let groupServerId;
-    if (computedMatch.params.inviteCode) {
+    if (inviteCode) {
       await fetch('/api/groupServer/join', {
         method: 'POST',
         headers: {
@@ -20,7 +22,7 @@ export default function JoinGroupServer({
         },
         body: JSON.stringify({
           type: 'join',
-          inviteCode: computedMatch.params.inviteCode,
+          inviteCode,
           userId: user._id,
         }),
         signal,
@@ -30,7 +32,7 @@ export default function JoinGroupServer({
             groupServerId = data.groupServerId;
             const _groupServers = { ...groupServers };
             _groupServers[groupServerId] = data.groupServer;
-            setGroupServers({ ..._groupServers });
+            setGroupServers(_groupServers);
             history.push(`/group/${groupServerId}`);
           } else {
             console.log(data.message);
@@ -47,13 +49,3 @@ export default function JoinGroupServer({
     <Loading />
   );
 }
-
-JoinGroupServer.propTypes = {
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  computedMatch: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-};

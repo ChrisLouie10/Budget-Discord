@@ -14,7 +14,7 @@ export default function FriendsList({ setError, handleFriendDelete, friend }) {
       setError('');
       setLoading(true);
       handleFriendDelete(friend);
-      await fetch('/api/friends', {
+      await fetch(`/api/friends?friendId=${friend.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

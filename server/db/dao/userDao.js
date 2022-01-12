@@ -27,11 +27,23 @@ async function createUser(name, email, hashPassword) {
   return jwt.sign({ _id: newUser._id }, process.env.SECRET_AUTH_TOKEN);
 }
 
-async function findUser(query) {
-  return User.findOne(query);
+async function findUserById(id) {
+  return User.findOne({ _id: id });
 }
 
-async function findUsersWithName(name) {
+async function findUsersByIds(ids) {
+  return User.find({ _id: { $in: ids } });
+}
+
+async function findUserByNameAndNumber(name, number) {
+  return User.findOne({ name, number_id: number });
+}
+
+async function findUserByEmail(email) {
+  return User.findOne({ email });
+}
+
+async function findUsersByName(name) {
   return User.find({ name });
 }
 
@@ -45,18 +57,20 @@ async function updateUserName(id, name) {
 async function updateUserPassword(id, password) {
   const query = { _id: id };
   const set = { $set: { password } };
-  console.log(set);
   return User.updateOne(query, set);
 }
 
-function deleteUser(query) {
+async function deleteUser(query) {
   return User.deleteOne(query);
 }
 
 module.exports = {
   createUser,
-  findUser,
-  findUsersWithName,
+  findUserById,
+  findUsersByIds,
+  findUserByNameAndNumber,
+  findUserByEmail,
+  findUsersByName,
   updateUserName,
   updateUserPassword,
   deleteUser,

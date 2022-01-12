@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
-export default function InviteForm({
-  groupServers, setGroupServers, groupServerId, uri, userId,
-}) {
+export default function InviteForm() {
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [loading, setLoading] = useState(false);
   const [inviteUrl, setInviteUrl] = useState('');
   const [expiration, setExpiration] = useState('30');
   const [limit, setLimit] = useState('1');
+  const { groupServerId } = useParams();
 
   useEffect(() => {
-    if (groupServers[groupServerId].inviteCode) { setInviteUrl(`${uri}/join/${groupServers[groupServerId].inviteCode}`); }
-  }, []);
+    const groupServer = groupServers[groupServerId];
+    if (groupServer.inviteCode) {
+      setInviteUrl(`${process.env.REACT_APP_URI}/join/${groupServers[groupServerId].inviteCode}`);
+    }
+  }, [groupServerId]);
 
   async function generateInviteLink(e) {
     e.preventDefault();
     setLoading(true);
-
     try {
       await fetch('/api/groupServer/create-invite', {
         method: 'POST',
@@ -25,7 +30,7 @@ export default function InviteForm({
         },
         body: JSON.stringify({
           type: 'create-invite',
-          userId,
+          userId: user._id,
           groupServerId,
           expiration: parseInt(expiration, 10),
           limit: parseInt(limit, 10),
@@ -33,10 +38,10 @@ export default function InviteForm({
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            setInviteUrl(`${uri}/join/${data.code}`);
+            setInviteUrl(`${process.env.REACT_APP_URI}/join/${data.code}`);
             const _groupServers = { ...groupServers };
             _groupServers[groupServerId].inviteCode = data.code;
-            setGroupServers({ ..._groupServers });
+            setGroupServers(_groupServers);
           }
         });
     } finally { setLoading(false); }
@@ -84,12 +89,3 @@ export default function InviteForm({
     </form>
   );
 }
-
-InviteForm.propTypes = {
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  uri: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
-};

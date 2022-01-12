@@ -12,7 +12,8 @@ const {
 } = require('../lib/validation/authValidation');
 const {
   createUser,
-  findUser,
+  findUserById,
+  findUserByEmail,
   updateUserName,
   updateUserPassword,
   deleteUser,
@@ -26,7 +27,7 @@ const {
 } = require('../db/converters/userConverter');
 
 router.get('/', verify, async (req, res) => {
-  const user = await findUser({ _id: req.user._id });
+  const user = await findUserById(req.user._id);
   if (user) return res.status(200).json({ success: true, message: 'Success', user: userToObject(user) });
   return res.status(401).json({ success: false, message: 'Denied Access' });
 });
@@ -42,7 +43,7 @@ router.post('/register', async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
   // Check if the user's email is already in the database
-  if (await findUser({ email: req.body.email })) return res.status(400).json({ success: false, message: 'Email already exists' });
+  if (await findUserByEmail(req.body.email)) return res.status(400).json({ success: false, message: 'Email already exists' });
 
   // Create User and return jwt to user.
   return createUser(req.body.name, req.body.email, await hashPassword(req.body.password))
@@ -59,7 +60,7 @@ router.post('/login', async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
   // Check if the user's email is already in the database
-  const user = await findUser({ email: req.body.email });
+  const user = await findUserByEmail(req.body.email);
   if (!user) return res.status(400).json({ success: false, message: 'Email or password is incorrect' });
 
   // Check if password is valid
@@ -86,7 +87,7 @@ router.put('/password', verify, async (req, res) => {
   if (!validPass) return res.status(400).json({ success: false, message: 'Old Password is Incorrect' });
 
   // Update password
-  return updateUserPassword(req.user._id, hashPassword(req.body.password))
+  return updateUserPassword(req.user._id, await hashPassword(req.body.password))
     .then(() => res.status(200).json({ success: true, message: 'Success' }))
     .catch(() => res.status(500).json({ success: false, message: 'Failed to change password' }));
 });

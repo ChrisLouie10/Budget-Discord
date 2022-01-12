@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
-export default function DeleteChannelForm({
-  groupServers, groupServerId, textChannelId, userId, setGroupServers,
-}) {
+export default function DeleteChannelForm() {
   const history = useHistory();
+  const { groupServerId, textChannelId } = useParams();
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [textChannelName] = useState(groupServers[groupServerId].textChannels[textChannelId].name);
   const [input, setInput] = useState('');
   // eslint-disable-next-line
@@ -26,7 +28,7 @@ export default function DeleteChannelForm({
           type: 'delete-channel',
           groupServerId,
           textChannelId,
-          userId,
+          userId: user._id,
         }),
       }).then((response) => response.json())
         .then((data) => {
@@ -34,7 +36,7 @@ export default function DeleteChannelForm({
             history.push('/dashboard');
             const _groupServers = { ...groupServers };
             delete _groupServers[groupServerId].textChannels[textChannelId];
-            setGroupServers({ ..._groupServers });
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     }
@@ -69,12 +71,3 @@ export default function DeleteChannelForm({
     </form>
   );
 }
-
-DeleteChannelForm.propTypes = {
-  // eslint-disable-next-line
-  groupServers: PropTypes.object.isRequired,
-  groupServerId: PropTypes.string.isRequired,
-  textChannelId: PropTypes.string.isRequired,
-  userId: PropTypes.string.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-};
