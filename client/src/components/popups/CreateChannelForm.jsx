@@ -17,28 +17,27 @@ export default function CreateChannelForm({ setOpenPopup }) {
     setLoading(true);
     let newTextChannelId;
     try {
-      await fetch('/api/groupServer/create-channel', {
+      await fetch('/api/groupServer/text-channel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: 'create-channel',
           name: input,
           userId: user._id,
           groupServerId,
         }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            const _groupServers = { ...groupServers };
-            newTextChannelId = data.textChannelId;
-            _groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
-            setGroupServers(_groupServers);
-            setLoading(false);
-            setOpenPopup(false);
-          }
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        if (response.status === 200) {
+          const _groupServers = { ...groupServers };
+          newTextChannelId = data.textChannelId;
+          _groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;
+          setGroupServers(_groupServers);
+          setLoading(false);
+          setOpenPopup(false);
+        } else console.error(data.message);
+      });
     } finally {
       if (newTextChannelId) { history.push(`/group/${groupServerId}/${newTextChannelId}`); } else history.push('/dashboard');
     }

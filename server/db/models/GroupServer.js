@@ -18,7 +18,7 @@ const groupServerSchema = new mongoose.Schema({
     index: true,
     required: true,
   }],
-  textChannels: [{
+  text_channels: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TextChannel',
     required: true,

@@ -9,7 +9,7 @@ const textChannelSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true,
+    default: Date.now,
   },
   group_server_id: {
     type: mongoose.Schema.Types.ObjectId,

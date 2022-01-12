@@ -4,6 +4,9 @@ const GroupServer = require('../db/models/GroupServer');
 const TextChannel = require('../db/models/TextChannel');
 const Invite = require('../db/models/Invite');
 const { verify } = require('../lib/utils/tokenUtils');
+const { createServerValidation, createTextChannelValidation } = require('../lib/validation/groupServerValidation');
+const { createGroupServer, checkUserPemission } = require('../db/dao/groupServerDao');
+const { createTextChannel, findTextChannelById } = require('../db/dao/textChannelDao');
 
 // expiration is in minutes
 // 0 limit = infinite use
@@ -35,105 +38,53 @@ async function createInvite(groupServerId, expiration, limit) {
   }
 }
 
-// Creates a new group server
-router.post('/create', verify, async (req, res) => {
-  if (req.body.type === 'create'
-    && req.body.name
-    && req.body.userId) {
-    // Create new groupServer using request body parameters
-    const groupServer = await GroupServer.create({
-      name: req.body.name,
-      owner: req.body.userId,
-      users: [req.body.userId],
-      date: new Date(),
-      textChannels: [],
-    });
-    if (groupServer !== null) {
-      // Create the new groupServer's first textChannel
-      const textChannel = await TextChannel.create({
-        name: 'general',
-        date: new Date(),
-        group_server_id: groupServer._id,
-        chat_log: [],
-      });
-      if (textChannel !== null) {
-        // Push the new textChannel Id into the groupServer's textChannels property
-        await GroupServer.findByIdAndUpdate(groupServer._id, {
-          $push: { textChannels: textChannel._id },
-        });
-        // Push the new groupServer Id into the user's groupServers property
-        const user = await User.findByIdAndUpdate(
-          req.body.userId,
-          { $push: { group_servers: groupServer._id } },
-          { new: true },
-        );
-        if (user !== null) {
-          // Return the new groupServer to client
-          const _textChannel = {};
-          _textChannel[textChannel._id] = {
-            groupServerId: textChannel.group_server_id,
-            name: textChannel.name,
-            date: textChannel.date,
-          };
-          const _groupServer = {
-            name: groupServer.name,
-            owner: true,
-            textChannels: _textChannel,
-          };
-          res.status(200).json({
-            success: true, message: 'Success', groupServer: _groupServer, groupServerId: groupServer._id,
-          });
-        } else res.status(500).json({ success: false, message: 'Something went wrong when updating user info.' });
-      } else res.status(500).json({ success: false, message: 'Something went wrong when creating a new text channel.' });
-    } else res.status(500).json({ success: false, message: 'Something went wrong when creating a new group server.' });
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
+router.post('/', verify, async (req, res) => {
+  // Validate data before creating server
+  const { error } = createServerValidation(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { name, userId } = req.body;
+  const groupServer = await createGroupServer(name, userId);
+  if (groupServer) {
+    const textChannels = {};
+    const textChannel = await findTextChannelById(groupServer.text_channels[0]);
+    const result = {
+      name: groupServer.name,
+      owner: groupServer.owner,
+      textChannels: {},
+    };
+
+    textChannels[textChannel._id] = {
+      groupServerId: textChannel.group_server_id,
+      name: textChannel.name,
+    };
+    result.textChannels = textChannels;
+    return res.json({ groupServer: result });
+  }
+  return res.status(500).json({ message: 'An error ocurred when creating the server' });
 });
 
-// Creates a new channel in a group server
-router.post('/create-channel', verify, async (req, res) => {
-  if (req.body.type === 'create-channel'
-        && req.body.name
-        && req.body.userId
-        && req.body.groupServerId) {
-    // Find the groupServer we want to create a new channel for
-    const groupServer = await GroupServer.findById(req.body.groupServerId);
-    if (groupServer !== null) {
-      // Check whether the user attempting to create a new channel is
-      // the owner of the groupServer or an admin
-      let permission = groupServer.owner == req.body.userId;
-      if (!permission) {
-        groupServer.admins.forEach((admin) => {
-          if (admin === req.body.userId) {
-            permission = true;
-          }
-        });
-      }
-      if (permission) {
-        // Create the new textChannel
-        const textChannel = await TextChannel.create({
-          name: req.body.name,
-          date: new Date(),
-          group_server_id: req.body.groupServerId,
-          chat_log: [],
-        });
-        // Update the groupServer's information to reflect the new textChannel
-        // and return the new textChannel to client
-        await GroupServer.findByIdAndUpdate(req.body.groupServerId, {
-          $push: { textChannels: textChannel._id },
-        });
-        res.status(200).json({
-          success: true,
-          message: 'Success.',
-          textChannelId: textChannel._id,
-          textChannel: {
-            groupServerId: textChannel.group_server_id,
-            name: textChannel.name,
-            date: textChannel.date,
-          },
-        });
-      } else res.status(401).json({ success: false, message: 'The user is not authorized to create channels.' });
-    } else res.status(500).json({ success: false, message: 'Something went wrong when searching for a groupServer.' });
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
+// Create a new text channel in a group server
+router.post('/text-channel', verify, async (req, res) => {
+  const { error } = createTextChannelValidation(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { name, userId, groupServerId } = req.body;
+  if (!checkUserPemission(userId, groupServerId)) {
+    return res.status(401).json({ message: 'User is not authorized to create text channels' });
+  }
+
+  const textChannel = await createTextChannel(name, groupServerId);
+  if (textChannel) {
+    return res.json({
+      textChannelId: textChannel._id,
+      textChannel: {
+        groupServerId: textChannel.group_server_id,
+        name: textChannel.name,
+      },
+    });
+  }
+  return res.status(500).json({ message: 'An error occured when creating a text channel' });
 });
 
 // Returns a single group server
