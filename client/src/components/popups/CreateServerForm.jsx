@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
+import { UserContext } from '../../contexts/user-context';
+import { GroupServersContext } from '../../contexts/groupServers-context';
 
-export default function CreateServerForm({
-  user, groupServers, setGroupServers, setOpenPopup,
-}) {
+export default function CreateServerForm({ setOpenPopup }) {
+  const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [input, setInput] = useState(`${user.name}'s Server`);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+
     try {
       fetch('/api/groupServer/create', {
         method: 'POST',
@@ -26,7 +29,7 @@ export default function CreateServerForm({
           if (data.success) {
             const _groupServers = { ...groupServers };
             _groupServers[data.groupServerId] = data.groupServer;
-            setGroupServers({ ..._groupServers });
+            setGroupServers(_groupServers);
           } else console.log(data.message);
         });
     } finally {
@@ -35,9 +38,9 @@ export default function CreateServerForm({
     }
   }
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     setInput(e.target.value);
-  };
+  }
 
   return (
     <form>
@@ -58,11 +61,11 @@ export default function CreateServerForm({
 }
 
 CreateServerForm.propTypes = {
-  // eslint-disable-next-line react/forbid-prop-types
-  user: PropTypes.object.isRequired,
-  // eslint-disable-next-line react/forbid-prop-types
-  groupServers: PropTypes.object.isRequired,
-  setGroupServers: PropTypes.func.isRequired,
-  // eslint-disable-next-line react/require-default-props
   setOpenPopup: PropTypes.func,
+};
+
+CreateServerForm.defaultProps = {
+  setOpenPopup: () => {
+    console.log('No function provided for Create Server Form');
+  },
 };

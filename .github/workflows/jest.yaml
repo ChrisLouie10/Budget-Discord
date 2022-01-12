@@ -1,0 +1,25 @@
+name: 'Jest Tests'
+
+on:
+  pull_request:
+
+jobs:
+  run-jest:
+    name: Run Jest Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        working-directory: ./server
+        run: npm ci
+      - name: create env file
+        working-directory: ./server
+        env: 
+          MONGO_TEST_SERVER: ${{ secrets.MONGO_TEST_SERVER }}
+          SECRET_AUTH_TOKEN: ${{ secrets.SECRET_AUTH_TOKEN }}
+        run: |
+          touch .env
+          echo -e "MONGO_TEST_SERVER=$MONGO_TEST_SERVER\r\nSECRET_AUTH_TOKEN=$SECRET_AUTH_TOKEN" >> .env
+      - name: Run Jest
+        working-directory: ./server
+        run: npm run test
