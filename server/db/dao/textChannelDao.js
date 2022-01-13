@@ -25,7 +25,13 @@ async function findTextChannelById(id) {
 }
 
 async function findTextChannelsByServerId(groupServerId) {
-  return TextChannel.find({ group_server_id: groupServerId });
+  const groupServer = await GroupServer.findById(groupServerId);
+  const promises = [];
+  groupServer.text_channels.forEach((textChannel) => {
+    promises.push(TextChannel.findById(textChannel));
+  });
+  const results = await Promise.all(promises);
+  return results;
 }
 
 async function deleteTextChannel(query) {

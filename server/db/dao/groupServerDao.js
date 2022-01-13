@@ -1,4 +1,5 @@
 const GroupServer = require('../models/GroupServer');
+const Invite = require('../models/Invite');
 const { createTextChannel } = require('./textChannelDao');
 
 async function createGroupServer(name, ownerId) {
@@ -22,7 +23,7 @@ async function createGroupServer(name, ownerId) {
   }
 }
 
-async function checkUserPemission(userId, groupServerId) {
+async function checkUserPermission(userId, groupServerId) {
   try {
     const groupServer = await GroupServer.findById(groupServerId);
     // check if user is the owner
@@ -43,6 +44,11 @@ async function findServerById(groupServerId) {
   return GroupServer.findById(groupServerId);
 }
 
+async function findServerByInvite(inviteCode) {
+  const rawInvite = Invite.findOne({ code: inviteCode });
+  return GroupServer.findOne({ invite: rawInvite._id });
+}
+
 async function findServerByIdAndUserId(groupServerId, userId) {
   return GroupServer.findOne({ _id: groupServerId, users: userId });
 }
@@ -55,11 +61,43 @@ async function deleteServer(query) {
   return GroupServer.deleteOne(query);
 }
 
+async function removeTextChannel(groupServerId, textChannelId) {
+  return GroupServer.findByIdAndUpdate(groupServerId, {
+    $pull: {
+      text_channels: textChannelId,
+    },
+  });
+}
+
+async function removeUserFromServer(groupServerId, userId) {
+  return GroupServer.findByIdAndUpdate(groupServerId, {
+    $pull: {
+      users: userId,
+    },
+  }, {
+    new: true,
+  });
+}
+
+async function addUserToServer(groupServerId, userId) {
+  return GroupServer.findByIdAndUpdate(groupServerId, {
+    $push: {
+      users: userId,
+    },
+  }, {
+    new: true,
+  });
+}
+
 module.exports = {
   createGroupServer,
-  checkUserPemission,
+  checkUserPermission,
   findServerById,
+  findServerByInvite,
   findServerByIdAndUserId,
   findServersByUserId,
   deleteServer,
+  removeTextChannel,
+  removeUserFromServer,
+  addUserToServer,
 };

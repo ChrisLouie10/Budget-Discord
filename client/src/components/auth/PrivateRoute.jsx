@@ -75,11 +75,12 @@ export default function PrivateRoute({ component: Component, ...rest }) {
               headers,
             });
             return response.json();
-          } return null;
+          } return {};
         })
         .then((data) => {
           if (data) {
             setGroupServers(data.groupServers);
+            console.log(data.groupServers);
           }
         });
     } catch {

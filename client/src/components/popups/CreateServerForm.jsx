@@ -25,7 +25,7 @@ export default function CreateServerForm({ setOpenPopup }) {
         }),
       }).then(async (response) => {
         const data = await response.json();
-        if (response.status === 200) {
+        if (response.status === 201) {
           const _groupServers = { ...groupServers };
           _groupServers[data.groupServerId] = data.groupServer;
           setGroupServers(_groupServers);

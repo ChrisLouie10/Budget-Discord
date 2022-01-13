@@ -27,7 +27,7 @@ export default function CreateChannelForm({ setOpenPopup }) {
         }),
       }).then(async (response) => {
         const data = await response.json();
-        if (response.status === 200) {
+        if (response.status === 201) {
           const _groupServers = { ...groupServers };
           newTextChannelId = data.textChannelId;
           _groupServers[groupServerId].textChannels[newTextChannelId] = data.textChannel;

@@ -22,10 +22,27 @@ const createTextChannelValidation = (data) => {
   return schema.validate(data);
 };
 
-const chatLogsValidation = (data) => {
+const textChannelValidation = (data) => {
   const schema = Joi.object({
     groupServerId: Joi.string().length(24).required(),
     textChannelId: Joi.string().length(24).required(),
+  });
+  return schema.validate(data);
+};
+
+const inviteValidation = (data) => {
+  const schema = Joi.object({
+    inviteCode: Joi.string().min(9).max(10).required(),
+  });
+  return schema.validate(data);
+};
+
+const createInviteValidation = (data) => {
+  const schema = Joi.object({
+    limit: Joi.number().integer().min(-1).max(100)
+      .required(),
+    expiration: Joi.number().integer().min(-1).max(1440)
+      .required(),
   });
   return schema.validate(data);
 };
@@ -34,5 +51,7 @@ module.exports = {
   createServerValidation,
   groupServerValidation,
   createTextChannelValidation,
-  chatLogsValidation,
+  textChannelValidation,
+  inviteValidation,
+  createInviteValidation,
 };

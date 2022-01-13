@@ -11,12 +11,6 @@ const textChannelSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  group_server_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'GroupServer',
-    required: true,
-    indexed: true,
-  },
   chat_log: [{
     content: String,
     author: String,

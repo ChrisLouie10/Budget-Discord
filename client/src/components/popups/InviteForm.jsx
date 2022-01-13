@@ -23,27 +23,24 @@ export default function InviteForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch('/api/group-servers/create-invite', {
+      await fetch(`/api/group-servers/${groupServerId}/invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: 'create-invite',
-          userId: user._id,
-          groupServerId,
           expiration: parseInt(expiration, 10),
           limit: parseInt(limit, 10),
         }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            setInviteUrl(`${process.env.REACT_APP_URI}/join/${data.code}`);
-            const _groupServers = { ...groupServers };
-            _groupServers[groupServerId].inviteCode = data.code;
-            setGroupServers(_groupServers);
-          }
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        if (response.status === 201) {
+          setInviteUrl(`${process.env.REACT_APP_URI}/join/${data.code}`);
+          const _groupServers = { ...groupServers };
+          _groupServers[groupServerId].inviteCode = data.code;
+          setGroupServers(_groupServers);
+        } console.error(data.message);
+      });
     } finally { setLoading(false); }
   }
 
