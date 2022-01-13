@@ -43,13 +43,23 @@ async function findServerById(groupServerId) {
   return GroupServer.findById(groupServerId);
 }
 
+async function findServerByIdAndUserId(groupServerId, userId) {
+  return GroupServer.findOne({ _id: groupServerId, users: userId });
+}
+
 async function findServersByUserId(userId) {
   return GroupServer.find({ users: userId });
+}
+
+async function deleteServer(query) {
+  return GroupServer.deleteOne(query);
 }
 
 module.exports = {
   createGroupServer,
   checkUserPemission,
   findServerById,
+  findServerByIdAndUserId,
   findServersByUserId,
+  deleteServer,
 };

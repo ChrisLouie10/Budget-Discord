@@ -24,7 +24,7 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
   async function leaveGroupServer() {
     if (groupServerId && mounted) {
       setLoading(true);
-      await fetch('/api/group-server/leave', {
+      await fetch('/api/group-servers/leave', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

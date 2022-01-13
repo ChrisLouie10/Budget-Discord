@@ -14,7 +14,7 @@ export default function CreateServerForm({ setOpenPopup }) {
     setLoading(true);
 
     try {
-      await fetch('/api/group-server/', {
+      await fetch('/api/group-servers/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

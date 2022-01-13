@@ -21,25 +21,22 @@ export default function DeleteGroupServerForm() {
     if (groupServerId && mounted) {
       console.log('Gonna try to delete or something');
       setLoading(true);
-      await fetch('/api/group-server/delete', {
-        method: 'POST',
+      await fetch(`/api/group-servers/${groupServerId}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: 'delete',
-          groupServerId,
-          userId: user._id,
-        }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            history.push('/dashboard');
-            const _groupServers = { ...groupServers };
-            delete _groupServers[groupServerId];
-            setGroupServers(_groupServers);
-          } else console.log(data.message);
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        console.log(response.status);
+        if (response.status === 200) {
+          console.log('here');
+          history.push('/dashboard');
+          const _groupServers = { ...groupServers };
+          delete _groupServers[groupServerId];
+          setGroupServers(_groupServers);
+        } else console.error(data.message);
+      });
     }
   }
 

@@ -19,7 +19,7 @@ export default function GroupServer() {
   useEffect(async () => {
     if (groupServerId) {
       try {
-        await fetch(`/api/group-server/${groupServerId}`, {
+        await fetch(`/api/group-servers/${groupServerId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

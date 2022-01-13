@@ -28,8 +28,13 @@ async function findTextChannelsByServerId(groupServerId) {
   return TextChannel.find({ group_server_id: groupServerId });
 }
 
+async function deleteTextChannel(query) {
+  return TextChannel.deleteOne(query);
+}
+
 module.exports = {
   createTextChannel,
   findTextChannelById,
   findTextChannelsByServerId,
+  deleteTextChannel,
 };

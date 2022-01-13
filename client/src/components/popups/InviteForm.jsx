@@ -23,7 +23,7 @@ export default function InviteForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch('/api/group-server/create-invite', {
+      await fetch('/api/group-servers/create-invite', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

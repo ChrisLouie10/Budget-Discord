@@ -17,15 +17,13 @@ export default function CreateChannelForm({ setOpenPopup }) {
     setLoading(true);
     let newTextChannelId;
     try {
-      await fetch('/api/group-server/text-channel', {
+      await fetch(`/api/group-servers/${groupServerId}/text-channels`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: input,
-          userId: user._id,
-          groupServerId,
         }),
       }).then(async (response) => {
         const data = await response.json();

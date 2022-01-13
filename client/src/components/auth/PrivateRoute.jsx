@@ -70,7 +70,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         .then(async (_user) => {
           let response;
           if (_user) {
-            response = await fetch('/api/group-server/', {
+            response = await fetch('/api/group-servers/', {
               method: 'GET',
               headers,
             });

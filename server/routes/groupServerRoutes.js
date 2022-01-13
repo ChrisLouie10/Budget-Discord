@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const User = require('../db/models/User');
 const GroupServer = require('../db/models/GroupServer');
 const TextChannel = require('../db/models/TextChannel');
@@ -8,18 +9,23 @@ const {
   createServerValidation,
   createTextChannelValidation,
   groupServerValidation,
+  chatLogsValidation,
 } = require('../lib/validation/groupServerValidation');
 const {
   createGroupServer,
   checkUserPemission,
-  findServerById,
+  findServerByIdAndUserId,
   findServersByUserId,
+  findServerById,
+  deleteServer,
 } = require('../db/dao/groupServerDao');
 const {
   createTextChannel,
   findTextChannelById,
   findTextChannelsByServerId,
+  deleteTextChannel,
 } = require('../db/dao/textChannelDao');
+const { deleteInvite } = require('../db/dao/inviteDao');
 
 // expiration is in minutes
 // 0 limit = infinite use
@@ -72,121 +78,151 @@ async function formatRawGroupServer(rawGroupServer) {
   return result;
 }
 
-// Get all of user's group servers
+// get all of user's group servers
 router.get('/', verify, async (req, res) => {
-  const rawGroupServers = await findServersByUserId(req.user._id);
-  if (rawGroupServers.length > 0) {
-    const groupServers = {};
-    const promises = [];
+  try {
+    const rawGroupServers = await findServersByUserId(req.user._id);
+    if (rawGroupServers.length > 0) {
+      const groupServers = {};
+      const promises = [];
 
-    rawGroupServers.forEach((rawGroupServer) => {
-      promises.push(formatRawGroupServer(rawGroupServer));
-    });
+      rawGroupServers.forEach((rawGroupServer) => {
+        promises.push(formatRawGroupServer(rawGroupServer));
+      });
 
-    const results = await Promise.all(promises);
-    results.forEach((result) => {
-      groupServers[result.id] = result.groupServer;
-    });
-    return res.json({ groupServers });
-  } return res.status(404).json({ message: 'User is not a member of any servers' });
+      const results = await Promise.all(promises);
+      results.forEach((result) => {
+        groupServers[result.id] = result.groupServer;
+      });
+      return res.json({ groupServers });
+    } return res.status(404).json({ message: 'User is not a member of any servers' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
+  }
 });
 
+// create a group server
 router.post('/', verify, async (req, res) => {
-  // Validate data before creating server
   const { error } = createServerValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const { name, userId } = req.body;
-  const rawGroupServer = await createGroupServer(name, userId);
-  if (rawGroupServer) {
-    const textChannels = {};
-    const rawTextChannel = await findTextChannelById(rawGroupServer.text_channels[0]);
-    const groupServer = {
-      name: rawGroupServer.name,
-      owner: rawGroupServer.owner,
-      admins: [],
-      textChannels: {},
-    };
+  try {
+    const { name, userId } = req.body;
+    const rawGroupServer = await createGroupServer(name, userId);
+    if (rawGroupServer) {
+      const textChannels = {};
+      const rawTextChannel = await findTextChannelById(rawGroupServer.text_channels[0]);
+      const groupServer = {
+        name: rawGroupServer.name,
+        owner: rawGroupServer.owner,
+        admins: [],
+        textChannels: {},
+      };
 
-    textChannels[rawTextChannel._id] = {
-      groupServerId: rawTextChannel.group_server_id,
-      name: rawTextChannel.name,
-    };
-    groupServer.textChannels = textChannels;
-    return res.json({ groupServer });
+      textChannels[rawTextChannel._id] = {
+        groupServerId: rawTextChannel.group_server_id,
+        name: rawTextChannel.name,
+      };
+      groupServer.textChannels = textChannels;
+      return res.json({ groupServer });
+    }
+    return res.status(500).json({ message: 'An error ocurred when creating the server' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
   }
-  return res.status(500).json({ message: 'An error ocurred when creating the server' });
 });
 
 // get a specific group server
 router.get('/:groupServerId', verify, async (req, res) => {
-  // Validate parameter
   const { error } = groupServerValidation(req.params);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  // Find and return group server
-  const rawGroupServer = await findServerById(req.params.groupServerId);
-  if (rawGroupServer) {
-    const result = await formatRawGroupServer(rawGroupServer);
-    const groupServer = {};
-    groupServer[result.id] = result.groupServer;
-    return res.json({ groupServer });
-  } return res.status(404).json({ message: 'No server found' });
+  try {
+    const rawGroupServer = await findServerByIdAndUserId(req.params.groupServerId, req.user._id);
+    if (rawGroupServer) {
+      const result = await formatRawGroupServer(rawGroupServer);
+      const groupServer = {};
+      groupServer[result.id] = result.groupServer;
+      return res.json({ groupServer });
+    } return res.status(404).json({ message: 'No server found' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
+  }
 });
 
-// Create a new text channel in a group server
-router.post('/text-channel', verify, async (req, res) => {
-  const { error } = createTextChannelValidation(req.body);
+// delete a group server
+router.delete('/:groupServerId', verify, async (req, res) => {
+  const { error } = groupServerValidation(req.params);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const { name, userId, groupServerId } = req.body;
-  if (!checkUserPemission(userId, groupServerId)) {
+  try { // remove all text channels and invite associated to group server
+    const rawGroupServer = await GroupServer.findById(req.params.groupServerId);
+    if (rawGroupServer) {
+      if (rawGroupServer.owner.toString() === req.user._id.toString()) {
+        const promises = [];
+        rawGroupServer.text_channels.forEach((textChannelId) => {
+          promises.push(deleteTextChannel({ _id: textChannelId }));
+        });
+        await Promise.all(promises);
+        if (rawGroupServer.invite) await deleteInvite({ _id: rawGroupServer.invite });
+        await deleteServer({ _id: rawGroupServer._id });
+        return res.json({});
+      } return res.status(401).json({ message: 'User is not allowed to delete the server' });
+    } return res.status(404).json({ message: 'No server found' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
+  }
+});
+
+// create a text channel in a group server
+router.post('/:groupServerId/text-channels', verify, async (req, res) => {
+  const { serverError } = groupServerValidation(req.params);
+  const { channelError } = createTextChannelValidation(req.body);
+  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
+  if (channelError) return res.status(400).json({ message: channelError.details[0].message });
+
+  if (!checkUserPemission(req.user._id, req.params.groupServerId)) {
     return res.status(401).json({ message: 'User is not authorized to create text channels' });
   }
 
-  const textChannel = await createTextChannel(name, groupServerId);
-  if (textChannel) {
-    return res.json({
-      textChannelId: textChannel._id,
-      textChannel: {
-        groupServerId: textChannel.group_server_id,
-        name: textChannel.name,
-      },
-    });
+  try {
+    const textChannel = await createTextChannel(req.body.name, req.params.groupServerId);
+    if (textChannel) {
+      return res.json({
+        textChannelId: textChannel._id,
+        textChannel: {
+          groupServerId: textChannel.group_server_id,
+          name: textChannel.name,
+        },
+      });
+    }
+    return res.status(500).json({ message: 'An error occured when creating a text channel' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
   }
-  return res.status(500).json({ message: 'An error occured when creating a text channel' });
 });
 
-router.post('/get-chat-log', verify, async (req, res) => {
-  if (req.body.type === 'get-chat-log' && req.body.textChannelId) {
-    try {
-      const textChannel = await TextChannel.findById(req.body.textChannelId);
-      if (textChannel !== null) { res.status(200).json({ success: true, message: 'Success.', chatLog: textChannel.chat_log }); } else { res.status(400).json({ success: false, message: 'Failed. No match found.' }); }
-    } catch (e) {
-      res.status(500).json({ success: false, message: 'Failed. Something went wrong.', err: e });
-    }
-  } else res.status(400).json({ success: false, message: `Failed. Bad request. \n${JSON.stringify(req.body)}` });
+// get chat logs
+router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, async (req, res) => {
+  const { error } = chatLogsValidation(req.params);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { groupServerId, textChannelId } = req.params;
+  const rawGroupServer = await findServerById(groupServerId);
+  const rawTextChannel = await findTextChannelById(textChannelId);
+  const textChannelIds = rawGroupServer.text_channels;
+
+  if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
+    return res.json({ chatLog: rawTextChannel.chat_log });
+  } return res.status(404).json({ message: 'Could not find text channel' });
 });
 
-// Verifies whether a user is part of a groupServer and has access to the channel
-router.post('/verify', verify, async (req, res) => {
-  if (req.body.type === 'verify'
-        && req.body.userId
-        && req.body.groupServerId
-        && req.body.textChannelId) {
-    try {
-      const groupServer = await GroupServer.find(
-        { _id: req.body.groupServerId, users: req.body.userId },
-      );
-      const textChannel = await TextChannel.findById(req.body.textChannelId);
-      res.status(200).json({ success: true, message: 'Success.', access: (groupServer !== null && textChannel !== null) });
-    } catch (e) {
-      res.status(500).json({ success: false, message: 'Failed. Something went wrong.', err: e });
-    }
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
-});
-
-// Creates an invite for a group server
+// creates an invite for a group server
 router.post('/create-invite', verify, async (req, res) => {
   if (req.body.type === 'create-invite'
         && req.body.userId
@@ -333,34 +369,6 @@ router.post('/delete-channel', verify, async (req, res) => {
         res.status(200).json({ success: true, message: 'Success.' });
       } else res.status(401).json({ success: false, message: 'The user is not authorized to delete channels.' });
     } else res.status(500).json({ success: false, message: 'Something went wrong when looking for the group server.' });
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
-});
-
-// Deletes a group server
-router.post('/delete', verify, async (req, res) => {
-  if (req.body.type === 'delete' && req.body.groupServerId) {
-    // Find the group server we want to delete
-    const groupServer = await GroupServer.findById(req.body.groupServerId);
-    if (groupServer !== null) {
-      // Check whether the user making the delete request is authorized
-      if (groupServer.owner == req.body.userId) {
-        // Remove the group server and its text channels as well as its invite code
-        try {
-          await GroupServer.findByIdAndDelete(groupServer._id);
-          await TextChannel.deleteMany({ group_server_id: groupServer._id });
-          await Invite.findOneAndDelete({ group_server_id: groupServer._id });
-          const users = await User.find({ group_servers: groupServer._id });
-          if (users.length > 0) {
-            users.forEach(async (user) => {
-              await User.findByIdAndUpdate(user._id, { $pull: { group_servers: groupServer._id } });
-            });
-          }
-          res.status(200).json({ success: true, message: 'Success' });
-        } catch (e) {
-          res.status(500).json({ success: false, message: `Something went wrong when deleting the group server.\n${e}`, err: e });
-        }
-      } else res.status(401).json({ success: false, message: 'The requesting user is not the owner of the group server.' });
-    } else res.status(500).json({ success: false, message: 'Something went wrong when looking for the group server to delete.' });
   } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
 });
 
