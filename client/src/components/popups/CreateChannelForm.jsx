@@ -17,7 +17,7 @@ export default function CreateChannelForm({ setOpenPopup }) {
     setLoading(true);
     let newTextChannelId;
     try {
-      await fetch('/api/groupServer/text-channel', {
+      await fetch('/api/group-server/text-channel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

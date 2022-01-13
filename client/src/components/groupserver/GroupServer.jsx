@@ -19,21 +19,20 @@ export default function GroupServer() {
   useEffect(async () => {
     if (groupServerId) {
       try {
-        await fetch('/api/groupServer/verify', {
-          method: 'POST',
+        await fetch(`/api/group-server/${groupServerId}`, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
+          /*
           body: JSON.stringify({
-            type: 'verify',
-            userId: user._id,
             groupServerId,
             textChannelId: textChannelId || Object.keys(state.groupServers[groupServerId].textChannels)[0],
           }),
-        }).then((response) => response.json())
-          .then(async (data) => {
-            setUserAccess(data.access);
-          });
+          */
+        }).then((response) => {
+          setUserAccess(response.status === 200);
+        });
       } finally {
         setLoading(false);
       }

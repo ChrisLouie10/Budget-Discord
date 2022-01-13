@@ -39,7 +39,17 @@ async function checkUserPemission(userId, groupServerId) {
   return false;
 }
 
+async function findServerById(groupServerId) {
+  return GroupServer.findById(groupServerId);
+}
+
+async function findServersByUserId(userId) {
+  return GroupServer.find({ users: userId });
+}
+
 module.exports = {
   createGroupServer,
   checkUserPemission,
+  findServerById,
+  findServersByUserId,
 };

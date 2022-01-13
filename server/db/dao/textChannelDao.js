@@ -24,7 +24,12 @@ async function findTextChannelById(id) {
   return TextChannel.findById(id);
 }
 
+async function findTextChannelsByServerId(groupServerId) {
+  return TextChannel.find({ group_server_id: groupServerId });
+}
+
 module.exports = {
   createTextChannel,
   findTextChannelById,
+  findTextChannelsByServerId,
 };

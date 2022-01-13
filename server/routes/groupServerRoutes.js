@@ -4,9 +4,22 @@ const GroupServer = require('../db/models/GroupServer');
 const TextChannel = require('../db/models/TextChannel');
 const Invite = require('../db/models/Invite');
 const { verify } = require('../lib/utils/tokenUtils');
-const { createServerValidation, createTextChannelValidation } = require('../lib/validation/groupServerValidation');
-const { createGroupServer, checkUserPemission } = require('../db/dao/groupServerDao');
-const { createTextChannel, findTextChannelById } = require('../db/dao/textChannelDao');
+const {
+  createServerValidation,
+  createTextChannelValidation,
+  groupServerValidation,
+} = require('../lib/validation/groupServerValidation');
+const {
+  createGroupServer,
+  checkUserPemission,
+  findServerById,
+  findServersByUserId,
+} = require('../db/dao/groupServerDao');
+const {
+  createTextChannel,
+  findTextChannelById,
+  findTextChannelsByServerId,
+} = require('../db/dao/textChannelDao');
 
 // expiration is in minutes
 // 0 limit = infinite use
@@ -38,30 +51,87 @@ async function createInvite(groupServerId, expiration, limit) {
   }
 }
 
+async function formatRawGroupServer(rawGroupServer) {
+  const result = { id: rawGroupServer._id };
+  const properties = {
+    name: rawGroupServer.name,
+    owner: rawGroupServer.owner,
+    admins: rawGroupServer.admins,
+  };
+  const rawTextChannels = await findTextChannelsByServerId(rawGroupServer._id);
+  const textChannels = {};
+
+  rawTextChannels.forEach((rawTextChannel) => {
+    textChannels[rawTextChannel._id] = {
+      groupServerId: rawTextChannel.group_server_id,
+      name: rawTextChannel.name,
+    };
+  });
+  properties.textChannels = textChannels;
+  result.groupServer = properties;
+  return result;
+}
+
+// Get all of user's group servers
+router.get('/', verify, async (req, res) => {
+  const rawGroupServers = await findServersByUserId(req.user._id);
+  if (rawGroupServers.length > 0) {
+    const groupServers = {};
+    const promises = [];
+
+    rawGroupServers.forEach((rawGroupServer) => {
+      promises.push(formatRawGroupServer(rawGroupServer));
+    });
+
+    const results = await Promise.all(promises);
+    results.forEach((result) => {
+      groupServers[result.id] = result.groupServer;
+    });
+    return res.json({ groupServers });
+  } return res.status(404).json({ message: 'User is not a member of any servers' });
+});
+
 router.post('/', verify, async (req, res) => {
   // Validate data before creating server
   const { error } = createServerValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   const { name, userId } = req.body;
-  const groupServer = await createGroupServer(name, userId);
-  if (groupServer) {
+  const rawGroupServer = await createGroupServer(name, userId);
+  if (rawGroupServer) {
     const textChannels = {};
-    const textChannel = await findTextChannelById(groupServer.text_channels[0]);
-    const result = {
-      name: groupServer.name,
-      owner: groupServer.owner,
+    const rawTextChannel = await findTextChannelById(rawGroupServer.text_channels[0]);
+    const groupServer = {
+      name: rawGroupServer.name,
+      owner: rawGroupServer.owner,
+      admins: [],
       textChannels: {},
     };
 
-    textChannels[textChannel._id] = {
-      groupServerId: textChannel.group_server_id,
-      name: textChannel.name,
+    textChannels[rawTextChannel._id] = {
+      groupServerId: rawTextChannel.group_server_id,
+      name: rawTextChannel.name,
     };
-    result.textChannels = textChannels;
-    return res.json({ groupServer: result });
+    groupServer.textChannels = textChannels;
+    return res.json({ groupServer });
   }
   return res.status(500).json({ message: 'An error ocurred when creating the server' });
+});
+
+// get a specific group server
+router.get('/:groupServerId', verify, async (req, res) => {
+  // Validate parameter
+  const { error } = groupServerValidation(req.params);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  // Find and return group server
+  const rawGroupServer = await findServerById(req.params.groupServerId);
+  if (rawGroupServer) {
+    const result = await formatRawGroupServer(rawGroupServer);
+    const groupServer = {};
+    groupServer[result.id] = result.groupServer;
+    return res.json({ groupServer });
+  } return res.status(404).json({ message: 'No server found' });
 });
 
 // Create a new text channel in a group server
@@ -85,99 +155,6 @@ router.post('/text-channel', verify, async (req, res) => {
     });
   }
   return res.status(500).json({ message: 'An error occured when creating a text channel' });
-});
-
-// Returns a single group server
-router.post('/find-one', verify, async (req, res) => {
-  if (req.body.type === 'find-one'
-        && req.body.groupServerId
-        && req.body.userId) {
-    const groupServer = await GroupServer.findById(req.body.serverId);
-    if (groupServer !== null) {
-      const server = {};
-      const properties = {
-        name: groupServer.name,
-        invite: groupServer.invite,
-      };
-
-      if (req.body.userId == groupServer.owner) {
-        properties.owner = true;
-      } else if (groupServer.admins && !properties.owner) {
-        groupServer.admins.forEach((admin) => {
-          if (admin == req.body.userId) {
-            properties.admin = true;
-          }
-        });
-      }
-      server[groupServer._id] = properties;
-      res.status(200).json({ success: true, message: 'Success', server });
-    } else res.status(500).json({ success: false, message: 'No match found.' });
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
-});
-
-// Returns a dictionary of groupServers
-// that match the id's from req.body.servers
-// key = _id, value = {name: String, inviteCode: String, owner/admin: boolean, textChannels: Object}
-router.post('/find', verify, async (req, res) => {
-  if (req.body.type === 'find' && req.body.userId) {
-    const groupServers = {};
-    // Find the user's groupServers
-    const _groupServers = await GroupServer.find({ users: req.body.userId });
-    if (_groupServers.length > 0) {
-      // Iterate through each groupServer. Put the iteration inside a promise
-      // to force compiler to "wait" before returning to client
-      const promise = new Promise((resolve) => {
-        _groupServers.forEach(async (groupServer, index, array) => {
-          // Push groupServer info. to the groupServers object
-          const properties = {
-            name: groupServer.name,
-            owner: (req.body.userId == groupServer.owner) ? true : undefined,
-          };
-          // Check whether the user is an admin
-          if (groupServer.admins && !properties.owner) {
-            groupServer.admins.forEach((admin) => {
-              if (admin == req.body.userId) {
-                properties.admin = true;
-              }
-            });
-          }
-          // Give user access to invite code if they are the owner/admin
-          if (properties.owner || properties.admin) {
-            const invite = await Invite.findOne({ group_server_id: groupServer._id });
-            if (invite !== null) {
-              properties.inviteCode = invite.code;
-            }
-          }
-
-          const _textChannels = await TextChannel.find({ group_server_id: groupServer._id });
-          const textChannels = {};
-          if (_textChannels.length > 0) {
-            _textChannels.forEach((textChannel) => {
-              textChannels[textChannel._id] = {
-                groupServerId: textChannel.group_server_id,
-                name: textChannel.name,
-                date: textChannel.date,
-              };
-            });
-          }
-          properties.textChannels = textChannels;
-          groupServers[groupServer._id] = properties;
-
-          // End promise after the last groupServer
-          if (index === array.length - 1) resolve();
-        });
-      });
-      promise.then(() => {
-        // Return the group servers to client as well as the textChannels
-        // and invites if they were requested
-        res.status(200).json({
-          success: true,
-          message: 'Success',
-          groupServers,
-        });
-      });
-    } else res.status(200).json({ success: true, message: 'No group servers found.', groupServers: {} });
-  } else res.status(400).json({ success: false, message: `Failed. Bad request.\n${JSON.stringify(req.body)}` });
 });
 
 router.post('/get-chat-log', verify, async (req, res) => {

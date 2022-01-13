@@ -21,7 +21,7 @@ export default function DeleteGroupServerForm() {
     if (groupServerId && mounted) {
       console.log('Gonna try to delete or something');
       setLoading(true);
-      await fetch('/api/groupServer/delete', {
+      await fetch('/api/group-server/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

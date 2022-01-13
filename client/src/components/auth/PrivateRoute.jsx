@@ -70,13 +70,9 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         .then(async (_user) => {
           let response;
           if (_user) {
-            response = await fetch('/api/groupServer/find', {
-              method: 'POST',
+            response = await fetch('/api/group-server/', {
+              method: 'GET',
               headers,
-              body: JSON.stringify({
-                type: 'find',
-                userId: _user._id,
-              }),
             });
             return response.json();
           } return null;

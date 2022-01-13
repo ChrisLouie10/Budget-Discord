@@ -8,6 +8,13 @@ const createServerValidation = (data) => {
   return schema.validate(data);
 };
 
+const groupServerValidation = (data) => {
+  const schema = Joi.object({
+    groupServerId: Joi.string().length(24).required(),
+  });
+  return schema.validate(data);
+};
+
 const createTextChannelValidation = (data) => {
   const schema = Joi.object({
     name: Joi.string().max(32).required(),
@@ -19,5 +26,6 @@ const createTextChannelValidation = (data) => {
 
 module.exports = {
   createServerValidation,
+  groupServerValidation,
   createTextChannelValidation,
 };
