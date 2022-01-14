@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 export default function FriendsList({ setError, handleFriendDelete, friend }) {
@@ -35,13 +36,13 @@ export default function FriendsList({ setError, handleFriendDelete, friend }) {
 
   return (
     <div className="d-flex m-2 mx-auto" style={{ maxWidth: '800px' }}>
-      <p className="mr-auto p-2">
+      <Link className="mr-auto p-2 text-reset" to={{ pathname: `/friends/${friend.id}` }}>
         {friend.name}
         {' '}
         #
         {friend.numberID}
         {' '}
-      </p>
+      </Link>
       <button
         disabled={loading}
         className="btn btn-primary"

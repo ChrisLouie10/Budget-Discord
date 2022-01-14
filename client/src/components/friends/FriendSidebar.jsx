@@ -1,52 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import FriendsList from './FriendsList';
-import FriendRequests from './FriendRequests';
+import { Link, useParams } from 'react-router-dom';
 
 export default function FriendSidebar(props) {
   const {
-    friends, friendRequests, handleFriendAccept, handleFriendDelete, setError, textChannelId,
+    friends,
   } = props;
-  const [friendName, setFriendName] = useState('Friend');
+  const { friendId } = useParams();
 
-  useEffect(() => {
-    if (friends) {
-      setFriendName(friends[0].name);
-    }
-  }, [friends]);
-
+  // TODO: Change to display private chats
   // eslint-disable-next-line
   function displayFriends() {
-    if (friends[friends.id]) {
+    if (friends) {
       return (
         <>
-          {friends && friends.length > 0 ? friends.map((friend) => <FriendsList handleFriendDelete={handleFriendDelete} setError={setError} key={friend.id} friend={friend} />) : <div /> }
-          <hr />
-          {friendRequests && friendRequests.length > 0 ? friendRequests.map((friend) => <FriendRequests handleFriendAccept={handleFriendAccept} setError={setError} key={friend.id} friend={friend} />) : <div> </div>}
-          {/* {
-            Object.entries(friends.textChannels).map(([key, value]) => (
-              <li key={key}>
+          {
+            friends.map((friend) => (
+              <li key={friend.id}>
                 {
-                  textChannelId === key
+                  friendId === friend.id
                     ? (
                       // eslint-disable-next-line
-                      <Link style={{ color: '#b5fff3' }} to={{ pathname: `/me/${friend.id}` }}>
-                        {value.name}
-
+                      <Link style={{ color: '#b5fff3' }} to={{ pathname: `/friends/${friend.id}` }}>
+                        {friend.name}
+                        {' '}
+                        #
+                        {friend.numberID}
+                        {' '}
                       </Link>
                     )
                     : (
                       // eslint-disable-next-line
-                      <Link className="text-reset" to={{ pathname: `/me/${friend.id}` }}>
-                        {value.name}
-
+                      <Link className="text-reset" to={{ pathname: `/friends/${friend.id}` }}>
+                        {friend.name}
+                        {' '}
+                        #
+                        {friend.numberID}
+                        {' '}
                       </Link>
                     )
                   }
               </li>
             ))
-            } */}
+            }
         </>
       );
     }
@@ -55,7 +51,7 @@ export default function FriendSidebar(props) {
   return (
     <nav id="server-side-bar">
       <div className="row">
-        <h5 className="text-white">{friendName}</h5>
+        <Link to={{ pathname: '/friends' }}>Friends</Link>
       </div>
       <div className="row">
         <ul className="list-unstyled text-white">
@@ -70,16 +66,4 @@ export default function FriendSidebar(props) {
 FriendSidebar.propTypes = {
   // eslint-disable-next-line
   friends: PropTypes.object.isRequired,
-  // eslint-disable-next-line
-  friendRequests: PropTypes.object.isRequired,
-  handleFriendAccept: PropTypes.func.isRequired,
-  handleFriendDelete: PropTypes.func.isRequired,
-  setError: PropTypes.func.isRequired,
-  textChannelId: PropTypes.string,
-  // eslint-disable-next-line
-  user: PropTypes.object.isRequired,
-};
-
-FriendSidebar.defaultProps = {
-  textChannelId: '',
 };

@@ -36,6 +36,8 @@ export default function App() {
               <Switch>
                 <PrivateRoute exact path="/" component={Dashboard} />
                 <PrivateRoute exact path="/friends" component={Friends} />
+                <PrivateRoute exact path="/friends" component={Friends} />
+                <PrivateRoute exact path="/friends/:friendId" component={Friends} />
                 <PrivateRoute exact path="/dashboard" component={Dashboard} />
                 <PrivateRoute exact path="/change-name" component={ChangeName} />
                 <PrivateRoute exact path="/change-password" component={ChangePassword} />
