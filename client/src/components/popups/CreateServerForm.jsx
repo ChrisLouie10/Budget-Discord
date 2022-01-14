@@ -14,24 +14,25 @@ export default function CreateServerForm({ setOpenPopup }) {
     setLoading(true);
 
     try {
-      fetch('/api/groupServer/create', {
+      await fetch('/api/group-servers/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          type: 'create',
           name: input,
           userId: user._id,
         }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            const _groupServers = { ...groupServers };
-            _groupServers[data.groupServerId] = data.groupServer;
-            setGroupServers(_groupServers);
-          } else console.log(data.message);
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        if (response.status === 201) {
+          const _groupServers = { ...groupServers };
+          _groupServers[data.groupServerId] = data.groupServer;
+          setGroupServers(_groupServers);
+        } else console.error(data.message);
+      });
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
       setOpenPopup(false);

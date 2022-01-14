@@ -47,22 +47,19 @@ export default function TextChannel() {
     // If the chat log for the text channel with the id "props.textChannelId"
     // doesn't exist in the client, then retrieve it from the server
     if (!chatLogs[textChannelId]) {
-      await fetch('/api/groupServer/get-chat-log', {
-        method: 'POST',
+      await fetch(`/api/group-servers/${groupServerId}/text-channels/${textChannelId}/chat-logs`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: 'get-chat-log',
-          userId: user._id,
-          textChannelId,
-        }),
       })
-        .then((response) => response.json())
-        .then((data) => {
-          const _chatLogs = { ...chatLogs };
-          _chatLogs[textChannelId] = data.chatLog;
-          setChatLogs(_chatLogs);
+        .then(async (response) => {
+          const data = await response.json();
+          if (response.status === 200) {
+            const _chatLogs = { ...chatLogs };
+            _chatLogs[textChannelId] = data.chatLog;
+            setChatLogs(_chatLogs);
+          } else console.error(data.message);
         })
         .then(() => {
           const data = {

@@ -24,26 +24,20 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
   async function leaveGroupServer() {
     if (groupServerId && mounted) {
       setLoading(true);
-      await fetch('/api/groupServer/leave', {
-        method: 'POST',
+      await fetch(`/api/group-servers/${groupServerId}/users`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: 'leave',
-          groupServerId,
-          userId: user._id,
-        }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success && mounted) {
-            history.push('/dashboard');
-            const _groupServers = { ...groupServers };
-            delete _groupServers[groupServerId];
-            setUser(data.user);
-            setGroupServers(_groupServers);
-          } else console.log(data.message);
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        history.push('/dashboard');
+        if (response.status === 200) {
+          const _groupServers = { ...groupServers };
+          delete _groupServers[groupServerId];
+          setGroupServers(_groupServers);
+        } else console.error(data.message);
+      });
     }
   }
 

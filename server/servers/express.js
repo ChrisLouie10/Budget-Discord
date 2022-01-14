@@ -21,6 +21,6 @@ app.use(cors());
 // Use routes
 app.use('/api/user', authRoute);
 app.use('/api/friends', friendsRoute);
-app.use('/api/groupServer', groupServerRoute);
+app.use('/api/group-servers', groupServerRoute);
 
 module.exports = app;
