@@ -8,6 +8,7 @@ const logger = require('morgan');
 const authRoute = require('../routes/authRoutes');
 const friendsRoute = require('../routes/friendRoutes');
 const groupServerRoute = require('../routes/groupServerRoutes');
+const privateChatRoute = require('../routes/privateChatRoutes');
 
 const app = express();
 
@@ -22,5 +23,6 @@ app.use(cors());
 app.use('/api/user', authRoute);
 app.use('/api/friends', friendsRoute);
 app.use('/api/groupServer', groupServerRoute);
+app.use('/api/privateChat', privateChatRoute);
 
 module.exports = app;
