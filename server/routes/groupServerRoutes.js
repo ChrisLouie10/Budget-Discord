@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
-const GroupServer = require('../db/models/GroupServer');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   createServerValidation,
@@ -29,8 +28,9 @@ const {
   deleteTextChannel,
 } = require('../db/dao/textChannelDao');
 const {
-  createInvite, deleteInvite, findInviteByCode, AddNumberToInviteUse,
+  createInvite, deleteInvite, findInviteById, findInviteByCode, AddNumberToInviteUse,
 } = require('../db/dao/inviteDao');
+const { findChatLogById } = require('../db/dao/chatLogDao');
 
 async function formatRawGroupServer(rawGroupServer) {
   const result = { id: rawGroupServer._id };
@@ -39,8 +39,11 @@ async function formatRawGroupServer(rawGroupServer) {
     owner: rawGroupServer.owner,
     admins: rawGroupServer.admins,
   };
+  const rawInvite = await findInviteById(rawGroupServer.invite);
   const rawTextChannels = await findTextChannelsByServerId(rawGroupServer._id);
   const textChannels = {};
+
+  if (rawInvite) properties.inviteCode = rawInvite.code;
 
   rawTextChannels.forEach((rawTextChannel) => {
     textChannels[rawTextChannel._id] = {
@@ -96,10 +99,10 @@ router.post('/', verify, async (req, res) => {
   const { error } = createServerValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
+  const { name, userId } = req.body;
+
   try {
-    const { name, userId } = req.body;
     const rawGroupServer = await createGroupServer(name, userId);
-    console.log(rawGroupServer);
     if (rawGroupServer) {
       const textChannels = {};
       const rawTextChannel = await findTextChannelById(rawGroupServer.text_channels[0]);
@@ -115,7 +118,7 @@ router.post('/', verify, async (req, res) => {
         name: rawTextChannel.name,
       };
       groupServer.textChannels = textChannels;
-      return res.status(201).json({ groupServer });
+      return res.status(201).json({ groupServer, groupServerId: rawGroupServer._id });
     }
     return res.status(500).json({ message: 'An error ocurred when creating the server' });
   } catch (e) {
@@ -149,7 +152,7 @@ router.delete('/:groupServerId', verify, async (req, res) => {
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   try { // remove all text channels and invite associated to group server
-    const rawGroupServer = await GroupServer.findById(req.params.groupServerId);
+    const rawGroupServer = await findServerById(req.params.groupServerId);
     if (rawGroupServer) {
       if (rawGroupServer.owner.toString() === req.user._id.toString()) {
         const promises = [];
@@ -210,11 +213,11 @@ router.delete('/:groupServerId/text-channels/:textChannelId', verify, async (req
   const { groupServerId, textChannelId } = req.params;
 
   try {
-    const rawGroupServer = await GroupServer.findById(groupServerId);
+    const rawGroupServer = await findServerById(groupServerId);
     if (rawGroupServer) {
       await removeTextChannel(groupServerId, textChannelId);
       const result = await deleteTextChannel({ _id: textChannelId });
-      if (result.deletedCount > 0) return res.json({});
+      if (result) return res.json({});
       return res.status(404).json({ message: 'No text channel found' });
     } return res.status(404).json({ message: 'No server found' });
   } catch (e) {
@@ -229,17 +232,25 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   const { groupServerId, textChannelId } = req.params;
-  const rawGroupServer = await findServerById(groupServerId);
-  const rawTextChannel = await findTextChannelById(textChannelId);
-  const textChannelIds = rawGroupServer.text_channels;
 
-  if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
-    return res.json({ chatLog: rawTextChannel.chat_log });
-  } return res.status(404).json({ message: 'Could not find text channel' });
+  try {
+    const rawGroupServer = await findServerById(groupServerId);
+    const rawTextChannel = await findTextChannelById(textChannelId);
+    const textChannelIds = rawGroupServer.text_channels;
+
+    if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
+      const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
+      if (rawChatLog) return res.json({ chatLog: rawChatLog.chat_log });
+      return res.status(404).json({ message: 'Could not find chat log' });
+    } return res.status(404).json({ message: 'Could not find text channel' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({});
+  }
 });
 
 // Adds a user to a group server
-router.post('/user', verify, async (req, res) => {
+router.post('/users', verify, async (req, res) => {
   const { error } = inviteValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -271,12 +282,12 @@ router.post('/user', verify, async (req, res) => {
 });
 
 // remove a user from a group server
-router.delete('/user', verify, async (req, res) => {
-  const { error } = groupServerValidation(req.body);
+router.delete('/:groupServerId/users', verify, async (req, res) => {
+  const { error } = groupServerValidation(req.params);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   try {
-    const rawGroupServer = await removeUserFromServer(req.body.groupServerId, req.user._id);
+    const rawGroupServer = await removeUserFromServer(req.params.groupServerId, req.user._id);
     if (rawGroupServer) {
       return res.json({});
     } return res.status(404).json({ message: 'No server found' });

@@ -16,7 +16,7 @@ async function createGroupServer(name, ownerId) {
     await createTextChannel('general', groupServer._id);
 
     // find updated group server and return that
-    return await GroupServer.findById(groupServer._id);
+    return GroupServer.findById(groupServer._id);
   } catch (e) {
     console.error(e);
     return null;
@@ -45,8 +45,9 @@ async function findServerById(groupServerId) {
 }
 
 async function findServerByInvite(inviteCode) {
-  const rawInvite = Invite.findOne({ code: inviteCode });
-  return GroupServer.findOne({ invite: rawInvite._id });
+  const rawInvite = await Invite.findOne({ code: inviteCode });
+  if (rawInvite) return GroupServer.findOne({ invite: rawInvite._id });
+  return null;
 }
 
 async function findServerByIdAndUserId(groupServerId, userId) {

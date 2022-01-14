@@ -68,19 +68,14 @@ export default function PrivateRoute({ component: Component, ...rest }) {
           return data.user;
         })
         .then(async (_user) => {
-          let response;
           if (_user) {
-            response = await fetch('/api/group-servers/', {
+            const response = await fetch('/api/group-servers/', {
               method: 'GET',
               headers,
             });
-            return response.json();
-          } return {};
-        })
-        .then((data) => {
-          if (data) {
-            setGroupServers(data.groupServers);
-            console.log(data.groupServers);
+            const data = await response.json();
+            if (response.status === 200) setGroupServers(data.groupServers);
+            else console.log(data.message);
           }
         });
     } catch {

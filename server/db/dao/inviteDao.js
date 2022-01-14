@@ -18,6 +18,10 @@ async function deleteInvite(query) {
   return Invite.deleteOne(query);
 }
 
+async function findInviteById(inviteId) {
+  return Invite.findById(inviteId);
+}
+
 async function findInviteByCode(code) {
   return Invite.findOne({ code });
 }
@@ -29,6 +33,7 @@ async function AddNumberToInviteUse(inviteId, number) {
 module.exports = {
   createInvite,
   deleteInvite,
+  findInviteById,
   findInviteByCode,
   AddNumberToInviteUse,
 };

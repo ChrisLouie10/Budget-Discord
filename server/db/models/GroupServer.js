@@ -31,7 +31,7 @@ const groupServerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Invite',
   },
-  date: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },

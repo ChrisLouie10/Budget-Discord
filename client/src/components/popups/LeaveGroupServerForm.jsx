@@ -35,7 +35,6 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
         if (response.status === 200) {
           const _groupServers = { ...groupServers };
           delete _groupServers[groupServerId];
-          setUser(data.user);
           setGroupServers(_groupServers);
         } else console.error(data.message);
       });

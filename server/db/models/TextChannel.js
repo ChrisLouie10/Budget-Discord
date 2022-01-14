@@ -7,16 +7,15 @@ const textChannelSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  date: {
+  createdAt: {
     type: Date,
     default: Date.now,
   },
-  chat_log: [{
-    content: String,
-    author: String,
-    index: Number,
-    timestamp: Date,
-  }],
+  chat_log: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ChatLog',
+    required: true,
+  },
 });
 
 module.exports = mongoose.model('TextChannel', textChannelSchema);
