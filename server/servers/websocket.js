@@ -7,20 +7,43 @@ const app = require('./express');
 const { findTextChannelById } = require('../db/dao/textChannelDao');
 const { addMessageToChatLog } = require('../db/dao/chatLogDao');
 const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
+const { parseCookies } = require('../lib/utils/cookieUtils');
+const { getUserWithToken } = require('../lib/utils/tokenUtils');
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ noServer: true });
 const wsclients = {};
+
+// verify connection is authenticated before connecting to websocket
+server.on('upgrade', async (req, socket, head) => {
+  const cookies = parseCookies(req);
+  const { token } = cookies;
+
+  if (!token) {
+    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  const user = await getUserWithToken(token);
+  req.user = user;
+
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    wss.emit('connection', ws, req);
+  });
+});
 
 // On WebSocket Server connection add an event listener
 // Echo back data received from a client to every client
-wss.on('connection', (ws) => {
+wss.on('connection', (ws, req) => {
   // For every new websocket client, give it a unique session id
   // to help identify it
   const sessionId = generateUniqueSessionId();
   const wsclient = ws;
   wsclient.sessionId = sessionId;
   wsclients[sessionId] = wsclient;
+
+  console.log(req.user);
 
   ws.on('message', async (msgStr) => {
     // if the message can't be parsed, then skip it as all ws clients'
