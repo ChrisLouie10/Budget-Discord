@@ -24,51 +24,14 @@ const {
 const {
   createTextChannel,
   findTextChannelById,
-  findTextChannelsByServerId,
   deleteTextChannel,
 } = require('../db/dao/textChannelDao');
 const {
-  createInvite, deleteInvite, findInviteById, findInviteByCode, AddNumberToInviteUse,
+  createInvite, deleteInvite, findInviteByCode,
 } = require('../db/dao/inviteDao');
 const { findChatLogById } = require('../db/dao/chatLogDao');
-
-async function formatRawGroupServer(rawGroupServer) {
-  const result = { id: rawGroupServer._id };
-  const properties = {
-    name: rawGroupServer.name,
-    owner: rawGroupServer.owner,
-    admins: rawGroupServer.admins,
-  };
-  const rawInvite = await findInviteById(rawGroupServer.invite);
-  const rawTextChannels = await findTextChannelsByServerId(rawGroupServer._id);
-  const textChannels = {};
-
-  if (rawInvite) properties.inviteCode = rawInvite.code;
-
-  rawTextChannels.forEach((rawTextChannel) => {
-    textChannels[rawTextChannel._id] = {
-      groupServerId: rawGroupServer._id,
-      name: rawTextChannel.name,
-    };
-  });
-  properties.textChannels = textChannels;
-  result.groupServer = properties;
-  return result;
-}
-
-function checkInviteExpiration(invite) { // returns true if not expired
-  const creationDate = invite.date;
-  const currentDate = new Date();
-  const timeLapse = (currentDate.getTime() - creationDate.getTime()) / 60000;
-  return invite.expiration <= 0 || (timeLapse < invite.expiration && invite.limit !== 0);
-}
-
-async function decreaseInviteUse(invite) {
-  if (invite.limit) {
-    await AddNumberToInviteUse(invite._id, -1);
-    if (invite.limit - 1 <= 0) await deleteInvite({ _id: invite._id });
-  }
-}
+const { formatRawGroupServer } = require('../lib/utils/groupServerUtils');
+const { checkInviteExpiration, decreaseInviteUse } = require('../lib/utils/inviteUtils');
 
 // get all of user's group servers
 router.get('/', verify, async (req, res) => {
