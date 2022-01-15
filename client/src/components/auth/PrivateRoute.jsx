@@ -32,11 +32,10 @@ export default function PrivateRoute({ component: Component, ...rest }) {
 
     setChatLogs((currChatLogs) => {
       const currLogs = { ...currChatLogs };
-      if (messageObject.type === 'duplicateMessage') {
-        const index = currLogs[messageObject.textChannelId].length - 1;
-        currLogs[messageObject.textChannelId][index] = messageObject.message;
-      } else if (messageObject.type === 'message') {
-        currLogs[messageObject.textChannelId].push(messageObject.message);
+      if (messageObject.type === 'message') {
+        if (currLogs[messageObject.textChannelId]) {
+          currLogs[messageObject.textChannelId].push(messageObject.message);
+        }
       }
       return currLogs;
     });

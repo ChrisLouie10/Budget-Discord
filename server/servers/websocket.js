@@ -1,15 +1,18 @@
 const WebSocket = require('ws');
 const http = require('http');
 const app = require('./express');
+const { findServersByUserId } = require('../db/dao/groupServerDao');
 const { findTextChannelById } = require('../db/dao/textChannelDao');
 const { addMessageToChatLog } = require('../db/dao/chatLogDao');
 const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
 const { parseCookies } = require('../lib/utils/cookieUtils');
 const { getUserWithToken } = require('../lib/utils/tokenUtils');
+const { messageValidation } = require('../lib/validation/websocketValidation');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
 const clients = {};
+const groupServerIds = {};
 
 // verify connection is authenticated before connecting to websocket
 server.on('upgrade', async (req, socket, head) => {
@@ -36,62 +39,63 @@ server.on('upgrade', async (req, socket, head) => {
   });
 });
 
-wss.on('connection', (ws, req) => {
+wss.on('connection', async (ws, req) => {
   // For every new client, give it a unique session id to help identify it later
   const sessionId = `${req.user._id}-${generateUniqueSessionId()}`;
-  const client = ws;
-  client.sessionId = sessionId;
-  clients[sessionId] = client;
-  console.log('NEW CONNECTION Current number of ws clients connected:', Object.keys(clients).length);
+  clients[sessionId] = ws;
+  console.log('NEW CONNECTION Current number of clients:', Object.keys(clients).length);
 
-  ws.on('message', async (msgStr) => {
-    // if the message can't be parsed, then skip it as all clients'
+  // get all of clients' groupservers
+  const rawGroupServers = await findServersByUserId(req.user._id);
+  rawGroupServers.forEach((rawGroupServer) => {
+    const { _id } = rawGroupServer;
+    if (groupServerIds[_id]) {
+      groupServerIds[_id].push(sessionId);
+    } else groupServerIds[_id] = [sessionId];
+  });
+
+  ws.on('message', async (msg) => {
+    // if the msg can't be parsed, then skip it as all clients'
     // messages should be parsable
-    let messageObj;
+    let result;
     try {
-      messageObj = JSON.parse(msgStr);
+      result = JSON.parse(msg);
     } catch {
-      console.log('Message from client could not be parsed!', msgStr);
+      console.log('Message from client could not be parsed!', msg);
       return;
     }
 
-    client.serverId = messageObj.serverId;
-    client.textChannelId = messageObj.textChannelId;
-
     // if the ws client is sending a new message
-    if (messageObj.type === 'message') {
-      const newMessage = {
-        content: messageObj.message.content,
-        author: messageObj.message.author,
-        timestamp: messageObj.message.timestamp,
+    if (result.method === 'message') {
+      // validate message
+      const { error } = messageValidation(result.message);
+      if (error) return;
+
+      const message = {
+        content: result.message.content,
+        author: result.message.author,
+        timestamp: result.message.timestamp,
       };
       try {
         // Find and update the text channel's chat log
-        const rawTextChannel = await findTextChannelById(messageObj.textChannelId);
-        const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, newMessage);
+        const rawTextChannel = await findTextChannelById(result.textChannelId);
+        const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, message);
         if (rawChatLog) {
-          // Echo this message to EVERY websocket clients with the same serverId
+          // Send message to every client that are on the same group server
           const data = {
             type: 'message',
-            message: newMessage,
-            textChannelId: messageObj.textChannelId,
+            message,
+            textChannelId: result.textChannelId,
           };
-          Object.keys(clients).forEach((key) => {
-            if (clients[key].readyState === WebSocket.OPEN
-              && clients[key].serverId === ws.serverId) {
-              if (clients[key].sessionId !== ws.sessionId) {
-                clients[key].send(JSON.stringify(data));
-              } else {
-                const duplicate = {
-                  type: 'duplicateMessage',
-                  message: newMessage,
-                  textChannelId: messageObj.textChannelId,
-                };
-                clients[key].send(JSON.stringify(duplicate));
-              }
+          groupServerIds[result.groupServerId].forEach((id) => {
+            if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
+              console.log(result.groupServerId, id);
+              clients[id].send(JSON.stringify(data));
             }
           });
-        } else console.log('Failed to update text channel', messageObj.textChannelId, 'with a new message.');
+        } else {
+          console.log('Failed to update text channel', result.textChannelId, 'with a new message.');
+        }
       } catch (e) {
         console.error(e);
       }
@@ -99,8 +103,16 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', () => {
-    delete clients[client.sessionId];
-    console.log('DISCONNECTED Current number of ws clients connected:', Object.keys(clients).length);
+    delete clients[sessionId];
+    // remove sessionId from groupServerIds dictionary
+    rawGroupServers.forEach((rawGroupServer) => {
+      const { _id } = rawGroupServer;
+      if (groupServerIds[_id]) {
+        const index = groupServerIds[_id].indexOf(sessionId);
+        if (index >= 0) groupServerIds[_id].splice(index, 1);
+      }
+    });
+    console.log('DISCONNECTED Current number of clients:', Object.keys(clients).length);
   });
 });
 

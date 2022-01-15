@@ -15,32 +15,13 @@ export default function TextChannel() {
   const [input, setInput] = useState('');
   const { groupServerId, textChannelId } = useParams();
 
-  // Repeatedly attempts to contact ws server with "callback" until ws server is online
-  function waitForWSConnection(callback, interval) {
-    const { ws } = state;
-    if (ws) {
-      if (ws.readyState === WebSocket.OPEN) callback();
-      else {
-        setTimeout(() => {
-          waitForWSConnection(callback, interval);
-        }, interval);
-      }
-    }
-  }
-
   function sendMessage(message) {
-    const { ws } = state;
-    // Create data
-    const data = {
-      type: 'message',
+    state.ws.send(JSON.stringify({
+      method: 'message',
       textChannelId,
-      serverId: groupServerId,
+      groupServerId,
       message,
-    };
-    // Send data over to ws server
-    waitForWSConnection(() => {
-      ws.send(JSON.stringify(data));
-    }, 500);
+    }));
   }
 
   useEffect(async () => {
@@ -60,15 +41,6 @@ export default function TextChannel() {
             _chatLogs[textChannelId] = data.chatLog;
             setChatLogs(_chatLogs);
           } else console.error(data.message);
-        })
-        .then(() => {
-          const data = {
-            textChannelId,
-            serverId: groupServerId,
-          };
-          waitForWSConnection(() => {
-            state.ws.send(JSON.stringify(data));
-          }, 500);
         });
     }
     setLoading(false);
@@ -79,10 +51,8 @@ export default function TextChannel() {
     if (input !== '') {
       const message = {
         content: input,
-        index: Object.keys(chatLogs).length + 1,
         author: user._id,
         timestamp: new Date(),
-        notSent: true,
       };
       // update client chatlogs
       const _chatLogs = { ...chatLogs };
