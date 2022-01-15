@@ -29,7 +29,6 @@ export default function ChangePassword() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: state.user.email,
           oldPassword: oldPasswordRef.current.value,
           password: passwordRef.current.value,
         }),
