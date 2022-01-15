@@ -38,7 +38,7 @@ export default function Signup() {
             setError(data.message);
             console.log(data.message);
           } else {
-            history.push('/dashboard');
+            history.push('/friends');
           }
         });
     } finally {

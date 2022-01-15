@@ -34,7 +34,7 @@ export default function DeleteGroupServerForm() {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            history.push('/dashboard');
+            history.push('/friends');
             const _groupServers = { ...groupServers };
             delete _groupServers[groupServerId];
             setGroupServers(_groupServers);

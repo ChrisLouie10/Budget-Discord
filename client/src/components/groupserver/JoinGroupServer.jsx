@@ -36,7 +36,7 @@ export default function JoinGroupServer() {
             history.push(`/group/${groupServerId}`);
           } else {
             console.log(data.message);
-            history.push('/dashboard');
+            history.push('/friends');
           }
         });
     }

@@ -40,7 +40,7 @@ export default function CreateChannelForm({ setOpenPopup }) {
           }
         });
     } finally {
-      if (newTextChannelId) { history.push(`/group/${groupServerId}/${newTextChannelId}`); } else history.push('/dashboard');
+      if (newTextChannelId) { history.push(`/group/${groupServerId}/${newTextChannelId}`); } else history.push('/friends');
     }
   }
 
