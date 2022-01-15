@@ -26,6 +26,7 @@ const {
   findTextChannelById,
   deleteTextChannel,
 } = require('../db/dao/textChannelDao');
+const { findMessageById } = require('../db/dao/messageDao');
 const {
   createInvite, deleteInvite, findInviteByCode,
 } = require('../db/dao/inviteDao');
@@ -203,7 +204,14 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
 
     if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
       const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
-      if (rawChatLog) return res.json({ chatLog: rawChatLog.chat_log });
+      if (rawChatLog) {
+        const promises = [];
+        rawChatLog.chat_log.forEach((messageId) => {
+          promises.push(findMessageById(messageId));
+        });
+        const chatLog = await Promise.all(promises);
+        return res.json({ chatLog });
+      }
       return res.status(404).json({ message: 'Could not find chat log' });
     } return res.status(404).json({ message: 'Could not find text channel' });
   } catch (e) {

@@ -80,7 +80,7 @@ export default function TextChannel() {
       const message = {
         content: input,
         index: Object.keys(chatLogs).length + 1,
-        author: user.name,
+        author: user._id,
         timestamp: new Date(),
         notSent: true,
       };
