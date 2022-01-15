@@ -33,7 +33,7 @@ export default function DeleteChannelForm() {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            history.push('/dashboard');
+            history.push('/friends');
             const _groupServers = { ...groupServers };
             delete _groupServers[groupServerId].textChannels[textChannelId];
             setGroupServers(_groupServers);

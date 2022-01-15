@@ -37,7 +37,7 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success && mounted) {
-            history.push('/dashboard');
+            history.push('/friends');
             const _groupServers = { ...groupServers };
             delete _groupServers[groupServerId];
             setUser(data.user);

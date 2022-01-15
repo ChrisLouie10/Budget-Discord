@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { UserContext } from '../../contexts/user-context';
 import ChangeName from './ChangeName';
 import ChangePassword from './ChangePassword';
@@ -48,15 +48,17 @@ export default function Dashboard({
                 {' '}
                 {user.email}
               </div>
-              <li onClick={() => { setDashboardDialog(1); }}>
-                <a className="text-reset" role="button">Change Name</a>
-              </li>
-              <li onClick={() => { setDashboardDialog(2); }}>
-                <a className="text-reset" role="button">Change Password</a>
-              </li>
-              <li onClick={() => { setDashboardDialog(3); }}>
-                <a className="text-reset" role="button">Delete Acount</a>
-              </li>
+              <ul className="list-unstyled">
+                <li onClick={() => { setDashboardDialog(1); }}>
+                  <a className="text-reset" role="button">Change Name</a>
+                </li>
+                <li onClick={() => { setDashboardDialog(2); }}>
+                  <a className="text-reset" role="button">Change Password</a>
+                </li>
+                <li onClick={() => { setDashboardDialog(3); }}>
+                  <a className="text-reset" role="button">Delete Acount</a>
+                </li>
+              </ul>
             </div>
           </div>
           <div className="w-100 text-center mt-2">
