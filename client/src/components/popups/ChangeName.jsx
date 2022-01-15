@@ -51,7 +51,7 @@ export default function ChangeName() {
               <label htmlFor="input-password">Password</label>
               <input className="form-control" type="password" id="input-password" ref={passwordRef} required />
             </div>
-            <button disabled={loading} className="btn btn-primary w-25" type="submit">Update</button>
+            <button disabled={loading} className="btn btn-primary w-5" type="submit">Update</button>
           </form>
         </div>
       </div>

@@ -64,7 +64,7 @@ export default function ChangePassword() {
               <label htmlFor="input-password-confirm">Confirm Password</label>
               <input className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required />
             </div>
-            <button disabled={loading} className="btn btn-primary w-25" type="submit">Update</button>
+            <button disabled={loading} className="btn btn-primary w-5" type="submit">Update</button>
           </form>
         </div>
       </div>
