@@ -8,7 +8,7 @@ import DeleteAccount from './DeleteAccount';
 // Simple private account information.
 
 export default function Dashboard({
-  dashboardDialog, setDashboardTitle, setDashboardDialog, setOpenPopup,
+  dashboardDialog, setDashboardDialog, setOpenPopup,
 }) {
   const [user, setUser] = useContext(UserContext);
   const [error, setError] = useState('');

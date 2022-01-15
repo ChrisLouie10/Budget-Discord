@@ -55,9 +55,6 @@ export default function ChangeName() {
           </form>
         </div>
       </div>
-      <div className="w-100 text-center mt-2">
-        <Link to="/dashboard">Cancel</Link>
-      </div>
     </div>
   );
 }
