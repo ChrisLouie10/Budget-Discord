@@ -4,7 +4,8 @@ const http = require('http');
 
 // project imports
 const app = require('./express');
-const TextChannel = require('../db/models/TextChannel');
+const { findTextChannelById } = require('../db/dao/textChannelDao');
+const { addMessageToChatLog } = require('../db/dao/chatLogDao');
 const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
 
 const server = http.createServer(app);
@@ -21,7 +22,7 @@ wss.on('connection', (ws) => {
   wsclient.sessionId = sessionId;
   wsclients[sessionId] = wsclient;
 
-  ws.on('message', (msgStr) => {
+  ws.on('message', async (msgStr) => {
     // if the message can't be parsed, then skip it as all ws clients'
     // messages should be parsable
     let messageObj;
@@ -43,13 +44,11 @@ wss.on('connection', (ws) => {
         index: messageObj.message.index,
         timestamp: messageObj.message.timestamp,
       };
-      // Find and update the text channel with the new message
-      TextChannel.findByIdAndUpdate(
-        messageObj.textChannelId,
-        { $push: { chat_log: newMessage } },
-        { new: true },
-      ).then((textChannel) => {
-        if (textChannel !== null) {
+      try {
+        // Find and update the text channel's chat log
+        const rawTextChannel = await findTextChannelById(messageObj.textChannelId);
+        const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, newMessage);
+        if (rawChatLog) {
           // Echo this message to EVERY websocket clients with the same serverId
           const data = {
             type: 'message',
@@ -72,10 +71,9 @@ wss.on('connection', (ws) => {
             }
           });
         } else console.log('Failed to update text channel', messageObj.textChannelId, 'with a new message.');
-      }).catch((err) => {
-        console.log('An error occured when accessing the DB for text channels');
-        console.error(err);
-      });
+      } catch (e) {
+        console.error(e);
+      }
     }
   });
 

@@ -22,7 +22,7 @@ app.use(cors());
 // Use routes
 app.use('/api/user', authRoute);
 app.use('/api/friends', friendsRoute);
-app.use('/api/groupServer', groupServerRoute);
-app.use('/api/privateChat', privateChatRoute);
+app.use('/api/group-servers', groupServerRoute);
+app.use('/api/private-chat', privateChatRoute);
 
 module.exports = app;
