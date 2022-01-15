@@ -23,35 +23,37 @@ export default function ServersList() {
   // Group Server name will be highlighted "#b5fff3" if the user is in that group server page
 
   function displayServers() {
-    return (
-      <>
-        {
-          // eslint-disable-next-line
-          Object.entries(groupServers).map(([key, value]) => {
-            if (value) {
-              const textChannelId = Object.keys(value.textChannels)[0];
-              return (
-                <li key={key}>
-                  {
-                    key === groupServerId
-                      ? (
-                        <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                          {value.name}
-                        </Link>
-                      )
-                      : (
-                        <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
-                          {value.name}
-                        </Link>
-                      )
-                    }
-                </li>
-              );
-            }
-          })
-        }
-      </>
-    );
+    if (groupServers && Object.entries(groupServers).length > 0) {
+      return (
+        <>
+          {
+            // eslint-disable-next-line
+            Object.entries(groupServers).map(([key, value]) => {
+              if (value) {
+                const textChannelId = Object.keys(value.textChannels)[0];
+                return (
+                  <li key={key}>
+                    {
+                      key === groupServerId
+                        ? (
+                          <Link onClick={(e) => e.preventDefault()} style={{ color: '#b5fff3' }} to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                            {value.name}
+                          </Link>
+                        )
+                        : (
+                          <Link className="text-reset" to={{ pathname: `/group/${key}/${textChannelId}` }}>
+                            {value.name}
+                          </Link>
+                        )
+                      }
+                  </li>
+                );
+              }
+            })
+          }
+        </>
+      );
+    } return <></>;
   }
 
   return (

@@ -19,26 +19,20 @@ export default function DeleteChannelForm() {
     const numOfTextChannels = Object.keys(groupServers[groupServerId].textChannels).length;
     if (mounted && numOfTextChannels > 1) {
       setLoading(true);
-      await fetch('/api/groupServer/delete-channel', {
-        method: 'POST',
+      await fetch(`/api/group-servers/${groupServerId}/text-channels/${textChannelId}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          type: 'delete-channel',
-          groupServerId,
-          textChannelId,
-          userId: user._id,
-        }),
-      }).then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            history.push('/friends');
-            const _groupServers = { ...groupServers };
-            delete _groupServers[groupServerId].textChannels[textChannelId];
-            setGroupServers(_groupServers);
-          } else console.log(data.message);
-        });
+      }).then(async (response) => {
+        const data = await response.json();
+        if (response.status === 200) {
+          history.push('/friends');
+          const _groupServers = { ...groupServers };
+          delete _groupServers[groupServerId].textChannels[textChannelId];
+          setGroupServers(_groupServers);
+        } else console.error(data.message);
+      });
     }
   }
 
