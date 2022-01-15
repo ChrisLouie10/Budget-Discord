@@ -30,7 +30,7 @@ export default function App() {
           <ChatLogsProvider>
             <Router>
               <Switch>
-                <PrivateRoute exact path="/" />
+                <PrivateRoute exact path="/" component={Friends} />
                 <PrivateRoute exact path="/friends" component={Friends} />
                 <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
                 <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
