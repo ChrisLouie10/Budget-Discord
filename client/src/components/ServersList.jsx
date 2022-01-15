@@ -8,7 +8,6 @@ import Dashboard from './popups/Dashboard';
 export default function ServersList() {
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [groupServerId, setGroupServerId] = useState('');
-  const [dashboardTitle, setDashboardTitle] = useState('Dashboard');
   const [dashboardDialog, setDashboardDialog] = useState(0);
   const [openPopupDashboard, setOpenPopupDashboard] = useState(false);
   const [openPopupCreateServer, setOpenPopupCreateServer] = useState(false);
@@ -65,20 +64,17 @@ export default function ServersList() {
           <li onClick={() => {
             if (!openPopupDashboard) {
               setOpenPopupDashboard(true);
-              setDashboardTitle('Dashboard');
               setDashboardDialog(0);
             }
           }}
           >
             <Link className="text-reset" to="#">Dashboard</Link>
             <Popup
-              title={dashboardTitle}
               openPopup={openPopupDashboard}
               setOpenPopup={setOpenPopupDashboard}
             >
               <Dashboard
                 dashboardDialog={dashboardDialog}
-                setDashboardTitle={setDashboardTitle}
                 setDashboardDialog={setDashboardDialog}
                 setOpenPopup={setOpenPopupDashboard}
               />

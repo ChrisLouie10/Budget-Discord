@@ -48,13 +48,13 @@ export default function Dashboard({
                 {' '}
                 {user.email}
               </div>
-              <li onClick={() => { setDashboardDialog(1); setDashboardTitle('Change Name'); }}>
+              <li onClick={() => { setDashboardDialog(1); }}>
                 <a className="text-reset" role="button">Change Name</a>
               </li>
-              <li onClick={() => { setDashboardDialog(2); setDashboardTitle('Change Password'); }}>
+              <li onClick={() => { setDashboardDialog(2); }}>
                 <a className="text-reset" role="button">Change Password</a>
               </li>
-              <li onClick={() => { setDashboardDialog(3); setDashboardTitle('Delete Account'); }}>
+              <li onClick={() => { setDashboardDialog(3); }}>
                 <a className="text-reset" role="button">Delete Acount</a>
               </li>
             </div>
