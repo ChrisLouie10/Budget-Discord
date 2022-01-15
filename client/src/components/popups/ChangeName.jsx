@@ -27,7 +27,7 @@ export default function ChangeName() {
       }).then((response) => response.json())
         .then((data) => {
           if (!data.success) setError(data.message);
-          else history.push('/dashboard');
+          else history.push('/friends');
         });
     } finally {
       setLoading(false);
