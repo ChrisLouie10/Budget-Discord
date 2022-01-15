@@ -1,5 +1,5 @@
 import React, { useRef, useState, useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Context } from '../../contexts/Store';
 
 // // Simple Update Profile page
@@ -29,14 +29,13 @@ export default function ChangePassword() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: state.user.email,
           oldPassword: oldPasswordRef.current.value,
           password: passwordRef.current.value,
         }),
       }).then((response) => response.json())
         .then((data) => {
           if (!data.success) setError(data.message);
-          else history.push('/dashboard');
+          else history.push('/friends');
         });
     } finally {
       setLoading(false);
@@ -64,12 +63,9 @@ export default function ChangePassword() {
               <label htmlFor="input-password-confirm">Confirm Password</label>
               <input className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required />
             </div>
-            <button disabled={loading} className="btn btn-primary w-25" type="submit">Update</button>
+            <button disabled={loading} className="btn btn-primary w-5" type="submit">Update</button>
           </form>
         </div>
-      </div>
-      <div className="w-100 text-center mt-2">
-        <Link to="/dashboard">Cancel</Link>
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ export default function DeleteGroupServerForm() {
         console.log(response.status);
         if (response.status === 200) {
           console.log('here');
-          history.push('/dashboard');
+          history.push('/friends');
           const _groupServers = { ...groupServers };
           delete _groupServers[groupServerId];
           setGroupServers(_groupServers);
