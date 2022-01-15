@@ -93,7 +93,6 @@ describe('Testing basic auth methods', () => {
           'Content-Type': 'application/json' 
         })
         .send({
-          email: 'testEmail@testEmail.com',
           oldPassword: 'testPassword123',
           password: 'newPassword123'
         });
