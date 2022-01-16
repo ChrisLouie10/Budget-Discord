@@ -6,15 +6,30 @@ const {
   deletePrivateChat,
 } = require('../db/dao/privateChatDao');
 const { findChatLogById } = require('../db/dao/chatLogDao');
+const { findUserById } = require('../db/dao/userDao');
+const {
+  createPrivateChatValidation,
+} = require('../lib/validation/privateChatValidation');
 
-// create a text channel in a group server
-router.post('/:groupServerId/text-channels', verify, async (req, res) => {
-  const { serverError } = groupServerValidation(req.params);
-  const { channelError } = createTextChannelValidation(req.body);
-  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
-  if (channelError) return res.status(400).json({ message: channelError.details[0].message });
+router.get('/', verify, async (req, res) => {
+  try {
+    await findPrivateChatsByUserId(req.body.userId);
+    return res.status(500).json({ message: 'Unknown error occured' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Unknown error occured' });
+  }
+});
+
+// create a private chat between user and a friend
+router.post('/', verify, async (req, res) => {
+  const { error } = createPrivateChatValidation(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
   try {
+    const friend = await findUserById(req.body.friendID);
+    if (!friend) return res.status(404).json({ success: false, message: 'User does not exist' });
+
     const rawTextChannel = await createPrivateChat(req.body.name, req.params.groupServerId);
     if (rawTextChannel) {
       return res.status(201).json({
@@ -47,7 +62,7 @@ router.delete('/:groupServerId/text-channels/:textChannelId', verify, async (req
     const rawGroupServer = await findServerById(groupServerId);
     if (rawGroupServer) {
       await removeTextChannel(groupServerId, textChannelId);
-      const result = await deleteTextChannel({ _id: textChannelId });
+      const result = await deletePrivateChat({ _id: textChannelId });
       if (result) return res.json({});
       return res.status(404).json({ message: 'No text channel found' });
     } return res.status(404).json({ message: 'No server found' });
