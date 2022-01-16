@@ -30,7 +30,7 @@ export default function GroupServer() {
   }, [params]);
 
   if (loading) return <Loading />;
-  if (!userAccess) return <Redirect to="/dashboard" />;
+  if (!userAccess) return <Redirect to="/friends" />;
   return (
     <>
       <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>

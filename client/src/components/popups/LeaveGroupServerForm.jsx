@@ -31,7 +31,7 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
         },
       }).then(async (response) => {
         const data = await response.json();
-        history.push('/dashboard');
+        history.push('/friends');
         if (response.status === 200) {
           const _groupServers = { ...groupServers };
           delete _groupServers[groupServerId];

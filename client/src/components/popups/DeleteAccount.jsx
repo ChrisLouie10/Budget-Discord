@@ -55,12 +55,9 @@ export default function DeleteAccount() {
               <label htmlFor="input-password-confirm">Confirm Password</label>
               <input className="form-control" type="password" id="input-password-confirm" ref={passwordConfirmRef} required />
             </div>
-            <button disabled={loading} className="btn btn-primary w-25" type="submit">Update</button>
+            <button disabled={loading} className="btn btn-danger w-5" type="submit">Delete</button>
           </form>
         </div>
-      </div>
-      <div className="w-100 text-center mt-2">
-        <Link to="/dashboard">Cancel</Link>
       </div>
     </div>
   );
