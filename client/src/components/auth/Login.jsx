@@ -33,7 +33,7 @@ export default function Login() {
       }).then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            history.push('/dashboard');
+            history.push('/friends');
           } else setError(data.message);
         });
     } finally {

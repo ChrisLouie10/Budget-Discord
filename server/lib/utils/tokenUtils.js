@@ -38,11 +38,20 @@ async function verify(req, res, next) {
   }
 }
 
+async function getUserWithToken(token) {
+  return jwt.verify(token, process.env.SECRET_AUTH_TOKEN, async (error, id) => {
+    if (!error && id) {
+      return findUserById(id._id);
+    } return null;
+  });
+}
+
 function generateToken(id) {
   return jwt.sign({ _id: id }, process.env.SECRET_AUTH_TOKEN, { expiresIn: '1h' });
 }
 
 module.exports = {
   verify,
+  getUserWithToken,
   generateToken,
 };

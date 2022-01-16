@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 // // Simple Update Profile page
 
@@ -27,7 +27,7 @@ export default function ChangeName() {
       }).then((response) => response.json())
         .then((data) => {
           if (!data.success) setError(data.message);
-          else history.push('/dashboard');
+          else history.push('/friends');
         });
     } finally {
       setLoading(false);
@@ -51,12 +51,9 @@ export default function ChangeName() {
               <label htmlFor="input-password">Password</label>
               <input className="form-control" type="password" id="input-password" ref={passwordRef} required />
             </div>
-            <button disabled={loading} className="btn btn-primary w-25" type="submit">Update</button>
+            <button disabled={loading} className="btn btn-primary w-5" type="submit">Update</button>
           </form>
         </div>
-      </div>
-      <div className="w-100 text-center mt-2">
-        <Link to="/dashboard">Cancel</Link>
       </div>
     </div>
   );
