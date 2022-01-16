@@ -4,25 +4,18 @@ import React, {
 import { useParams } from 'react-router-dom';
 import { Context } from '../../../contexts/Store';
 import { ChatLogsContext } from '../../../contexts/chatLogs-context';
+import { PendingMessagesContext } from '../../../contexts/pendingMessages-context';
 import { UserContext } from '../../../contexts/user-context';
 import Loading from '../../Loading';
 
 export default function TextChannel() {
   const [state, setState] = useContext(Context);
-  const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
   const [user, setUser] = useContext(UserContext);
+  const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
+  const [pendingMessages, setPendingMessages] = useContext(PendingMessagesContext);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
   const { groupServerId, textChannelId } = useParams();
-
-  function sendMessage(message) {
-    state.ws.send(JSON.stringify({
-      method: 'message',
-      textChannelId,
-      groupServerId,
-      message,
-    }));
-  }
 
   useEffect(async () => {
     // If the chat log for the text channel with the id "props.textChannelId"
@@ -46,6 +39,15 @@ export default function TextChannel() {
     setLoading(false);
   }, [textChannelId]);
 
+  function sendMessage(message) {
+    state.ws.send(JSON.stringify({
+      method: 'message',
+      textChannelId,
+      groupServerId,
+      message,
+    }));
+  }
+
   function handleChatBoxSubmit(e) {
     e.preventDefault();
     if (input !== '') {
@@ -55,9 +57,11 @@ export default function TextChannel() {
         timestamp: new Date(),
       };
       // update client chatlogs
-      const _chatLogs = { ...chatLogs };
-      _chatLogs[textChannelId].push(message);
-      setChatLogs(_chatLogs);
+      const _pendingMessages = { ...pendingMessages };
+      if (_pendingMessages[textChannelId]) {
+        _pendingMessages[textChannelId].push(message);
+      } else _pendingMessages[textChannelId] = [message];
+      setPendingMessages(_pendingMessages);
       // update server chatlogs
       sendMessage(message);
       setInput('');
@@ -68,47 +72,44 @@ export default function TextChannel() {
     setInput(e.target.value);
   }
 
-  // Displays messages
-  // If a message is not "sent" then it will be displayed with a dark gray color
-  // Otherwise, sent messages will be light gray
-  const displayChat = useMemo(() => {
+  function displayPendingMessages() { // If a message is not "sent" then it will be displayed with a dark gray color
+    if (pendingMessages[textChannelId]) {
+      return Object.entries(pendingMessages[textChannelId]).map(([key, value]) => (
+        <p className="ml-2 #858585" key={key}>
+          {value.author}
+          {' '}
+          (
+          {new Date(value.timestamp).toLocaleString()}
+          ):
+          <br />
+          {value.content}
+        </p>
+      ));
+    } return <></>;
+  }
+
+  const displayChat = useMemo(() => { // Sent messages will be a lighter gray
     if (chatLogs[textChannelId]) {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
-            {
-              Object.entries(chatLogs[textChannelId]).map(([key, value]) => {
-                if (value.notSent) {
-                  return (
-                    <p className="ml-2 #858585" key={key}>
-                      {value.author}
-                      {' '}
-                      (
-                      {new Date(value.timestamp).toLocaleString()}
-                      ):
-                      <br />
-                      {value.content}
-                    </p>
-                  );
-                }
-                return (
-                  <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
-                    {value.author}
-                    {' '}
-                    (
-                    {new Date(value.timestamp).toLocaleString()}
-                    ):
-                    <br />
-                    {value.content}
-                  </p>
-                );
-              })
-            }
+            { Object.entries(chatLogs[textChannelId]).map(([key, value]) => (
+              <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
+                {value.author}
+                {' '}
+                (
+                {new Date(value.timestamp).toLocaleString()}
+                ):
+                <br />
+                {value.content}
+              </p>
+            ))}
+            { displayPendingMessages() }
           </div>
         </div>
       );
     } return <div />;
-  }, [chatLogs, textChannelId]);
+  }, [chatLogs, pendingMessages, textChannelId]);
 
   if (loading) return <Loading />;
   return (

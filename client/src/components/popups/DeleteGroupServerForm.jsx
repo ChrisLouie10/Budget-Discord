@@ -19,7 +19,6 @@ export default function DeleteGroupServerForm() {
 
   async function deleteCurrentServer() {
     if (groupServerId && mounted) {
-      console.log('Gonna try to delete or something');
       setLoading(true);
       await fetch(`/api/group-servers/${groupServerId}`, {
         method: 'DELETE',
@@ -28,9 +27,7 @@ export default function DeleteGroupServerForm() {
         },
       }).then(async (response) => {
         const data = await response.json();
-        console.log(response.status);
         if (response.status === 200) {
-          console.log('here');
           history.push('/dashboard');
           const _groupServers = { ...groupServers };
           delete _groupServers[groupServerId];

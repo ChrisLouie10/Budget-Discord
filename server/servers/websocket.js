@@ -8,11 +8,14 @@ const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
 const { parseCookies } = require('../lib/utils/cookieUtils');
 const { getUserWithToken } = require('../lib/utils/tokenUtils');
 const { messageValidation } = require('../lib/validation/websocketValidation');
+const { clients, userIds, groupServerIds } = require('../lib/websocket/state');
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
-const clients = {};
-const groupServerIds = {};
+
+function heartbeat() {
+  this.isAlive = true;
+}
 
 // verify connection is authenticated before connecting to websocket
 server.on('upgrade', async (req, socket, head) => {
@@ -43,16 +46,24 @@ wss.on('connection', async (ws, req) => {
   // For every new client, give it a unique session id to help identify it later
   const sessionId = `${req.user._id}-${generateUniqueSessionId()}`;
   clients[sessionId] = ws;
+  clients[sessionId].isAlive = true;
   console.log('NEW CONNECTION Current number of clients:', Object.keys(clients).length);
 
-  // get all of clients' groupservers
-  const rawGroupServers = await findServersByUserId(req.user._id);
+  // add new client id to userIds dict
+  if (userIds[req.user._id]) {
+    userIds[req.user._id].push(sessionId);
+  } else userIds[req.user._id] = [sessionId];
+
+  // get all of clients' groupservers & populate groupServerIds dict
+  let rawGroupServers = await findServersByUserId(req.user._id);
   rawGroupServers.forEach((rawGroupServer) => {
     const { _id } = rawGroupServer;
     if (groupServerIds[_id]) {
       groupServerIds[_id].push(sessionId);
     } else groupServerIds[_id] = [sessionId];
   });
+
+  ws.on('pong', heartbeat);
 
   ws.on('message', async (msg) => {
     // if the msg can't be parsed, then skip it as all clients'
@@ -83,18 +94,17 @@ wss.on('connection', async (ws, req) => {
         if (rawChatLog) {
           // Send message to every client that are on the same group server
           const data = {
-            type: 'message',
+            method: 'message',
             message,
             textChannelId: result.textChannelId,
           };
           groupServerIds[result.groupServerId].forEach((id) => {
             if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
-              console.log(result.groupServerId, id);
               clients[id].send(JSON.stringify(data));
             }
           });
         } else {
-          console.log('Failed to update text channel', result.textChannelId, 'with a new message.');
+          console.warn('Failed to update text channel', result.textChannelId, 'with a new message.');
         }
       } catch (e) {
         console.error(e);
@@ -102,18 +112,44 @@ wss.on('connection', async (ws, req) => {
     }
   });
 
-  ws.on('close', () => {
+  ws.on('close', async () => {
     delete clients[sessionId];
-    // remove sessionId from groupServerIds dictionary
+    // remove sessionId from userIds
+    const userId = sessionId.split('-')[0];
+    if (userId && userIds[userId]) {
+      const index = userIds[userId].indexOf(sessionId);
+      if (index >= 0) userIds[userId].splice(index, 1);
+      if (userIds[userId].length <= 0) delete userIds[userId];
+    }
+    // remove sessionId from groupServerIds
+    rawGroupServers = await findServersByUserId(req.user._id);
     rawGroupServers.forEach((rawGroupServer) => {
       const { _id } = rawGroupServer;
       if (groupServerIds[_id]) {
         const index = groupServerIds[_id].indexOf(sessionId);
         if (index >= 0) groupServerIds[_id].splice(index, 1);
+        if (groupServerIds[_id].length <= 0) delete groupServerIds[_id];
       }
     });
     console.log('DISCONNECTED Current number of clients:', Object.keys(clients).length);
   });
+});
+
+const interval = setInterval(() => {
+  // eslint-disable-next-line consistent-return
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive) {
+      console.log('Destroying broken connection');
+      return ws.terminate();
+    }
+    // eslint-disable-next-line no-param-reassign
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 1000 * 60 * 15); // 15 minutes
+
+wss.on('close', () => {
+  clearInterval(interval);
 });
 
 module.exports = server;

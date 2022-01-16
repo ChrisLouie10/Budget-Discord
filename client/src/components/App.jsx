@@ -4,6 +4,7 @@ import StoreProvider from '../contexts/Store';
 import UserProvider from '../contexts/user-context';
 import GroupServersProvider from '../contexts/groupServers-context';
 import ChatLogsProvider from '../contexts/chatLogs-context';
+import PendingMessagesProvider from '../contexts/pendingMessages-context';
 import Signup from './auth/Signup';
 import Dashboard from './auth/Dashboard';
 import Login from './auth/Login';
@@ -32,21 +33,23 @@ export default function App() {
       <UserProvider>
         <GroupServersProvider>
           <ChatLogsProvider>
-            <Router>
-              <Switch>
-                <PrivateRoute exact path="/" component={Dashboard} />
-                <PrivateRoute exact path="/friends" component={Friends} />
-                <PrivateRoute exact path="/dashboard" component={Dashboard} />
-                <PrivateRoute exact path="/change-name" component={ChangeName} />
-                <PrivateRoute exact path="/change-password" component={ChangePassword} />
-                <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
-                <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
-                <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
-                <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer} />
-                <Route path="/signup" component={Signup} />
-                <Route path="/login" component={Login} />
-              </Switch>
-            </Router>
+            <PendingMessagesProvider>
+              <Router>
+                <Switch>
+                  <PrivateRoute exact path="/" component={Dashboard} />
+                  <PrivateRoute exact path="/friends" component={Friends} />
+                  <PrivateRoute exact path="/dashboard" component={Dashboard} />
+                  <PrivateRoute exact path="/change-name" component={ChangeName} />
+                  <PrivateRoute exact path="/change-password" component={ChangePassword} />
+                  <PrivateRoute exact path="/delete-account" component={DeleteAccount} />
+                  <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
+                  <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
+                  <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer} />
+                  <Route path="/signup" component={Signup} />
+                  <Route path="/login" component={Login} />
+                </Switch>
+              </Router>
+            </PendingMessagesProvider>
           </ChatLogsProvider>
         </GroupServersProvider>
       </UserProvider>
