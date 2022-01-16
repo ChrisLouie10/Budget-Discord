@@ -26,12 +26,14 @@ const {
   findTextChannelById,
   deleteTextChannel,
 } = require('../db/dao/textChannelDao');
+const { findMessageById } = require('../db/dao/messageDao');
 const {
   createInvite, deleteInvite, findInviteByCode,
 } = require('../db/dao/inviteDao');
 const { findChatLogById } = require('../db/dao/chatLogDao');
 const { formatRawGroupServer } = require('../lib/utils/groupServerUtils');
 const { checkInviteExpiration, decreaseInviteUse } = require('../lib/utils/inviteUtils');
+const { userIds, groupServerIds } = require('../lib/websocket/state');
 
 // get all of user's group servers
 router.get('/', verify, async (req, res) => {
@@ -81,7 +83,12 @@ router.post('/', verify, async (req, res) => {
         name: rawTextChannel.name,
       };
       groupServer.textChannels = textChannels;
-      return res.status(201).json({ groupServer, groupServerId: rawGroupServer._id });
+
+      // update websocket state
+      const clientIds = userIds[req.user._id];
+      if (clientIds) {
+        groupServerIds[rawGroupServer._id] = [...clientIds];
+      } return res.status(201).json({ groupServer, groupServerId: rawGroupServer._id });
     }
     return res.status(500).json({ message: 'An error ocurred when creating the server' });
   } catch (e) {
@@ -126,7 +133,10 @@ router.delete('/:groupServerId', verify, async (req, res) => {
         await Promise.all(promises);
         if (rawGroupServer.invite) await deleteInvite({ _id: rawGroupServer.invite });
         await deleteServer({ _id: rawGroupServer._id });
-        return res.json({});
+        // update websocket state
+        if (groupServerIds[rawGroupServer._id]) {
+          delete groupServerIds[rawGroupServer._id];
+        } return res.json({});
       } return res.status(401).json({ message: 'User is not allowed to delete the server' });
     } return res.status(404).json({ message: 'No server found' });
   } catch (e) {
@@ -203,7 +213,14 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
 
     if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
       const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
-      if (rawChatLog) return res.json({ chatLog: rawChatLog.chat_log });
+      if (rawChatLog) {
+        const promises = [];
+        rawChatLog.chat_log.forEach((messageId) => {
+          promises.push(findMessageById(messageId));
+        });
+        const chatLog = await Promise.all(promises);
+        return res.json({ chatLog });
+      }
       return res.status(404).json({ message: 'Could not find chat log' });
     } return res.status(404).json({ message: 'Could not find text channel' });
   } catch (e) {
@@ -236,7 +253,13 @@ router.post('/users', verify, async (req, res) => {
     if (rawNewGroupServer) {
       await decreaseInviteUse(rawInvite);
       const result = await formatRawGroupServer(rawNewGroupServer);
-      return res.status(201).json({ groupServerId: result.id, groupServer: result.groupServer });
+      // update websocket state
+      const clientIds = userIds[req.user._id];
+      if (clientIds) {
+        if (groupServerIds[rawGroupServer._id]) {
+          clientIds.forEach((clientId) => { groupServerIds[rawGroupServer._id].push(clientId); });
+        } else groupServerIds[rawGroupServer._id] = [...clientIds];
+      } return res.status(201).json({ groupServerId: result.id, groupServer: result.groupServer });
     } return res.status(500).json({ message: 'An error occured when attempting to add the user to the server' });
   } catch (e) {
     console.error(e);
@@ -252,7 +275,17 @@ router.delete('/:groupServerId/users', verify, async (req, res) => {
   try {
     const rawGroupServer = await removeUserFromServer(req.params.groupServerId, req.user._id);
     if (rawGroupServer) {
-      return res.json({});
+      // update websocket state
+      const clientIds = userIds[req.user._id];
+      if (clientIds && groupServerIds[rawGroupServer._id]) {
+        clientIds.forEach((clientId) => {
+          const index = groupServerIds[rawGroupServer._id].indexOf(clientId);
+          if (index >= 0) groupServerIds[rawGroupServer._id].splice(index, 1);
+        });
+        if (groupServerIds[rawGroupServer._id].length <= 0) {
+          delete groupServerIds[rawGroupServer._id];
+        }
+      } return res.json({});
     } return res.status(404).json({ message: 'No server found' });
   } catch (e) {
     console.error(e);

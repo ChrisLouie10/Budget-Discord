@@ -1,88 +1,155 @@
-// package imports
 const WebSocket = require('ws');
 const http = require('http');
-
-// project imports
 const app = require('./express');
+const { findServersByUserId } = require('../db/dao/groupServerDao');
 const { findTextChannelById } = require('../db/dao/textChannelDao');
 const { addMessageToChatLog } = require('../db/dao/chatLogDao');
 const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
+const { parseCookies } = require('../lib/utils/cookieUtils');
+const { getUserWithToken } = require('../lib/utils/tokenUtils');
+const { messageValidation } = require('../lib/validation/websocketValidation');
+const { clients, userIds, groupServerIds } = require('../lib/websocket/state');
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-const wsclients = {};
+const wss = new WebSocket.Server({ noServer: true });
 
-// On WebSocket Server connection add an event listener
-// Echo back data received from a client to every client
-wss.on('connection', (ws) => {
-  // For every new websocket client, give it a unique session id
-  // to help identify it
-  const sessionId = generateUniqueSessionId();
-  const wsclient = ws;
-  wsclient.sessionId = sessionId;
-  wsclients[sessionId] = wsclient;
+function heartbeat() {
+  this.isAlive = true;
+}
 
-  ws.on('message', async (msgStr) => {
-    // if the message can't be parsed, then skip it as all ws clients'
+// verify connection is authenticated before connecting to websocket
+server.on('upgrade', async (req, socket, head) => {
+  const cookies = parseCookies(req);
+  const { token } = cookies;
+
+  try {
+    const user = await getUserWithToken(token);
+    if (!token || !user) { // no token or user means unauthorized
+      socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+      socket.destroy();
+      return;
+    }
+    req.user = user;
+  } catch (e) {
+    console.error(e);
+    socket.write('HTTP/1.1 500\r\n\r\n');
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(req, socket, head, (ws) => {
+    wss.emit('connection', ws, req);
+  });
+});
+
+wss.on('connection', async (ws, req) => {
+  // For every new client, give it a unique session id to help identify it later
+  const sessionId = `${req.user._id}-${generateUniqueSessionId()}`;
+  clients[sessionId] = ws;
+  clients[sessionId].isAlive = true;
+  console.log('NEW CONNECTION Current number of clients:', Object.keys(clients).length);
+
+  // add new client id to userIds dict
+  if (userIds[req.user._id]) {
+    userIds[req.user._id].push(sessionId);
+  } else userIds[req.user._id] = [sessionId];
+
+  // get all of clients' groupservers & populate groupServerIds dict
+  let rawGroupServers = await findServersByUserId(req.user._id);
+  rawGroupServers.forEach((rawGroupServer) => {
+    const { _id } = rawGroupServer;
+    if (groupServerIds[_id]) {
+      groupServerIds[_id].push(sessionId);
+    } else groupServerIds[_id] = [sessionId];
+  });
+
+  ws.on('pong', heartbeat);
+
+  ws.on('message', async (msg) => {
+    // if the msg can't be parsed, then skip it as all clients'
     // messages should be parsable
-    let messageObj;
+    let result;
     try {
-      messageObj = JSON.parse(msgStr);
+      result = JSON.parse(msg);
     } catch {
-      console.log('Message from ws client could not be parsed!', msgStr);
+      console.log('Message from client could not be parsed!', msg);
       return;
     }
 
-    wsclient.serverId = messageObj.serverId;
-    wsclient.textChannelId = messageObj.textChannelId;
-
     // if the ws client is sending a new message
-    if (messageObj.type === 'message') {
-      const newMessage = {
-        content: messageObj.message.content,
-        author: messageObj.message.author,
-        index: messageObj.message.index,
-        timestamp: messageObj.message.timestamp,
+    if (result.method === 'message') {
+      // validate message
+      const { error } = messageValidation(result.message);
+      if (error) return;
+
+      const message = {
+        content: result.message.content,
+        author: result.message.author,
+        timestamp: result.message.timestamp,
       };
       try {
         // Find and update the text channel's chat log
-        const rawTextChannel = await findTextChannelById(messageObj.textChannelId);
-        const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, newMessage);
+        const rawTextChannel = await findTextChannelById(result.textChannelId);
+        const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, message);
         if (rawChatLog) {
-          // Echo this message to EVERY websocket clients with the same serverId
+          // Send message to every client that are on the same group server
           const data = {
-            type: 'message',
-            message: newMessage,
-            textChannelId: messageObj.textChannelId,
+            method: 'message',
+            message,
+            textChannelId: result.textChannelId,
           };
-          Object.keys(wsclients).forEach((key) => {
-            if (wsclients[key].readyState === WebSocket.OPEN
-              && wsclients[key].serverId === ws.serverId) {
-              if (wsclients[key].sessionId !== ws.sessionId) {
-                wsclients[key].send(JSON.stringify(data));
-              } else {
-                const duplicate = {
-                  type: 'duplicateMessage',
-                  message: newMessage,
-                  textChannelId: messageObj.textChannelId,
-                };
-                wsclients[key].send(JSON.stringify(duplicate));
-              }
+          groupServerIds[result.groupServerId].forEach((id) => {
+            if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
+              clients[id].send(JSON.stringify(data));
             }
           });
-        } else console.log('Failed to update text channel', messageObj.textChannelId, 'with a new message.');
+        } else {
+          console.warn('Failed to update text channel', result.textChannelId, 'with a new message.');
+        }
       } catch (e) {
         console.error(e);
       }
     }
   });
 
-  ws.on('close', () => {
-    delete wsclients[wsclient.sessionId];
-    console.log('DISCONNECTED Current number of ws clients connected:', Object.keys(wsclients).length);
+  ws.on('close', async () => {
+    delete clients[sessionId];
+    // remove sessionId from userIds
+    const userId = sessionId.split('-')[0];
+    if (userId && userIds[userId]) {
+      const index = userIds[userId].indexOf(sessionId);
+      if (index >= 0) userIds[userId].splice(index, 1);
+      if (userIds[userId].length <= 0) delete userIds[userId];
+    }
+    // remove sessionId from groupServerIds
+    rawGroupServers = await findServersByUserId(req.user._id);
+    rawGroupServers.forEach((rawGroupServer) => {
+      const { _id } = rawGroupServer;
+      if (groupServerIds[_id]) {
+        const index = groupServerIds[_id].indexOf(sessionId);
+        if (index >= 0) groupServerIds[_id].splice(index, 1);
+        if (groupServerIds[_id].length <= 0) delete groupServerIds[_id];
+      }
+    });
+    console.log('DISCONNECTED Current number of clients:', Object.keys(clients).length);
   });
+});
 
-  console.log('NEW CONNECTION Current number of ws clients connected:', Object.keys(wsclients).length);
+const interval = setInterval(() => {
+  // eslint-disable-next-line consistent-return
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive) {
+      console.log('Destroying broken connection');
+      return ws.terminate();
+    }
+    // eslint-disable-next-line no-param-reassign
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 1000 * 60 * 15); // 15 minutes
+
+wss.on('close', () => {
+  clearInterval(interval);
 });
 
 module.exports = server;
