@@ -1,11 +1,14 @@
-name: 'Jest Tests'
+name: 'Jest Tests - MongoDB'
 
 on:
   pull_request:
+    paths:
+      - 'dao/**'
+      - 'daoTests/**'
 
 jobs:
   run-jest:
-    name: Run Jest Tests
+    name: Run Jest Tests on MongoDB
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,4 +25,4 @@ jobs:
           echo -e "MONGO_TEST_SERVER=$MONGO_TEST_SERVER\r\nSECRET_AUTH_TOKEN=$SECRET_AUTH_TOKEN" >> .env
       - name: Run Jest
         working-directory: ./server
-        run: npm run test
+        run: npm run test-db
