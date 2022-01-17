@@ -23,6 +23,14 @@ async function findPrivateChatsByUserId(userId) {
   return PrivateChat.find({ users: userId });
 }
 
+async function findPrivateChatById(privateChatId) {
+  return PrivateChat.findById(privateChatId);
+}
+
+async function findPrivateChatByUsers(users_) {
+  return PrivateChat.findOne({ users: { $all: users_, $size: users_.length } });
+}
+
 async function deletePrivateChat(query) {
   const privateChat = await PrivateChat.findOne(query);
   if (privateChat) { // delete chat log associated with the private chat
@@ -30,8 +38,11 @@ async function deletePrivateChat(query) {
     return PrivateChat.findByIdAndDelete(privateChat._id);
   } return null;
 }
+
 module.exports = {
   createPrivateChat,
   findPrivateChatsByUserId,
+  findPrivateChatById,
+  findPrivateChatByUsers,
   deletePrivateChat,
 };

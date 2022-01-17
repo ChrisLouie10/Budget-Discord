@@ -34,6 +34,7 @@ export default function App() {
                 <Switch>
                   <PrivateRoute exact path="/" component={Friends} />
                   <PrivateRoute exact path="/friends" component={Friends} />
+                  <PrivateRoute exact path="/friends/:privateChatId" component={Friends} />
                   <PrivateRoute exact path="/group/:groupServerId" component={GroupServer} />
                   <PrivateRoute exact path="/group/:groupServerId/:textChannelId" component={GroupServer} />
                   <PrivateRoute exact path="/join/:inviteCode" component={JoinGroupServer} />

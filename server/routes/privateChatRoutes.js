@@ -1,97 +1,138 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   createPrivateChat,
   findPrivateChatsByUserId,
   deletePrivateChat,
+  findPrivateChatById,
+  findPrivateChatByUsers,
 } = require('../db/dao/privateChatDao');
 const { findChatLogById } = require('../db/dao/chatLogDao');
 const { findUserById } = require('../db/dao/userDao');
 const {
   createPrivateChatValidation,
+  privateChatIdValidation,
 } = require('../lib/validation/privateChatValidation');
+const { friendIdValidation } = require('../lib/validation/friendValidation');
+const { formatRawPrivateChat } = require('../lib/utils/privateChatUtils');
 
+// get all private chats for a user
 router.get('/', verify, async (req, res) => {
   try {
-    await findPrivateChatsByUserId(req.body.userId);
-    return res.status(500).json({ message: 'Unknown error occured' });
+    const rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
+    if (rawPrivateChats.length > 0) {
+      const privateChats = {};
+      const promises = [];
+
+      rawPrivateChats.forEach((rawPrivateChat) => {
+        promises.push(formatRawPrivateChat(rawPrivateChat));
+      });
+
+      const results = await Promise.all(promises);
+      results.forEach((result) => {
+        privateChats[result.id] = result.privateChat;
+      });
+      return res.status(200).json({ success: true, privateChats });
+    } return res.status(200).json({ success: true, message: 'User has no private chats', privateChats: [] });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'Unknown error occured' });
+    return res.status(500).json({ success: false, message: 'Unknown error occured' });
   }
 });
 
 // create a private chat between user and a friend
 router.post('/', verify, async (req, res) => {
   const { error } = createPrivateChatValidation(req.body);
-  if (error) return res.status(400).json({ message: error.details[0].message });
+  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
+
+  const { userId, friendId } = req.body;
 
   try {
-    const friend = await findUserById(req.body.friendID);
+    const friend = await findUserById(friendId);
     if (!friend) return res.status(404).json({ success: false, message: 'User does not exist' });
 
-    const rawTextChannel = await createPrivateChat(req.body.name, req.params.groupServerId);
-    if (rawTextChannel) {
-      return res.status(201).json({
-        textChannelId: rawTextChannel._id,
-        textChannel: {
-          groupServerId: req.params.groupServerId,
-          name: rawTextChannel.name,
-        },
-      });
+    const rawExistingChat = await findPrivateChatByUsers([userId, friendId]);
+
+    if (rawExistingChat) return res.status(400).json({ success: false, message: 'Private chat already exists' });
+
+    const rawPrivateChat = await createPrivateChat(userId, friendId);
+    if (rawPrivateChat) {
+      return res.status(201).json({ success: true, privateChatId: rawPrivateChat._id });
     }
-    return res.status(500).json({ message: 'An error occured when creating a text channel' });
+    return res.status(500).json({ success: false, message: 'An error occured when creating a private chat' });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ message: 'Unknown error occured' });
+    return res.status(500).json({ success: false, message: 'Unknown error occured' });
   }
 });
 
-// delete a text channel from a group server
-router.delete('/:groupServerId/text-channels/:textChannelId', verify, async (req, res) => {
-  const { error } = textChannelValidation(req.params);
-  if (error) return res.status(400).json({ message: error.details[0].message });
+// get a private chat between a user and a friend
+router.get('/:friendID', verify, async (req, res) => {
+  const { error } = friendIdValidation(req.params);
+  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
-  if (!checkUserPermission(req.user._id, req.params.groupServerId)) {
-    return res.status(401).json({ message: 'User is not authorized to delete text channels' });
-  }
-
-  const { groupServerId, textChannelId } = req.params;
+  const { friendID } = req.params;
+  const userID = req.user._id;
 
   try {
-    const rawGroupServer = await findServerById(groupServerId);
-    if (rawGroupServer) {
-      await removeTextChannel(groupServerId, textChannelId);
-      const result = await deletePrivateChat({ _id: textChannelId });
-      if (result) return res.json({});
-      return res.status(404).json({ message: 'No text channel found' });
-    } return res.status(404).json({ message: 'No server found' });
+    const friend = await findUserById(friendID);
+    if (!friend) return res.status(404).json({ success: false, message: 'User does not exist' });
+
+    const rawExistingChat = await findPrivateChatByUsers([userID, friendID]);
+
+    if (rawExistingChat) {
+      return res.status(201).json({ success: true, privateChatId: rawExistingChat._id });
+    }
+    return res.status(400).json({ success: false, message: 'Private chat does not exist' });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({});
+    return res.status(500).json({ success: false });
+  }
+});
+
+// delete a private chat from a user
+router.delete('/:privateChatId', verify, async (req, res) => {
+  const { error } = privateChatIdValidation(req.params);
+  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
+
+  const { privateChatId } = req.params;
+
+  try {
+    const rawPrivateChat = await findPrivateChatById(privateChatId);
+
+    if (!rawPrivateChat) return res.status(404).json({ success: false, message: 'Private Chat is not found' });
+    if (!rawPrivateChat.users.includes(mongoose.Types.ObjectId(req.user._id))) {
+      return res.status(401).json({ success: false, message: 'User is not authorized to delete this private chat' });
+    }
+
+    await deletePrivateChat({ _id: privateChatId });
+    return res.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ success: false });
   }
 });
 
 // get chat logs
-router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, async (req, res) => {
-  const { error } = textChannelValidation(req.params);
-  if (error) return res.status(400).json({ message: error.details[0].message });
+router.get('/:privateChatId/chat-logs', verify, async (req, res) => {
+  const { error } = privateChatIdValidation(req.params);
+  if (error) return res.status(400).json({ success: false, message: error.details[0].message });
 
-  const { groupServerId, textChannelId } = req.params;
+  const { privateChatId } = req.params;
 
   try {
-    const rawGroupServer = await findServerById(groupServerId);
-    const rawTextChannel = await findTextChannelById(textChannelId);
-    const textChannelIds = rawGroupServer.text_channels;
+    const rawPrivateChat = await findPrivateChatById(privateChatId);
 
-    if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
-      const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
-      if (rawChatLog) return res.json({ chatLog: rawChatLog.chat_log });
-      return res.status(404).json({ message: 'Could not find chat log' });
-    } return res.status(404).json({ message: 'Could not find text channel' });
+    if (!rawPrivateChat) return res.status(404).json({ success: false, message: 'Private Chat is not found' });
+    if (!rawPrivateChat.users.includes(mongoose.Types.ObjectId(req.user._id))) return res.status(401).json({ success: false, message: 'User is not authorized to get this private chat' });
+
+    const rawChatLog = await findChatLogById(rawPrivateChat.chat_log);
+    if (rawChatLog) return res.json({ success: true, chatLog: rawChatLog.chat_log });
+    return res.status(404).json({ success: false, message: 'Could not find chat log' });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({});
+    return res.status(500).json({ success: false });
   }
 });
 module.exports = router;
