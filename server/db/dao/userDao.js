@@ -1,5 +1,3 @@
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { binarySearch } = require('../../lib/utils/searchUtils');
 
@@ -22,9 +20,7 @@ async function createUser(name, email, hashPassword) {
     password: hashPassword,
     number_id: await generateRandomNumberId(name),
   });
-  const newUser = await user.save();
-  // Create and assign a jwt to a user
-  return jwt.sign({ _id: newUser._id }, process.env.SECRET_AUTH_TOKEN);
+  return user.save();
 }
 
 async function findUserById(id) {
@@ -60,8 +56,8 @@ async function updateUserPassword(id, password) {
   return User.updateOne(query, set);
 }
 
-async function deleteUser(query) {
-  return User.deleteOne(query);
+async function deleteUser(id) {
+  return User.deleteOne({ _id: id });
 }
 
 module.exports = {

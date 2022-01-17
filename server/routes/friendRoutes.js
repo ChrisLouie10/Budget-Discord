@@ -28,7 +28,7 @@ router.post('/find', verify, async (req, res) => {
   if (req.body.friendNumber != '') {
     let numberId;
     try {
-      numberId = Number.isNaN(req.body.friendNumber) ? parseInt(req.body.friendNumber, 10) : -1;
+      numberId = !Number.isNaN(req.body.friendNumber) ? parseInt(req.body.friendNumber, 10) : -1;
     } catch {
       return res.status(404).json({ success: false, message: 'Invalid number' });
     }
