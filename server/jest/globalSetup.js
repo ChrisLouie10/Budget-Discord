@@ -1,5 +1,9 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const passwordUtils = require('../lib/utils/passwordUtils');
+
+// eslint-disable-next-line
+jest.mock('../lib/utils/passwordUtils');
 
 // eslint-disable-next-line
 beforeAll(async () => {
@@ -7,6 +11,14 @@ beforeAll(async () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
+  passwordUtils.hashPassword.mockResolvedValue('testHashPassword');
+  passwordUtils.comparePasswords.mockResolvedValue(true);
+});
+
+// eslint-disable-next-line
+afterEach(() => {
+  // eslint-disable-next-line
+  jest.clearAllMocks();
 });
 
 // eslint-disable-next-line
