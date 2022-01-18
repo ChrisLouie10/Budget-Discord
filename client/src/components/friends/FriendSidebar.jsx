@@ -4,39 +4,31 @@ import { Link, useParams } from 'react-router-dom';
 
 export default function FriendSidebar(props) {
   const {
-    friends,
+    privateChats,
   } = props;
-  const { friendId } = useParams();
+  const { privateChatId } = useParams();
 
   // TODO: Change to display private chats
   // eslint-disable-next-line
-  function displayFriends() {
-    if (friends) {
+  function displayChats() {
+    if (privateChats) {
       return (
         <>
           {
-            friends.map((friend) => (
-              <li key={friend.id}>
+            privateChats.map((chat) => (
+              <li key={chat.id}>
                 {
-                  friendId === friend.id
+                  privateChatId === chat.id
                     ? (
                       // eslint-disable-next-line
-                      <Link style={{ color: '#b5fff3' }} to={{ pathname: `/friends/${friend.id}` }}>
-                        {friend.name}
-                        {' '}
-                        #
-                        {friend.numberID}
-                        {' '}
+                      <Link style={{ color: '#b5fff3' }} to={{ pathname: `/friends/${chat.id}` }}>
+                        {chat.name}
                       </Link>
                     )
                     : (
                       // eslint-disable-next-line
-                      <Link className="text-reset" to={{ pathname: `/friends/${friend.id}` }}>
-                        {friend.name}
-                        {' '}
-                        #
-                        {friend.numberID}
-                        {' '}
+                      <Link className="text-reset" to={{ pathname: `/friends/${chat.id}` }}>
+                        {chat.name}
                       </Link>
                     )
                   }
@@ -55,7 +47,7 @@ export default function FriendSidebar(props) {
       </div>
       <div className="row">
         <ul className="list-unstyled text-white">
-          {displayFriends()}
+          {displayChats()}
         </ul>
       </div>
     </nav>
@@ -65,5 +57,6 @@ export default function FriendSidebar(props) {
 // https://reactjs.org/docs/typechecking-with-proptypes.html
 FriendSidebar.propTypes = {
   // eslint-disable-next-line
-  friends: PropTypes.object.isRequired,
+  privateChats: PropTypes.object.isRequired,
+
 };

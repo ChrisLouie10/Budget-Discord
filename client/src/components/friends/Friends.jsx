@@ -50,7 +50,7 @@ export default function Friend() {
   return (
     <>
       <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
-        <FriendSidebar friends={friends} friendRequests={friendRequests} setFriends={setFriends} setFriendRequests={setFriendRequests} />
+        <FriendSidebar privateChats={privateChats} />
       </div>
       {privateChatId ? <PrivateChat />
         : <FriendHome friends={friends} friendRequests={friendRequests} setFriends={setFriends} setFriendRequests={setFriendRequests} />}

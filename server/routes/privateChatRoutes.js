@@ -22,17 +22,19 @@ router.get('/', verify, async (req, res) => {
   try {
     const rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
     if (rawPrivateChats.length > 0) {
-      const privateChats = {};
+      const privateChats = [];
       const promises = [];
 
       rawPrivateChats.forEach((rawPrivateChat) => {
-        promises.push(formatRawPrivateChat(rawPrivateChat));
+        promises.push(formatRawPrivateChat(rawPrivateChat, req.user._id));
       });
 
       const results = await Promise.all(promises);
       results.forEach((result) => {
-        privateChats[result.id] = result.privateChat;
+        privateChats.push(result);
       });
+      console.log('all formatted private chats');
+      console.log(privateChats);
       return res.status(200).json({ success: true, privateChats });
     } return res.status(200).json({ success: true, message: 'User has no private chats', privateChats: [] });
   } catch (e) {

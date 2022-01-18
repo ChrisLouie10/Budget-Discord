@@ -8,20 +8,20 @@ import { PendingMessagesContext } from '../../../contexts/pendingMessages-contex
 import { UserContext } from '../../../contexts/user-context';
 import Loading from '../../Loading';
 
-export default function TextChannel() {
+export default function PrivateChat() {
   const [state, setState] = useContext(Context);
   const [user, setUser] = useContext(UserContext);
   const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
   const [pendingMessages, setPendingMessages] = useContext(PendingMessagesContext);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
-  const { groupServerId, textChannelId } = useParams();
+  const { privateChatId } = useParams();
 
   useEffect(async () => {
-    // If the chat log for the text channel with the id "props.textChannelId"
+    // If the chat log for the text channel with the id "props.privateChatId"
     // doesn't exist in the client, then retrieve it from the server
-    if (!chatLogs[textChannelId]) {
-      await fetch(`/api/group-servers/${groupServerId}/text-channels/${textChannelId}/chat-logs`, {
+    if (!chatLogs[privateChatId]) {
+      await fetch(`/api/private-chat/${privateChatId}/chat-logs`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -31,19 +31,18 @@ export default function TextChannel() {
           const data = await response.json();
           if (response.status === 200) {
             const _chatLogs = { ...chatLogs };
-            _chatLogs[textChannelId] = data.chatLog;
+            _chatLogs[privateChatId] = data.chatLog;
             setChatLogs(_chatLogs);
           } else console.error(data.message);
         });
     }
     setLoading(false);
-  }, [textChannelId]);
+  }, [privateChatId]);
 
   function sendMessage(message) {
     state.ws.send(JSON.stringify({
       method: 'message',
-      textChannelId,
-      groupServerId,
+      privateChatId,
       message,
     }));
   }
@@ -58,9 +57,9 @@ export default function TextChannel() {
       };
         // update client chatlogs
       const _pendingMessages = { ...pendingMessages };
-      if (_pendingMessages[textChannelId]) {
-        _pendingMessages[textChannelId].push(message);
-      } else _pendingMessages[textChannelId] = [message];
+      if (_pendingMessages[privateChatId]) {
+        _pendingMessages[privateChatId].push(message);
+      } else _pendingMessages[privateChatId] = [message];
       setPendingMessages(_pendingMessages);
       // update server chatlogs
       sendMessage(message);
@@ -73,8 +72,8 @@ export default function TextChannel() {
   }
 
   function displayPendingMessages() { // If a message is not "sent" then it will be displayed with a dark gray color
-    if (pendingMessages[textChannelId]) {
-      return Object.entries(pendingMessages[textChannelId]).map(([key, value]) => (
+    if (pendingMessages[privateChatId]) {
+      return Object.entries(pendingMessages[privateChatId]).map(([key, value]) => (
         <p className="ml-2 #858585" key={key}>
           {value.author}
           {' '}
@@ -89,11 +88,11 @@ export default function TextChannel() {
   }
 
   const displayChat = useMemo(() => { // Sent messages will be a lighter gray
-    if (chatLogs[textChannelId]) {
+    if (chatLogs[privateChatId]) {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
-            { Object.entries(chatLogs[textChannelId]).map(([key, value]) => (
+            { Object.entries(chatLogs[privateChatId]).map(([key, value]) => (
               <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
                 {value.author}
                 {' '}
@@ -109,7 +108,7 @@ export default function TextChannel() {
         </div>
       );
     } return <div />;
-  }, [chatLogs, pendingMessages, textChannelId]);
+  }, [chatLogs, pendingMessages, privateChatId]);
 
   if (loading) return <Loading />;
   return (
