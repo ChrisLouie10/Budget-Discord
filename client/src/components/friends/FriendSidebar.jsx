@@ -8,7 +8,6 @@ export default function FriendSidebar(props) {
   } = props;
   const { privateChatId } = useParams();
 
-  // TODO: Change to display private chats
   // eslint-disable-next-line
   function displayChats() {
     if (privateChats) {
@@ -54,7 +53,6 @@ export default function FriendSidebar(props) {
   );
 }
 
-// https://reactjs.org/docs/typechecking-with-proptypes.html
 FriendSidebar.propTypes = {
   // eslint-disable-next-line
   privateChats: PropTypes.object.isRequired,

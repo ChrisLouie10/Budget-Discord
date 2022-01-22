@@ -9,6 +9,7 @@ const {
   findPrivateChatByUsers,
 } = require('../db/dao/privateChatDao');
 const { findChatLogById } = require('../db/dao/chatLogDao');
+const { findMessageById } = require('../db/dao/messageDao');
 const { findUserById } = require('../db/dao/userDao');
 const {
   createPrivateChatValidation,
@@ -33,8 +34,7 @@ router.get('/', verify, async (req, res) => {
       results.forEach((result) => {
         privateChats.push(result);
       });
-      console.log('all formatted private chats');
-      console.log(privateChats);
+
       return res.status(200).json({ success: true, privateChats });
     } return res.status(200).json({ success: true, message: 'User has no private chats', privateChats: [] });
   } catch (e) {
@@ -130,7 +130,14 @@ router.get('/:privateChatId/chat-logs', verify, async (req, res) => {
     if (!rawPrivateChat.users.includes(mongoose.Types.ObjectId(req.user._id))) return res.status(401).json({ success: false, message: 'User is not authorized to get this private chat' });
 
     const rawChatLog = await findChatLogById(rawPrivateChat.chat_log);
-    if (rawChatLog) return res.json({ success: true, chatLog: rawChatLog.chat_log });
+    if (rawChatLog) {
+      const promises = [];
+      rawChatLog.chat_log.forEach((messageId) => {
+        promises.push(findMessageById(messageId));
+      });
+      const chatLog = await Promise.all(promises);
+      return res.json({ chatLog });
+    }
     return res.status(404).json({ success: false, message: 'Could not find chat log' });
   } catch (e) {
     console.error(e);

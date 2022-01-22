@@ -1,7 +1,6 @@
 const PrivateChat = require('../models/PrivateChat');
 const ChatLog = require('../models/ChatLog');
 
-// when you add a friend private chat created
 async function createPrivateChat(userId, friendId) {
   try {
     // create new chat log first

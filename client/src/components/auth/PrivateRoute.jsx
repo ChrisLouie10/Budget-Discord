@@ -35,32 +35,64 @@ export default function PrivateRoute({ component: Component, ...rest }) {
     if (messageObject.method === 'message') {
       const { message } = messageObject;
       if (message) {
-        setChatLogs((currChatLogs) => {
-          const currLogs = { ...currChatLogs };
-          if (currLogs[messageObject.textChannelId]) {
-            currLogs[messageObject.textChannelId].push(message);
-          }
-          return currLogs;
-        });
-        if (message.author === localStorage.getItem('user_id_cache')) {
-          setPendingMessages((currPendingMessages) => {
-            const currMessages = { ...currPendingMessages };
-            const pendingChannelMessages = currMessages[messageObject.textChannelId];
-            if (pendingChannelMessages) {
-              let index = -1;
-              for (let i = 0; i < pendingChannelMessages.length; i += 1) {
-                const pendingMessage = pendingChannelMessages[i];
-                const pTimestampDate = new Date(pendingMessage.timestamp);
-                const timestampDate = new Date(message.timestamp);
-                if (pendingMessage.content === message.content && pTimestampDate.toString() == timestampDate.toString()) {
-                  index = i;
-                  break;
-                }
-              }
-              if (index >= 0) pendingChannelMessages.splice(index, 1);
+        // If meesage is from a server/text channel
+        if (messageObject.textChannelId) {
+          setChatLogs((currChatLogs) => {
+            const currLogs = { ...currChatLogs };
+            if (currLogs[messageObject.textChannelId]) {
+              currLogs[messageObject.textChannelId].push(message);
             }
-            return currMessages;
+            return currLogs;
           });
+          if (message.author === localStorage.getItem('user_id_cache')) {
+            setPendingMessages((currPendingMessages) => {
+              const currMessages = { ...currPendingMessages };
+              const pendingChannelMessages = currMessages[messageObject.textChannelId];
+              if (pendingChannelMessages) {
+                let index = -1;
+                for (let i = 0; i < pendingChannelMessages.length; i += 1) {
+                  const pendingMessage = pendingChannelMessages[i];
+                  const pTimestampDate = new Date(pendingMessage.timestamp);
+                  const timestampDate = new Date(message.timestamp);
+                  if (pendingMessage.content === message.content && pTimestampDate.toString() == timestampDate.toString()) {
+                    index = i;
+                    break;
+                  }
+                }
+                if (index >= 0) pendingChannelMessages.splice(index, 1);
+              }
+              return currMessages;
+            });
+          }
+        } else {
+          // If message is from a private chat
+          setChatLogs((currChatLogs) => {
+            const currLogs = { ...currChatLogs };
+            if (currLogs[messageObject.privateChatId]) {
+              currLogs[messageObject.privateChatId].push(message);
+            }
+            return currLogs;
+          });
+          if (message.author === localStorage.getItem('user_id_cache')) {
+            setPendingMessages((currPendingMessages) => {
+              const currMessages = { ...currPendingMessages };
+              const pendingChannelMessages = currMessages[messageObject.privateChatId];
+              if (pendingChannelMessages) {
+                let index = -1;
+                for (let i = 0; i < pendingChannelMessages.length; i += 1) {
+                  const pendingMessage = pendingChannelMessages[i];
+                  const pTimestampDate = new Date(pendingMessage.timestamp);
+                  const timestampDate = new Date(message.timestamp);
+                  if (pendingMessage.content === message.content && pTimestampDate.toString() == timestampDate.toString()) {
+                    index = i;
+                    break;
+                  }
+                }
+                if (index >= 0) pendingChannelMessages.splice(index, 1);
+              }
+              return currMessages;
+            });
+          }
         }
       }
     }

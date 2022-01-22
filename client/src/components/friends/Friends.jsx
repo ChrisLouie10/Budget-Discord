@@ -4,8 +4,6 @@ import FriendSidebar from './FriendSidebar';
 import FriendHome from './FriendHome';
 import PrivateChat from './chat/PrivateChat';
 
-// Simple Login page
-
 export default function Friend() {
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
