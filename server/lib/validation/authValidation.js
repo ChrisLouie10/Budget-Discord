@@ -19,7 +19,6 @@ const loginValidation = (data) => {
 
 const updatePasswordValidation = (data) => {
   const schema = Joi.object({
-    email: Joi.string().max(64).required().email(),
     oldPassword: Joi.string().max(32).min(10).required(),
     password: Joi.string().max(32).min(10).required(),
   });

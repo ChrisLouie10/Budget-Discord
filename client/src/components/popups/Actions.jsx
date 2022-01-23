@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { UserContext } from '../../contexts/user-context';
 import { GroupServersContext } from '../../contexts/groupServers-context';
 import InviteForm from './InviteForm';
 import CreateChannelForm from './CreateChannelForm';
@@ -11,6 +12,7 @@ import LeaveGroupServerForm from './LeaveGroupServerForm';
 export default function Actions({
   actionDialog, setActionTitle, setActionDialog, setOpenPopup,
 }) {
+  const [user, setUser] = useContext(UserContext);
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const { groupServerId } = useParams();
   // eslint-disable-next-line
@@ -18,8 +20,7 @@ export default function Actions({
     if (actionDialog === 0) {
       return (
         <ul className="list-unstyled">
-          { (groupServers[groupServerId].owner
-            || groupServers[groupServerId].admin)
+          { (groupServers[groupServerId].owner === user._id)
             ? (
               <>
                 <li onClick={() => { setActionDialog(1); setActionTitle('Invite'); }}>
@@ -36,14 +37,11 @@ export default function Actions({
                 </li>
               </>
             )
-            : <></> }
-          {(!groupServers[groupServerId].owner)
-            ? (
+            : (
               <li onClick={() => { setActionDialog(5); setActionTitle('Leave Group Server'); }}>
                 <a className="text-reset" role="button">Leave Group Server</a>
               </li>
-            )
-            : <></>}
+            ) }
         </ul>
       );
     }

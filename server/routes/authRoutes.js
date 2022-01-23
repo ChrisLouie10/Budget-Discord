@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
 const {
   verify,
   generateToken,
@@ -12,7 +13,6 @@ const {
 } = require('../lib/validation/authValidation');
 const {
   createUser,
-  findUserById,
   findUserByEmail,
   updateUserName,
   updateUserPassword,
@@ -27,8 +27,7 @@ const {
 } = require('../db/converters/userConverter');
 
 router.get('/', verify, async (req, res) => {
-  const user = await findUserById(req.user._id);
-  if (user) return res.status(200).json({ success: true, message: 'Success', user: userToObject(user) });
+  if (req.user) return res.status(200).json({ success: true, message: 'Success', user: userToObject(req.user) });
   return res.status(401).json({ success: false, message: 'Denied Access' });
 });
 
@@ -47,8 +46,8 @@ router.post('/register', async (req, res) => {
 
   // Create User and return jwt to user.
   return createUser(req.body.name, req.body.email, await hashPassword(req.body.password))
-    .then((token) => {
-      res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
+    .then((user) => {
+      res.cookie('token', jwt.sign({ _id: user._id }, process.env.SECRET_AUTH_TOKEN), { httpOnly: true, maxAge: 3600000 });
       return res.status(201).json({ success: true, message: 'Success' });
     })
     .catch((err) => res.status(500).json({ success: false, message: err }));
@@ -117,7 +116,7 @@ router.delete('/', verify, async (req, res) => {
   if (!validPass) return res.status(400).json({ success: false, message: 'Password is incorrect' });
 
   // Delete user
-  return deleteUser({ _id: req.user._id })
+  return deleteUser(req.user._id)
     .then(() => res.status(200).json({ success: true, message: 'Success' }))
     .catch(() => res.status(500).json({ success: false, message: 'Failed to delete account' }));
 });

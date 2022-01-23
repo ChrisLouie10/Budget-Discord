@@ -5,6 +5,7 @@ import { Context } from '../../contexts/Store';
 import { UserContext } from '../../contexts/user-context';
 import { GroupServersContext } from '../../contexts/groupServers-context';
 import { ChatLogsContext } from '../../contexts/chatLogs-context';
+import { PendingMessagesContext } from '../../contexts/pendingMessages-context';
 import ServersList from '../ServersList';
 import Loading from '../Loading';
 
@@ -18,6 +19,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
   const [user, setUser] = useContext(UserContext);
   const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
+  const [pendingMessages, setPendingMessages] = useContext(PendingMessagesContext);
   const [state, setState] = useContext(Context);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -30,16 +32,38 @@ export default function PrivateRoute({ component: Component, ...rest }) {
       return;
     }
 
-    setChatLogs((currChatLogs) => {
-      const currLogs = { ...currChatLogs };
-      if (messageObject.type === 'duplicateMessage') {
-        const index = currLogs[messageObject.textChannelId].length - 1;
-        currLogs[messageObject.textChannelId][index] = messageObject.message;
-      } else if (messageObject.type === 'message') {
-        currLogs[messageObject.textChannelId].push(messageObject.message);
+    if (messageObject.method === 'message') {
+      const { message } = messageObject;
+      if (message) {
+        setChatLogs((currChatLogs) => {
+          const currLogs = { ...currChatLogs };
+          if (currLogs[messageObject.textChannelId]) {
+            currLogs[messageObject.textChannelId].push(message);
+          }
+          return currLogs;
+        });
+        if (message.author === localStorage.getItem('user_id_cache')) {
+          setPendingMessages((currPendingMessages) => {
+            const currMessages = { ...currPendingMessages };
+            const pendingChannelMessages = currMessages[messageObject.textChannelId];
+            if (pendingChannelMessages) {
+              let index = -1;
+              for (let i = 0; i < pendingChannelMessages.length; i += 1) {
+                const pendingMessage = pendingChannelMessages[i];
+                const pTimestampDate = new Date(pendingMessage.timestamp);
+                const timestampDate = new Date(message.timestamp);
+                if (pendingMessage.content === message.content && pTimestampDate.toString() == timestampDate.toString()) {
+                  index = i;
+                  break;
+                }
+              }
+              if (index >= 0) pendingChannelMessages.splice(index, 1);
+            }
+            return currMessages;
+          });
+        }
       }
-      return currLogs;
-    });
+    }
   }
 
   useEffect(async () => {
@@ -55,6 +79,7 @@ export default function PrivateRoute({ component: Component, ...rest }) {
       }).then((response) => response.json())
         .then((data) => {
           setUser(data.user);
+          localStorage.setItem('user_id_cache', data.user._id);
           if (data.success) {
             const currState = { ...state };
             const ws = new WebSocket(process.env.REACT_APP_WSS_URI);
@@ -68,22 +93,14 @@ export default function PrivateRoute({ component: Component, ...rest }) {
           return data.user;
         })
         .then(async (_user) => {
-          let response;
           if (_user) {
-            response = await fetch('/api/groupServer/find', {
-              method: 'POST',
+            const response = await fetch('/api/group-servers/', {
+              method: 'GET',
               headers,
-              body: JSON.stringify({
-                type: 'find',
-                userId: _user._id,
-              }),
             });
-            return response.json();
-          } return null;
-        })
-        .then((data) => {
-          if (data) {
-            setGroupServers(data.groupServers);
+            const data = await response.json();
+            if (response.status === 200) setGroupServers(data.groupServers);
+            else console.log(data.message);
           }
         });
     } catch {
