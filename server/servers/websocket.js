@@ -9,7 +9,7 @@ const { parseCookies } = require('../lib/utils/cookieUtils');
 const { getUserWithToken } = require('../lib/utils/tokenUtils');
 const { messageValidation } = require('../lib/validation/websocketValidation');
 const {
-  clients, userIds, groupServerIds, privateChatIds,
+  clients, userIds, serverIds,
 } = require('../lib/websocket/state');
 const { findPrivateChatById, findPrivateChatsByUserId } = require('../db/dao/privateChatDao');
 
@@ -57,22 +57,22 @@ wss.on('connection', async (ws, req) => {
     userIds[req.user._id].push(sessionId);
   } else userIds[req.user._id] = [sessionId];
 
-  // get all of clients' groupservers & populate groupServerIds dict
+  // get all of clients' groupservers & populate serverIds dict
   let rawGroupServers = await findServersByUserId(req.user._id);
   rawGroupServers.forEach((rawGroupServer) => {
     const { _id } = rawGroupServer;
-    if (groupServerIds[_id]) {
-      groupServerIds[_id].push(sessionId);
-    } else groupServerIds[_id] = [sessionId];
+    if (serverIds[_id]) {
+      serverIds[_id].push(sessionId);
+    } else serverIds[_id] = [sessionId];
   });
 
-  // get all of clients' private chats & populate privateChatIds dict
+  // get all of clients' private chats & populate serverIds dict
   let rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
   rawPrivateChats.forEach((rawPrivateChat) => {
     const { _id } = rawPrivateChat;
-    if (privateChatIds[_id]) {
-      privateChatIds[_id].push(sessionId);
-    } else privateChatIds[_id] = [sessionId];
+    if (serverIds[_id]) {
+      serverIds[_id].push(sessionId);
+    } else serverIds[_id] = [sessionId];
   });
 
   ws.on('pong', heartbeat);
@@ -112,7 +112,7 @@ wss.on('connection', async (ws, req) => {
               message,
               textChannelId: result.textChannelId,
             };
-            groupServerIds[result.groupServerId].forEach((id) => {
+            serverIds[result.groupServerId].forEach((id) => {
               if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
                 clients[id].send(JSON.stringify(data));
               }
@@ -131,7 +131,7 @@ wss.on('connection', async (ws, req) => {
               message,
               privateChatId: result.privateChatId,
             };
-            privateChatIds[result.privateChatId].forEach((id) => {
+            serverIds[result.privateChatId].forEach((id) => {
               if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
                 clients[id].send(JSON.stringify(data));
               }
@@ -155,24 +155,24 @@ wss.on('connection', async (ws, req) => {
       if (index >= 0) userIds[userId].splice(index, 1);
       if (userIds[userId].length <= 0) delete userIds[userId];
     }
-    // remove sessionId from groupServerIds
+    // remove sessionId from serverIds
     rawGroupServers = await findServersByUserId(req.user._id);
     rawGroupServers.forEach((rawGroupServer) => {
       const { _id } = rawGroupServer;
-      if (groupServerIds[_id]) {
-        const index = groupServerIds[_id].indexOf(sessionId);
-        if (index >= 0) groupServerIds[_id].splice(index, 1);
-        if (groupServerIds[_id].length <= 0) delete groupServerIds[_id];
+      if (serverIds[_id]) {
+        const index = serverIds[_id].indexOf(sessionId);
+        if (index >= 0) serverIds[_id].splice(index, 1);
+        if (serverIds[_id].length <= 0) delete serverIds[_id];
       }
     });
-    // remove sessionId from privateChatIds
+    // remove sessionId from serverIds
     rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
     rawPrivateChats.forEach((rawPrivateChat) => {
       const { _id } = rawPrivateChat;
-      if (privateChatIds[_id]) {
-        const index = privateChatIds[_id].indexOf(sessionId);
-        if (index >= 0) privateChatIds[_id].splice(index, 1);
-        if (privateChatIds[_id].length <= 0) delete privateChatIds[_id];
+      if (serverIds[_id]) {
+        const index = serverIds[_id].indexOf(sessionId);
+        if (index >= 0) serverIds[_id].splice(index, 1);
+        if (serverIds[_id].length <= 0) delete serverIds[_id];
       }
     });
 

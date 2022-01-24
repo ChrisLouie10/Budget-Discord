@@ -6,14 +6,10 @@ const clients = {}; // used to identify websocket clients
 // value = [clientIds]
 const userIds = {}; // used to identify a user's list of websocket clients
 
-// key = groupServerId
+// key = serverId
 // value = [clientIds]
-const groupServerIds = {}; // used to identify a server's list of websocket clients
-
-// key = groupServerId
-// value = [clientIds]
-const privateChatIds = {}; // used to identify a private chat's list of websocket clients
+const serverIds = {}; // used to identify a server's list of websocket clients
 
 module.exports = {
-  clients, userIds, groupServerIds, privateChatIds,
+  clients, userIds, serverIds,
 };
