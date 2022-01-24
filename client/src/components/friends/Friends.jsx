@@ -19,7 +19,6 @@ export default function Friend() {
       },
     }).then((response) => response.json())
       .then((data) => {
-        console.log(data);
         if (data.success) setFriendRequests(data.friendRequests);
         else setError(data.message);
       });

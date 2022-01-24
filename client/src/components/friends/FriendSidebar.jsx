@@ -55,6 +55,6 @@ export default function FriendSidebar(props) {
 
 FriendSidebar.propTypes = {
   // eslint-disable-next-line
-  privateChats: PropTypes.object.isRequired,
+  privateChats: PropTypes.array.isRequired,
 
 };

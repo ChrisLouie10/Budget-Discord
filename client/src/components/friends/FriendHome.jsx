@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
   Form, Button, Alert,
@@ -122,9 +121,9 @@ export default function FriendHome(props) {
 
 FriendHome.propTypes = {
   // eslint-disable-next-line
-  friends: PropTypes.object.isRequired,
+  friends: PropTypes.array.isRequired,
   // eslint-disable-next-line
-  friendRequests: PropTypes.object.isRequired,
+  friendRequests: PropTypes.array.isRequired,
   setFriends: PropTypes.func.isRequired,
   setFriendRequests: PropTypes.func.isRequired,
 };

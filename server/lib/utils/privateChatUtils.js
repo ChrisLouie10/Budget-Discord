@@ -2,14 +2,13 @@ const { findUsersByIds } = require('../../db/dao/userDao');
 
 async function formatRawPrivateChat(rawPrivateChat, userId) {
   const result = { id: rawPrivateChat._id };
-  const users = [];
+  const users = {};
 
-  const filteredUsers = rawPrivateChat.users.filter((id) => String(id) !== String(userId));
-  const rawUsers = await findUsersByIds(filteredUsers);
+  const rawUsers = await findUsersByIds(rawPrivateChat.users);
 
   // If private chat contains only one other user, set private chat name to that user's name
-  if (rawUsers.length === 1) {
-    result.name = rawUsers[0].name;
+  if (rawUsers.length === 2) {
+    result.name = (rawUsers.find((user) => String(user._id) !== String(userId))).name;
   } else {
     const names = rawUsers.map((user) => user.name);
     result.name = names.toString();
