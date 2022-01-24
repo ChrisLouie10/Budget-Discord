@@ -8,9 +8,7 @@ const { generateUniqueSessionId } = require('../lib/utils/groupServerUtils');
 const { parseCookies } = require('../lib/utils/cookieUtils');
 const { getUserWithToken } = require('../lib/utils/tokenUtils');
 const { messageValidation } = require('../lib/validation/websocketValidation');
-const {
-  clients, userIds, serverIds,
-} = require('../lib/websocket/state');
+const { clients, userIds, serverIds } = require('../lib/websocket/state');
 const { findPrivateChatById, findPrivateChatsByUserId } = require('../db/dao/privateChatDao');
 
 const server = http.createServer(app);
@@ -100,16 +98,16 @@ wss.on('connection', async (ws, req) => {
         timestamp: result.message.timestamp,
       };
       try {
+        let serverId;
         let channelId;
         let rawChannel;
-        let serverId;
         if (result.textChannelId) {
-          channelId = result.textChannelId;
           serverId = result.groupServerId;
+          channelId = result.textChannelId;
           rawChannel = await findTextChannelById(channelId);
         } else if (result.privateChatId) {
-          channelId = result.privateChatId;
           serverId = result.privateChatId;
+          channelId = result.privateChatId;
           rawChannel = await findPrivateChatById(result.privateChatId);
         }
 
