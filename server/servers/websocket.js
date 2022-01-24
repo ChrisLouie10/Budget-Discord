@@ -66,7 +66,7 @@ wss.on('connection', async (ws, req) => {
     } else serverIds[_id] = [sessionId];
   });
 
-  // get all of clients' private chats & populate serverIds dict
+  // get all of clients' private chat "servers" & populate serverIds dict
   let rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
   rawPrivateChats.forEach((rawPrivateChat) => {
     const { _id } = rawPrivateChat;
@@ -100,45 +100,34 @@ wss.on('connection', async (ws, req) => {
         timestamp: result.message.timestamp,
       };
       try {
-        // If message is from a server/text channel
+        let channelId;
+        let rawChannel;
+        let serverId;
         if (result.textChannelId) {
-        // Find and update the text channel's chat log
-          const rawTextChannel = await findTextChannelById(result.textChannelId);
-          const rawChatLog = await addMessageToChatLog(rawTextChannel.chat_log, message);
-          if (rawChatLog) {
-          // Send message to every client that are on the same group server
-            const data = {
-              method: 'message',
-              message,
-              textChannelId: result.textChannelId,
-            };
-            serverIds[result.groupServerId].forEach((id) => {
-              if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
-                clients[id].send(JSON.stringify(data));
-              }
-            });
-          } else {
-            console.warn('Failed to update text channel', result.textChannelId, 'with a new message.');
-          }
+          channelId = result.textChannelId;
+          serverId = result.groupServerId;
+          rawChannel = await findTextChannelById(channelId);
+        } else if (result.privateChatId) {
+          channelId = result.privateChatId;
+          serverId = result.privateChatId;
+          rawChannel = await findPrivateChatById(result.privateChatId);
+        }
+
+        const rawChatLog = await addMessageToChatLog(rawChannel.chat_log, message);
+        if (rawChatLog) {
+        // Send message to every client that are on the same server
+          const data = {
+            method: 'message',
+            message,
+            channelId,
+          };
+          serverIds[serverId].forEach((id) => {
+            if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
+              clients[id].send(JSON.stringify(data));
+            }
+          });
         } else {
-          // If message is from a private chat
-          const rawPrivateChat = await findPrivateChatById(result.privateChatId);
-          const rawChatLog = await addMessageToChatLog(rawPrivateChat.chat_log, message);
-          if (rawChatLog) {
-            // Send message to every client that are on the private chat
-            const data = {
-              method: 'message',
-              message,
-              privateChatId: result.privateChatId,
-            };
-            serverIds[result.privateChatId].forEach((id) => {
-              if (clients[id] && clients[id].readyState === WebSocket.OPEN) {
-                clients[id].send(JSON.stringify(data));
-              }
-            });
-          } else {
-            console.warn('Failed to update text channel', result.privateChatId, 'with a new message.');
-          }
+          console.warn('Failed to update text channel', channelId, 'with a new message.');
         }
       } catch (e) {
         console.error(e);
@@ -155,7 +144,7 @@ wss.on('connection', async (ws, req) => {
       if (index >= 0) userIds[userId].splice(index, 1);
       if (userIds[userId].length <= 0) delete userIds[userId];
     }
-    // remove sessionId from serverIds
+    // remove sessionId from group servers in serverIds
     rawGroupServers = await findServersByUserId(req.user._id);
     rawGroupServers.forEach((rawGroupServer) => {
       const { _id } = rawGroupServer;
@@ -165,7 +154,7 @@ wss.on('connection', async (ws, req) => {
         if (serverIds[_id].length <= 0) delete serverIds[_id];
       }
     });
-    // remove sessionId from serverIds
+    // remove sessionId from private chat "servers" in serverIds
     rawPrivateChats = await findPrivateChatsByUserId(req.user._id);
     rawPrivateChats.forEach((rawPrivateChat) => {
       const { _id } = rawPrivateChat;

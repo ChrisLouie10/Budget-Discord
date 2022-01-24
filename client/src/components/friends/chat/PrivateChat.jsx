@@ -104,6 +104,8 @@ export default function PrivateChat() {
               </p>
             ))}
             { displayPendingMessages() }
+            <br />
+            <br />
           </div>
         </div>
       );
