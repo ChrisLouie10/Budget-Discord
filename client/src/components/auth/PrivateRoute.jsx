@@ -37,15 +37,15 @@ export default function PrivateRoute({ component: Component, ...rest }) {
       if (message) {
         setChatLogs((currChatLogs) => {
           const currLogs = { ...currChatLogs };
-          if (currLogs[messageObject.textChannelId]) {
-            currLogs[messageObject.textChannelId].push(message);
+          if (currLogs[messageObject.channelId]) {
+            currLogs[messageObject.channelId].push(message);
           }
           return currLogs;
         });
         if (message.author === localStorage.getItem('user_id_cache')) {
           setPendingMessages((currPendingMessages) => {
             const currMessages = { ...currPendingMessages };
-            const pendingChannelMessages = currMessages[messageObject.textChannelId];
+            const pendingChannelMessages = currMessages[messageObject.channelId];
             if (pendingChannelMessages) {
               let index = -1;
               for (let i = 0; i < pendingChannelMessages.length; i += 1) {
