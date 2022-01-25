@@ -33,7 +33,7 @@ const {
 const { findChatLogById } = require('../db/dao/chatLogDao');
 const { formatRawGroupServer } = require('../lib/utils/groupServerUtils');
 const { checkInviteExpiration, decreaseInviteUse } = require('../lib/utils/inviteUtils');
-const { userIds, groupServerIds } = require('../lib/websocket/state');
+const { userIds, serverIds } = require('../lib/websocket/state');
 
 // get all of user's group servers
 router.get('/', verify, async (req, res) => {
@@ -64,7 +64,8 @@ router.post('/', verify, async (req, res) => {
   const { error } = createServerValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const { name, userId } = req.body;
+  const { name } = req.body;
+  const userId = req.user._id;
 
   try {
     const rawGroupServer = await createGroupServer(name, userId);
@@ -87,7 +88,7 @@ router.post('/', verify, async (req, res) => {
       // update websocket state
       const clientIds = userIds[req.user._id];
       if (clientIds) {
-        groupServerIds[rawGroupServer._id] = [...clientIds];
+        serverIds[rawGroupServer._id] = [...clientIds];
       } return res.status(201).json({ groupServer, groupServerId: rawGroupServer._id });
     }
     return res.status(500).json({ message: 'An error ocurred when creating the server' });
@@ -134,8 +135,8 @@ router.delete('/:groupServerId', verify, async (req, res) => {
         if (rawGroupServer.invite) await deleteInvite({ _id: rawGroupServer.invite });
         await deleteServer({ _id: rawGroupServer._id });
         // update websocket state
-        if (groupServerIds[rawGroupServer._id]) {
-          delete groupServerIds[rawGroupServer._id];
+        if (serverIds[rawGroupServer._id]) {
+          delete serverIds[rawGroupServer._id];
         } return res.json({});
       } return res.status(401).json({ message: 'User is not allowed to delete the server' });
     } return res.status(404).json({ message: 'No server found' });
@@ -256,9 +257,9 @@ router.post('/users', verify, async (req, res) => {
       // update websocket state
       const clientIds = userIds[req.user._id];
       if (clientIds) {
-        if (groupServerIds[rawGroupServer._id]) {
-          clientIds.forEach((clientId) => { groupServerIds[rawGroupServer._id].push(clientId); });
-        } else groupServerIds[rawGroupServer._id] = [...clientIds];
+        if (serverIds[rawGroupServer._id]) {
+          clientIds.forEach((clientId) => { serverIds[rawGroupServer._id].push(clientId); });
+        } else serverIds[rawGroupServer._id] = [...clientIds];
       } return res.status(201).json({ groupServerId: result.id, groupServer: result.groupServer });
     } return res.status(500).json({ message: 'An error occured when attempting to add the user to the server' });
   } catch (e) {
@@ -277,13 +278,13 @@ router.delete('/:groupServerId/users', verify, async (req, res) => {
     if (rawGroupServer) {
       // update websocket state
       const clientIds = userIds[req.user._id];
-      if (clientIds && groupServerIds[rawGroupServer._id]) {
+      if (clientIds && serverIds[rawGroupServer._id]) {
         clientIds.forEach((clientId) => {
-          const index = groupServerIds[rawGroupServer._id].indexOf(clientId);
-          if (index >= 0) groupServerIds[rawGroupServer._id].splice(index, 1);
+          const index = serverIds[rawGroupServer._id].indexOf(clientId);
+          if (index >= 0) serverIds[rawGroupServer._id].splice(index, 1);
         });
-        if (groupServerIds[rawGroupServer._id].length <= 0) {
-          delete groupServerIds[rawGroupServer._id];
+        if (serverIds[rawGroupServer._id].length <= 0) {
+          delete serverIds[rawGroupServer._id];
         }
       } return res.json({});
     } return res.status(404).json({ message: 'No server found' });
