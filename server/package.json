@@ -15,7 +15,7 @@
     "lint:js": "eslint --ext .js --ignore-path .gitignore .",
     "lint": "npm run lint:js",
     "test": "jest --config ./jest/jest.config.js",
-    "test-db": "jest --config ./jest/jest.config.js --testPathPattern /tests/daoTests/",
+    "test-db": "jest --config ./jest/jest.config.js --testPathPattern /tests\/daoTests/",
     "test-routes": "jest --config ./jest/jest.config.js --testPathIgnorePatterns /daoTests/"
   },
   "repository": {
