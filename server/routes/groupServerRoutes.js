@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   createServerValidation,
@@ -148,12 +147,13 @@ router.delete('/:groupServerId', verify, async (req, res) => {
 
 // create a text channel in a group server
 router.post('/:groupServerId/text-channels', verify, async (req, res) => {
-  const { serverError } = groupServerValidation(req.params);
-  const { channelError } = createTextChannelValidation(req.body);
-  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
-  if (channelError) return res.status(400).json({ message: channelError.details[0].message });
-
-  if (!checkUserPermission(req.user._id, req.params.groupServerId)) {
+  const serverError = groupServerValidation(req.params);
+  const channelError = createTextChannelValidation(req.body);
+  if (serverError.error) {
+    return res.status(400).json({ message: serverError.error.details[0].message });
+  } if (channelError.error) {
+    return res.status(400).json({ message: channelError.error.details[0].message });
+  } if (!checkUserPermission(req.user._id, req.params.groupServerId)) {
     return res.status(401).json({ message: 'User is not authorized to create text channels' });
   }
 
@@ -211,8 +211,7 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
     const rawGroupServer = await findServerById(groupServerId);
     const rawTextChannel = await findTextChannelById(textChannelId);
     const textChannelIds = rawGroupServer.text_channels;
-
-    if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
+    if (textChannelIds.includes(textChannelId) && rawTextChannel) {
       const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
       if (rawChatLog) {
         const promises = [];
@@ -231,7 +230,7 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
 });
 
 // Adds a user to a group server
-router.post('/users', verify, async (req, res) => {
+router.patch('/users', verify, async (req, res) => {
   const { error } = inviteValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -246,8 +245,8 @@ router.post('/users', verify, async (req, res) => {
       await deleteInvite({ code: inviteCode });
       return res.status(401).json({ message: 'Expired invite code' });
     }
-    if (rawGroupServer.users.includes(mongoose.Types.ObjectId(req.user._id))) {
-      return res.status(204).json({ message: 'User is already a member of the server' });
+    if (rawGroupServer.users.includes(req.user._id)) {
+      return res.status(204).send();
     }
 
     const rawNewGroupServer = await addUserToServer(rawGroupServer._id, req.user._id);
@@ -260,7 +259,7 @@ router.post('/users', verify, async (req, res) => {
         if (serverIds[rawGroupServer._id]) {
           clientIds.forEach((clientId) => { serverIds[rawGroupServer._id].push(clientId); });
         } else serverIds[rawGroupServer._id] = [...clientIds];
-      } return res.status(201).json({ groupServerId: result.id, groupServer: result.groupServer });
+      } return res.json({ groupServerId: result.id, groupServer: result.groupServer });
     } return res.status(500).json({ message: 'An error occured when attempting to add the user to the server' });
   } catch (e) {
     console.error(e);
@@ -269,7 +268,7 @@ router.post('/users', verify, async (req, res) => {
 });
 
 // remove a user from a group server
-router.delete('/:groupServerId/users', verify, async (req, res) => {
+router.patch('/:groupServerId/users', verify, async (req, res) => {
   const { error } = groupServerValidation(req.params);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -296,10 +295,13 @@ router.delete('/:groupServerId/users', verify, async (req, res) => {
 
 // create an invite for a group server
 router.post('/:groupServerId/invite', verify, async (req, res) => {
-  const { serverError } = groupServerValidation(req.params);
-  const { inviteError } = createInviteValidation(req.body);
-  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
-  if (inviteError) return res.status(400).json({ message: inviteError.details[0].message });
+  const serverError = groupServerValidation(req.params);
+  const inviteError = createInviteValidation(req.body);
+  if (serverError.error) {
+    return res.status(400).json({ message: serverError.error.details[0].message });
+  } if (inviteError.error) {
+    return res.status(400).json({ message: inviteError.error.details[0].message });
+  }
 
   try {
     // Find the groupServer we want to create an invite for

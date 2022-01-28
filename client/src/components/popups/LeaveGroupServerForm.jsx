@@ -25,7 +25,7 @@ export default function LeaveGroupServerForm({ setOpenPopup }) {
     if (groupServerId && mounted) {
       setLoading(true);
       await fetch(`/api/group-servers/${groupServerId}/users`, {
-        method: 'DELETE',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },

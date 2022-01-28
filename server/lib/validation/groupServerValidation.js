@@ -16,7 +16,7 @@ const groupServerValidation = (data) => {
 
 const createTextChannelValidation = (data) => {
   const schema = Joi.object({
-    name: Joi.string().max(32).required(),
+    name: Joi.string().min(1).max(32).required(),
   });
   return schema.validate(data);
 };
