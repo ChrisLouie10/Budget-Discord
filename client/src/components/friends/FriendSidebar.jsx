@@ -19,13 +19,11 @@ export default function FriendSidebar(props) {
                 {
                   privateChatId === chat.id
                     ? (
-                      // eslint-disable-next-line
                       <Link style={{ color: '#b5fff3' }} to={{ pathname: `/friends/${chat.id}` }}>
                         {chat.name}
                       </Link>
                     )
                     : (
-                      // eslint-disable-next-line
                       <Link className="text-reset" to={{ pathname: `/friends/${chat.id}` }}>
                         {chat.name}
                       </Link>
@@ -56,5 +54,4 @@ export default function FriendSidebar(props) {
 FriendSidebar.propTypes = {
   // eslint-disable-next-line
   privateChats: PropTypes.array.isRequired,
-
 };

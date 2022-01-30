@@ -49,7 +49,7 @@ export default function Friend() {
       <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
         <FriendSidebar privateChats={privateChats} />
       </div>
-      {privateChatId ? <PrivateChat />
+      {privateChatId ? <PrivateChat privateChat={privateChats.find((privateChat) => privateChat.id === privateChatId)} />
         : <FriendHome friends={friends} friendRequests={friendRequests} setFriends={setFriends} setFriendRequests={setFriendRequests} />}
     </>
 
