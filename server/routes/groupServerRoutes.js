@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   createServerValidation,
@@ -33,7 +32,7 @@ const {
 const { findChatLogById } = require('../db/dao/chatLogDao');
 const { formatRawGroupServer } = require('../lib/utils/groupServerUtils');
 const { checkInviteExpiration, decreaseInviteUse } = require('../lib/utils/inviteUtils');
-const { userIds, groupServerIds } = require('../lib/websocket/state');
+const { userIds, serverIds } = require('../lib/websocket/state');
 
 // get all of user's group servers
 router.get('/', verify, async (req, res) => {
@@ -64,7 +63,8 @@ router.post('/', verify, async (req, res) => {
   const { error } = createServerValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const { name, userId } = req.body;
+  const { name } = req.body;
+  const userId = req.user._id;
 
   try {
     const rawGroupServer = await createGroupServer(name, userId);
@@ -87,7 +87,7 @@ router.post('/', verify, async (req, res) => {
       // update websocket state
       const clientIds = userIds[req.user._id];
       if (clientIds) {
-        groupServerIds[rawGroupServer._id] = [...clientIds];
+        serverIds[rawGroupServer._id] = [...clientIds];
       } return res.status(201).json({ groupServer, groupServerId: rawGroupServer._id });
     }
     return res.status(500).json({ message: 'An error ocurred when creating the server' });
@@ -134,8 +134,8 @@ router.delete('/:groupServerId', verify, async (req, res) => {
         if (rawGroupServer.invite) await deleteInvite({ _id: rawGroupServer.invite });
         await deleteServer({ _id: rawGroupServer._id });
         // update websocket state
-        if (groupServerIds[rawGroupServer._id]) {
-          delete groupServerIds[rawGroupServer._id];
+        if (serverIds[rawGroupServer._id]) {
+          delete serverIds[rawGroupServer._id];
         } return res.json({});
       } return res.status(401).json({ message: 'User is not allowed to delete the server' });
     } return res.status(404).json({ message: 'No server found' });
@@ -147,12 +147,13 @@ router.delete('/:groupServerId', verify, async (req, res) => {
 
 // create a text channel in a group server
 router.post('/:groupServerId/text-channels', verify, async (req, res) => {
-  const { serverError } = groupServerValidation(req.params);
-  const { channelError } = createTextChannelValidation(req.body);
-  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
-  if (channelError) return res.status(400).json({ message: channelError.details[0].message });
-
-  if (!checkUserPermission(req.user._id, req.params.groupServerId)) {
+  const serverError = groupServerValidation(req.params);
+  const channelError = createTextChannelValidation(req.body);
+  if (serverError.error) {
+    return res.status(400).json({ message: serverError.error.details[0].message });
+  } if (channelError.error) {
+    return res.status(400).json({ message: channelError.error.details[0].message });
+  } if (!checkUserPermission(req.user._id, req.params.groupServerId)) {
     return res.status(401).json({ message: 'User is not authorized to create text channels' });
   }
 
@@ -210,8 +211,7 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
     const rawGroupServer = await findServerById(groupServerId);
     const rawTextChannel = await findTextChannelById(textChannelId);
     const textChannelIds = rawGroupServer.text_channels;
-
-    if (textChannelIds.includes(mongoose.Types.ObjectId(textChannelId)) && rawTextChannel) {
+    if (textChannelIds.includes(textChannelId) && rawTextChannel) {
       const rawChatLog = await findChatLogById(rawTextChannel.chat_log);
       if (rawChatLog) {
         const promises = [];
@@ -230,7 +230,7 @@ router.get('/:groupServerId/text-channels/:textChannelId/chat-logs', verify, asy
 });
 
 // Adds a user to a group server
-router.post('/users', verify, async (req, res) => {
+router.patch('/users', verify, async (req, res) => {
   const { error } = inviteValidation(req.body);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -245,8 +245,8 @@ router.post('/users', verify, async (req, res) => {
       await deleteInvite({ code: inviteCode });
       return res.status(401).json({ message: 'Expired invite code' });
     }
-    if (rawGroupServer.users.includes(mongoose.Types.ObjectId(req.user._id))) {
-      return res.status(204).json({ message: 'User is already a member of the server' });
+    if (rawGroupServer.users.includes(req.user._id)) {
+      return res.status(204).send();
     }
 
     const rawNewGroupServer = await addUserToServer(rawGroupServer._id, req.user._id);
@@ -256,10 +256,10 @@ router.post('/users', verify, async (req, res) => {
       // update websocket state
       const clientIds = userIds[req.user._id];
       if (clientIds) {
-        if (groupServerIds[rawGroupServer._id]) {
-          clientIds.forEach((clientId) => { groupServerIds[rawGroupServer._id].push(clientId); });
-        } else groupServerIds[rawGroupServer._id] = [...clientIds];
-      } return res.status(201).json({ groupServerId: result.id, groupServer: result.groupServer });
+        if (serverIds[rawGroupServer._id]) {
+          clientIds.forEach((clientId) => { serverIds[rawGroupServer._id].push(clientId); });
+        } else serverIds[rawGroupServer._id] = [...clientIds];
+      } return res.json({ groupServerId: result.id, groupServer: result.groupServer });
     } return res.status(500).json({ message: 'An error occured when attempting to add the user to the server' });
   } catch (e) {
     console.error(e);
@@ -268,7 +268,7 @@ router.post('/users', verify, async (req, res) => {
 });
 
 // remove a user from a group server
-router.delete('/:groupServerId/users', verify, async (req, res) => {
+router.patch('/:groupServerId/users', verify, async (req, res) => {
   const { error } = groupServerValidation(req.params);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
@@ -277,13 +277,13 @@ router.delete('/:groupServerId/users', verify, async (req, res) => {
     if (rawGroupServer) {
       // update websocket state
       const clientIds = userIds[req.user._id];
-      if (clientIds && groupServerIds[rawGroupServer._id]) {
+      if (clientIds && serverIds[rawGroupServer._id]) {
         clientIds.forEach((clientId) => {
-          const index = groupServerIds[rawGroupServer._id].indexOf(clientId);
-          if (index >= 0) groupServerIds[rawGroupServer._id].splice(index, 1);
+          const index = serverIds[rawGroupServer._id].indexOf(clientId);
+          if (index >= 0) serverIds[rawGroupServer._id].splice(index, 1);
         });
-        if (groupServerIds[rawGroupServer._id].length <= 0) {
-          delete groupServerIds[rawGroupServer._id];
+        if (serverIds[rawGroupServer._id].length <= 0) {
+          delete serverIds[rawGroupServer._id];
         }
       } return res.json({});
     } return res.status(404).json({ message: 'No server found' });
@@ -295,10 +295,13 @@ router.delete('/:groupServerId/users', verify, async (req, res) => {
 
 // create an invite for a group server
 router.post('/:groupServerId/invite', verify, async (req, res) => {
-  const { serverError } = groupServerValidation(req.params);
-  const { inviteError } = createInviteValidation(req.body);
-  if (serverError) return res.status(400).json({ message: serverError.details[0].message });
-  if (inviteError) return res.status(400).json({ message: inviteError.details[0].message });
+  const serverError = groupServerValidation(req.params);
+  const inviteError = createInviteValidation(req.body);
+  if (serverError.error) {
+    return res.status(400).json({ message: serverError.error.details[0].message });
+  } if (inviteError.error) {
+    return res.status(400).json({ message: inviteError.error.details[0].message });
+  }
 
   try {
     // Find the groupServer we want to create an invite for

@@ -13,7 +13,7 @@ export default function JoinGroupServer() {
     let groupServerId;
     if (inviteCode) {
       await fetch('/api/group-servers/users', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -21,17 +21,19 @@ export default function JoinGroupServer() {
           inviteCode,
         }),
       }).then(async (response) => {
-        const data = await response.json();
-        if (response.status === 201) {
-          groupServerId = data.groupServerId;
-          const _groupServers = { ...groupServers };
-          _groupServers[groupServerId] = data.groupServer;
-          setGroupServers(_groupServers);
-          history.push(`/group/${groupServerId}`);
-        } else {
-          console.error(data.message);
-          history.push('/friends');
-        }
+        if (response.status !== 204) {
+          const data = await response.json();
+          if (response.status === 200) {
+            groupServerId = data.groupServerId;
+            const _groupServers = { ...groupServers };
+            _groupServers[groupServerId] = data.groupServer;
+            setGroupServers(_groupServers);
+            history.push(`/group/${groupServerId}`);
+          } else {
+            console.error(data.message);
+            history.push('/friends');
+          }
+        } else history.push('/friends');
       });
     }
   }, []);

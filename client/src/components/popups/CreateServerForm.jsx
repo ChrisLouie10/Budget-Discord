@@ -21,7 +21,6 @@ export default function CreateServerForm({ setOpenPopup }) {
         },
         body: JSON.stringify({
           name: input,
-          userId: user._id,
         }),
       }).then(async (response) => {
         const data = await response.json();
