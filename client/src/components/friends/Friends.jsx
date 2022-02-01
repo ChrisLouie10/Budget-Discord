@@ -3,11 +3,13 @@ import { useParams } from 'react-router-dom';
 import FriendSidebar from './FriendSidebar';
 import FriendHome from './FriendHome';
 import PrivateChat from './chat/PrivateChat';
+import Loading from '../Loading';
 
 export default function Friend() {
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [privateChats, setPrivateChats] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const { privateChatId } = useParams();
 
@@ -42,14 +44,16 @@ export default function Friend() {
         if (data.success) setPrivateChats(data.privateChats);
         else setError(data.message);
       });
+    setLoading(false);
   }, []);
 
+  if (loading) return <Loading />;
   return (
     <>
       <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
         <FriendSidebar privateChats={privateChats} />
       </div>
-      {privateChatId ? <PrivateChat />
+      {privateChatId ? <PrivateChat privateChat={privateChats.find((privateChat) => privateChat.id === privateChatId)} />
         : <FriendHome friends={friends} friendRequests={friendRequests} setFriends={setFriends} setFriendRequests={setFriendRequests} />}
     </>
 

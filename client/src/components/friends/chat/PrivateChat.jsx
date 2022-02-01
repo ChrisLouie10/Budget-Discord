@@ -1,6 +1,7 @@
 import React, {
   useState, useEffect, useContext, useMemo,
 } from 'react';
+import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 import { Context } from '../../../contexts/Store';
 import { ChatLogsContext } from '../../../contexts/chatLogs-context';
@@ -8,13 +9,17 @@ import { PendingMessagesContext } from '../../../contexts/pendingMessages-contex
 import { UserContext } from '../../../contexts/user-context';
 import Loading from '../../Loading';
 
-export default function PrivateChat() {
+export default function PrivateChat(props) {
+  const {
+    privateChat,
+  } = props;
   const [state, setState] = useContext(Context);
   const [user, setUser] = useContext(UserContext);
   const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
   const [pendingMessages, setPendingMessages] = useContext(PendingMessagesContext);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
+  const [users, setUsers] = useState(privateChat.users);
   const { privateChatId } = useParams();
 
   useEffect(async () => {
@@ -75,7 +80,7 @@ export default function PrivateChat() {
     if (pendingMessages[privateChatId]) {
       return Object.entries(pendingMessages[privateChatId]).map(([key, value]) => (
         <p className="ml-2 #858585" key={key}>
-          {value.author}
+          {users[value.author].name}
           {' '}
           (
           {new Date(value.timestamp).toLocaleString()}
@@ -94,7 +99,7 @@ export default function PrivateChat() {
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
             { Object.entries(chatLogs[privateChatId]).map(([key, value]) => (
               <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
-                {value.author}
+                {users[value.author].name}
                 {' '}
                 (
                 {new Date(value.timestamp).toLocaleString()}
@@ -127,3 +132,8 @@ export default function PrivateChat() {
     </div>
   );
 }
+
+PrivateChat.propTypes = {
+  // eslint-disable-next-line
+  privateChat: PropTypes.object.isRequired,
+};
