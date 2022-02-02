@@ -11,7 +11,6 @@ export default function UserList() {
       return (
         <ul className="list-unstyled">
           {Object.keys(groupServers[groupServerId].users).map((userId) => {
-            console.log(userId);
             const user = groupServers[groupServerId].users[userId];
             return (
               <li key={userId}>
