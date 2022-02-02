@@ -119,12 +119,12 @@ export default function PrivateRoute({ component: Component, ...rest }) {
         <Route
           {...rest}
           render={(props) => (
-            <>
+            <div style={{ display: 'flex', width: '100%', height: '100%' }}>
               <div className="col-1" style={{ minHeight: '100vh', background: '#212121' }}>
                 <ServersList />
               </div>
               <Component {...props} />
-            </>
+            </div>
           )}
         />
       </div>
