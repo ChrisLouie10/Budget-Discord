@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
+import UserList from './UserList';
 import TextChannel from './textchat/TextChannel';
 import ServerSidebar from '../ServerSidebar';
 import Loading from '../Loading';
@@ -32,11 +33,12 @@ export default function GroupServer() {
   if (loading) return <Loading />;
   if (!userAccess) return <Redirect to="/friends" />;
   return (
-    <>
+    <div style={{ display: 'flex', width: '100%', height: '100%' }}>
       <div className="col-1" style={{ minHeight: '100vh', background: '#292929' }}>
         <ServerSidebar />
       </div>
       <TextChannel />
-    </>
+      <UserList />
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 const { findTextChannelsByServerId } = require('../../db/dao/textChannelDao');
 const { findInviteById } = require('../../db/dao/inviteDao');
+const { findUsersByIds } = require('../../db/dao/userDao');
 
 function generateUniqueSessionId() {
   function rand() {
@@ -14,9 +15,11 @@ async function formatRawGroupServer(rawGroupServer) {
     name: rawGroupServer.name,
     owner: rawGroupServer.owner,
     admins: rawGroupServer.admins,
+    users: {},
   };
   const rawInvite = await findInviteById(rawGroupServer.invite);
   const rawTextChannels = await findTextChannelsByServerId(rawGroupServer._id);
+  const rawUsers = await findUsersByIds(rawGroupServer.users);
   const textChannels = {};
 
   if (rawInvite) properties.inviteCode = rawInvite.code;
@@ -25,6 +28,12 @@ async function formatRawGroupServer(rawGroupServer) {
     textChannels[rawTextChannel._id] = {
       groupServerId: rawGroupServer._id,
       name: rawTextChannel.name,
+    };
+  });
+  rawUsers.forEach((rawUser) => {
+    properties.users[rawUser._id] = {
+      name: rawUser.name,
+      numberID: rawUser.number_id,
     };
   });
   properties.textChannels = textChannels;

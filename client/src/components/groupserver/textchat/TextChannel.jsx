@@ -4,6 +4,7 @@ import React, {
 import { useParams } from 'react-router-dom';
 import { Context } from '../../../contexts/Store';
 import { ChatLogsContext } from '../../../contexts/chatLogs-context';
+import { GroupServersContext } from '../../../contexts/groupServers-context';
 import { PendingMessagesContext } from '../../../contexts/pendingMessages-context';
 import { UserContext } from '../../../contexts/user-context';
 import Loading from '../../Loading';
@@ -11,6 +12,7 @@ import Loading from '../../Loading';
 export default function TextChannel() {
   const [state, setState] = useContext(Context);
   const [user, setUser] = useContext(UserContext);
+  const [groupServers, setGroupServers] = useContext(GroupServersContext);
   const [chatLogs, setChatLogs] = useContext(ChatLogsContext);
   const [pendingMessages, setPendingMessages] = useContext(PendingMessagesContext);
   const [loading, setLoading] = useState(true);
@@ -74,17 +76,20 @@ export default function TextChannel() {
 
   function displayPendingMessages() { // If a message is not "sent" then it will be displayed with a dark gray color
     if (pendingMessages[textChannelId]) {
-      return Object.entries(pendingMessages[textChannelId]).map(([key, value]) => (
-        <p className="ml-2 #858585" key={key}>
-          {value.author}
-          {' '}
-          (
-          {new Date(value.timestamp).toLocaleString()}
-          ):
-          <br />
-          {value.content}
-        </p>
-      ));
+      return Object.entries(pendingMessages[textChannelId]).map(([key, value]) => {
+        const author = groupServers[groupServerId].users[value.author];
+        return (
+          <p className="ml-2 #858585" key={key}>
+            {author ? author.name : value.author}
+            {' '}
+            (
+            {new Date(value.timestamp).toLocaleString()}
+            ):
+            <br />
+            {value.content}
+          </p>
+        );
+      });
     } return <></>;
   }
 
@@ -93,17 +98,20 @@ export default function TextChannel() {
       return (
         <div className="row">
           <div className="col-12" aria-orientation="vertical" style={{ height: '100%', position: 'absolute', overflowY: 'scroll' }}>
-            { Object.entries(chatLogs[textChannelId]).map(([key, value]) => (
-              <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
-                {value.author}
-                {' '}
-                (
-                {new Date(value.timestamp).toLocaleString()}
-                ):
-                <br />
-                {value.content}
-              </p>
-            ))}
+            { Object.entries(chatLogs[textChannelId]).map(([key, value]) => {
+              const author = groupServers[groupServerId].users[value.author];
+              return (
+                <p className="ml-2" style={{ color: '#c2c2c2' }} key={key}>
+                  {author ? author.name : value.name}
+                  {' '}
+                  (
+                  {new Date(value.timestamp).toLocaleString()}
+                  ):
+                  <br />
+                  {value.content}
+                </p>
+              );
+            })}
             { displayPendingMessages() }
           </div>
         </div>
