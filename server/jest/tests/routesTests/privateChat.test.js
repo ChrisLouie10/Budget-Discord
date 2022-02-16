@@ -47,6 +47,11 @@ const testFormattedPrivateChat= {
   }
 };
 
+const testChatLog = {
+  _id: '61e39d1995404235acc624eb',
+  chat_log: [],
+};
+
 let cookie;
 
 beforeAll(async () => {
@@ -285,5 +290,77 @@ describe('Testing private chat endpoints', () => {
       expect(response.statusCode).toBe(500);
       expect(Users.findUserById.mock.calls.length).toBe(1);
       expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+    });
+
+    test('Find ChatLog: Successfully find', async () => {
+      PrivateChat.findPrivateChatById.mockResolvedValueOnce(testPrivateChat);
+      ChatLogs.findChatLogById.mockResolvedValueOnce(testChatLog);
+      const response = await request(app)
+      .get(`/api/private-chat/${testPrivateChatId}/chat-logs`)
+      .set({
+        'Cookie': cookie,
+        'Content-Type': 'application/json',
+      });
+      expect(response.statusCode).toBe(200);
+      expect(Users.findUserById.mock.calls.length).toBe(1);
+      expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+      expect(ChatLogs.findChatLogById.mock.calls.length).toBe(1);
+    });
+
+    test('Find ChatLog: Private Chat Does Not Exist', async () => {
+      PrivateChat.findPrivateChatById.mockResolvedValueOnce();
+      const response = await request(app)
+      .get(`/api/private-chat/${testPrivateChatId}/chat-logs`)
+      .set({
+        'Cookie': cookie,
+        'Content-Type': 'application/json',
+      });
+      expect(response.statusCode).toBe(404);
+      expect(Users.findUserById.mock.calls.length).toBe(1);
+      expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+    });
+
+    test('Find ChatLog: User Has No Permission', async () => {
+      Users.findUserById.mockResolvedValueOnce(testFriend);
+      PrivateChat.findPrivateChatById.mockResolvedValueOnce(testPrivateChat);
+      const response = await request(app)
+      .get(`/api/private-chat/${testPrivateChatId}/chat-logs`)
+      .set({
+        'Cookie': cookie,
+        'Content-Type': 'application/json',
+      });
+      expect(response.statusCode).toBe(401);
+      expect(Users.findUserById.mock.calls.length).toBe(1);
+      expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+    });
+
+    test('Find ChatLog: ChatLog Not Found', async () => {
+      PrivateChat.findPrivateChatById.mockResolvedValueOnce(testPrivateChat);
+      ChatLogs.findChatLogById.mockResolvedValueOnce();
+      const response = await request(app)
+      .get(`/api/private-chat/${testPrivateChatId}/chat-logs`)
+      .set({
+        'Cookie': cookie,
+        'Content-Type': 'application/json',
+      });
+      expect(response.statusCode).toBe(404);
+      expect(Users.findUserById.mock.calls.length).toBe(1);
+      expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+      expect(ChatLogs.findChatLogById.mock.calls.length).toBe(1);
+    });
+
+    test('Find ChatLog: Unexpected Error', async () => {
+      PrivateChat.findPrivateChatById.mockResolvedValueOnce(testPrivateChat);
+      ChatLogs.findChatLogById.mockResolvedValueOnce({});
+      const response = await request(app)
+      .get(`/api/private-chat/${testPrivateChatId}/chat-logs`)
+      .set({
+        'Cookie': cookie,
+        'Content-Type': 'application/json',
+      });
+      expect(response.statusCode).toBe(500);
+      expect(Users.findUserById.mock.calls.length).toBe(1);
+      expect(PrivateChat.findPrivateChatById.mock.calls.length).toBe(1);
+      expect(ChatLogs.findChatLogById.mock.calls.length).toBe(1);
     });
 });
