@@ -16,19 +16,12 @@ const testUser = {
   email: 'testemail@testEmail.com',
   password: 'testPassword123',
 };
-
 const testFriend = {
   _id: '61e39d1995404235acc676er',
-  name: 'tesFriend',
-  email: 'testfrienl@testEmail.com',
+  name: 'testFriend',
+  email: 'testfriend@testEmail.com',
   password: 'testPassword123',
 };
-
-
-const testPrivateChatId = '56e39d1995404235acc624ea'
-const testId = '61e39d1995404235acc624ea';
-const testFriendId = '61e39d1995404235acc624ej';
-
 const testPrivateChat = {
   _id: '615ird1995404235acc624ea',
   users: ['61e39d1995404235acc624ae', '61e39d1995404235acc624ej'],
@@ -36,7 +29,6 @@ const testPrivateChat = {
   chat_log: 'chatLogId',
   createdAt: new Date(),
 };
-
 const testFormattedPrivateChat= {
   id: '61e39d1995404235acc624e1',
   name: 'serverName',
@@ -46,11 +38,13 @@ const testFormattedPrivateChat= {
       numberID: 123}
   }
 };
-
 const testChatLog = {
   _id: '61e39d1995404235acc624eb',
   chat_log: [],
 };
+const testPrivateChatId = '56e39d1995404235acc624ea'
+const testId = '61e39d1995404235acc624ea';
+const testFriendId = '61e39d1995404235acc624ej';
 
 let cookie;
 
