@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
 const { verify } = require('../lib/utils/tokenUtils');
 const {
   createPrivateChat,
@@ -104,7 +103,7 @@ router.delete('/:privateChatId', verify, async (req, res) => {
     const rawPrivateChat = await findPrivateChatById(privateChatId);
 
     if (!rawPrivateChat) return res.status(404).json({ success: false, message: 'Private Chat is not found' });
-    if (!rawPrivateChat.users.includes(mongoose.Types.ObjectId(req.user._id))) {
+    if (!rawPrivateChat.users.includes(String(req.user._id))) {
       return res.status(401).json({ success: false, message: 'User is not authorized to delete this private chat' });
     }
 
@@ -127,7 +126,7 @@ router.get('/:privateChatId/chat-logs', verify, async (req, res) => {
     const rawPrivateChat = await findPrivateChatById(privateChatId);
 
     if (!rawPrivateChat) return res.status(404).json({ success: false, message: 'Private Chat is not found' });
-    if (!rawPrivateChat.users.includes(mongoose.Types.ObjectId(req.user._id))) return res.status(401).json({ success: false, message: 'User is not authorized to get this private chat' });
+    if (!rawPrivateChat.users.includes(String(req.user._id))) return res.status(401).json({ success: false, message: 'User is not authorized to get this private chat' });
 
     const rawChatLog = await findChatLogById(rawPrivateChat.chat_log);
     if (rawChatLog) {
